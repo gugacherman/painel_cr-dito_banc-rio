@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emplacamentos de Veículos — Brasil &amp; Mundo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:"Segoe UI",Arial,sans-serif;background:#f7f8fa;color:#1a2230;min-height:100vh;display:flex;flex-direction:column;}
+header{background:#fff;border-bottom:1px solid #e2e6ea;padding:14px 28px;display:flex;align-items:center;gap:20px;}
+header h1{font-size:17px;font-weight:600;color:#1a2230;}
+header .sub{font-size:11px;color:#7a8fa6;}
+.tabs{background:#fff;border-bottom:1px solid #e2e6ea;padding:0 28px;display:flex;gap:0;}
+.tab{padding:10px 24px;font-size:13px;cursor:pointer;border-bottom:3px solid transparent;color:#7a8fa6;font-weight:500;transition:all .18s;user-select:none;background:none;border-top:none;border-left:none;border-right:none;}
+.tab.on{color:#1a73e8;border-bottom-color:#1a73e8;}
+.tab:hover:not(.on){color:#1a2230;}
+.view{display:none;flex:1;flex-direction:column;}
+.view.on{display:flex;}
+.map-wrap{flex:1;position:relative;background:#eaf4fb;}
+svg.world-svg{width:100%;display:block;cursor:default;}
+svg.brazil-svg{width:100%;display:block;cursor:default;}
+.tooltip{display:none;position:absolute;background:#fff;border:1px solid #d0dae6;border-radius:8px;padding:12px 16px;font-size:12px;pointer-events:none;max-width:250px;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.10);}
+.tooltip h4{font-size:13px;font-weight:600;color:#1a2230;margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid #eee;}
+.tt-row{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:4px 0;color:#5a7080;}
+.tt-val{font-weight:600;color:#1a2230;}
+.badge{display:inline-block;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;}
+.pos{background:#e6f4ea;color:#1e7e34;}
+.neg{background:#fce8e6;color:#c0392b;}
+.neu{background:#f1f3f4;color:#5a7080;}
+.tt-note{font-size:10px;color:#9aafbe;margin-top:6px;}
+.legend{position:absolute;bottom:20px;left:20px;background:rgba(255,255,255,.96);border:1px solid #d0dae6;border-radius:8px;padding:12px 14px;min-width:140px;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.legend h5{font-size:10px;font-weight:600;color:#7a8fa6;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.leg-item{display:flex;align-items:center;gap:8px;font-size:11px;color:#5a7080;margin:3px 0;}
+.leg-color{width:14px;height:11px;border-radius:2px;flex-shrink:0;}
+.info-bar{background:#fff;border-top:1px solid #e2e6ea;padding:8px 28px;font-size:11px;color:#9aafbe;}
+/* Brazil tab layout */
+.brazil-container{display:flex;flex:1;overflow:hidden;}
+.brazil-map-pane{flex:1;position:relative;background:#eaf4fb;overflow:hidden;}
+.brazil-chart-pane{width:380px;background:#fff;border-left:1px solid #e2e6ea;overflow-y:auto;padding:16px 20px;}
+.brazil-chart-pane h3{font-size:13px;font-weight:600;color:#1a2230;margin-bottom:4px;}
+.brazil-chart-pane .sub2{font-size:11px;color:#9aafbe;margin-bottom:14px;}
+.legend-br{position:absolute;bottom:20px;left:20px;background:rgba(255,255,255,.96);border:1px solid #d0dae6;border-radius:8px;padding:12px 14px;min-width:140px;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+/* Fenabrave tab */
+.fen-wrap{display:flex;flex-direction:column;flex:1;padding:20px 28px;overflow:auto;}
+.fen-controls{display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-bottom:18px;background:#fff;border:1px solid #e2e6ea;border-radius:8px;padding:12px 18px;}
+.fen-ctrl-group{display:flex;align-items:center;gap:8px;font-size:12px;color:#5a7080;}
+.fen-ctrl-group label{font-weight:600;color:#1a2230;white-space:nowrap;}
+.fen-toggle{display:flex;border:1px solid #d0dae6;border-radius:6px;overflow:hidden;}
+.fen-btn{padding:5px 14px;font-size:12px;border:none;background:#fff;color:#5a7080;cursor:pointer;font-weight:500;transition:all .15s;}
+.fen-btn.on{background:#1a73e8;color:#fff;}
+.fen-btn:hover:not(.on){background:#f1f3f4;}
+select#fen-period{padding:5px 10px;font-size:12px;border:1px solid #d0dae6;border-radius:6px;color:#1a2230;background:#fff;cursor:pointer;}
+.fen-table-wrap{background:#fff;border:1px solid #e2e6ea;border-radius:8px;overflow:auto;}
+#fen-table{width:100%;border-collapse:collapse;font-size:13px;}
+#fen-table thead tr{background:#f7f8fa;border-bottom:2px solid #e2e6ea;}
+#fen-table th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:#7a8fa6;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+#fen-table th.sortable{cursor:pointer;user-select:none;}
+#fen-table th.sortable:hover{color:#1a73e8;}
+#fen-table td{padding:8px 14px;border-bottom:1px solid #f1f3f4;vertical-align:middle;}
+#fen-table tbody tr:hover{background:#f7fbff;}
+#fen-table tbody tr:last-child td{border-bottom:none;}
+.td-rank{font-size:11px;color:#9aafbe;width:36px;}
+.td-name{font-weight:500;color:#1a2230;}
+.td-qty{font-weight:600;color:#1a2230;text-align:right;width:110px;}
+.td-share{font-size:12px;color:#5a7080;text-align:right;width:70px;}
+.td-bar{width:160px;padding-right:18px;}
+.bar-bg{background:#eef2f7;border-radius:4px;height:8px;overflow:hidden;}
+.bar-fill{height:8px;border-radius:4px;transition:width .3s;}
+.fen-total{font-size:11px;color:#9aafbe;margin-top:10px;text-align:right;}
+.fen-subtabs{display:flex;gap:0;border-bottom:2px solid #e2e6ea;margin-bottom:16px;}
+.fen-stab{padding:8px 20px;font-size:13px;border:none;background:none;color:#7a8fa6;cursor:pointer;font-weight:500;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.fen-stab.on{color:#1a73e8;border-bottom-color:#1a73e8;}
+.fen-stab:hover:not(.on){color:#1a2230;}
+.fen-subview{display:none;flex-direction:column;flex:1;}
+.fen-subview.on{display:flex;}
+.ev-chip{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:2px solid transparent;background:#f1f3f4;color:#5a7080;transition:all .15s;user-select:none;}
+.ev-chip.on{color:#fff;border-color:transparent;}
+.ev-chip:hover{opacity:.85;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Emplacamentos de Veículos</h1>
+  <span class="sub">Fonte: OICA 2025 (mundo · carros de passeio) &nbsp;·&nbsp; FENABRAVE/Denatran (Brasil · automóveis e motos) &nbsp;·&nbsp; Comparativo: 2025 vs 2024</span>
+</header>
+<div class="tabs">
+  <button class="tab on" id="btn-world" onclick="switchTab('world')">&#127758; Mapa Mundial</button>
+  <button class="tab" id="btn-brazil" onclick="switchTab('brazil')">&#127463;&#127479; Brasil por Estado</button>
+  <button class="tab" id="btn-fenabrave" onclick="switchTab('fenabrave')">&#128202; Análise Fenabrave</button>
+</div>
+
+<!-- WORLD VIEW -->
+<div class="view on" id="view-world">
+  <div class="map-wrap" id="wrap-world">
+    <svg class="world-svg" id="svg-world" viewBox="0 0 960 500"></svg>
+    <div class="tooltip" id="tt-world"></div>
+    <div class="legend" id="leg-world">
+      <h5>Carros emplacados 2025</h5>
+      <div class="leg-item"><div class="leg-color" style="background:#c6dbef"></div>&lt; 100k</div>
+      <div class="leg-item"><div class="leg-color" style="background:#9ecae1"></div>100k – 500k</div>
+      <div class="leg-item"><div class="leg-color" style="background:#6baed6"></div>500k – 1M</div>
+      <div class="leg-item"><div class="leg-color" style="background:#3182bd"></div>1M – 3M</div>
+      <div class="leg-item"><div class="leg-color" style="background:#08519c"></div>3M – 10M</div>
+      <div class="leg-item"><div class="leg-color" style="background:#08306b"></div>&gt; 10M</div>
+      <div class="leg-item"><div class="leg-color" style="background:#d0d8e0"></div>Sem dados</div>
+    </div>
+  </div>
+  <div class="info-bar">Passe o mouse sobre um país para ver os dados de emplacamento. Dados de 2 rodas disponíveis apenas para o Brasil.</div>
+</div>
+
+<!-- BRAZIL VIEW -->
+<div class="view" id="view-brazil">
+  <div class="brazil-container">
+    <div class="brazil-map-pane" id="wrap-brazil">
+      <svg class="brazil-svg" id="svg-brazil" viewBox="0 0 600 680"></svg>
+      <div class="tooltip" id="tt-brazil"></div>
+      <div class="legend-br" id="leg-brazil">
+        <h5>Automóveis emplacados 2025</h5>
+        <div class="leg-item"><div class="leg-color" style="background:#c6dbef"></div>&lt; 10k</div>
+        <div class="leg-item"><div class="leg-color" style="background:#9ecae1"></div>10k – 50k</div>
+        <div class="leg-item"><div class="leg-color" style="background:#6baed6"></div>50k – 150k</div>
+        <div class="leg-item"><div class="leg-color" style="background:#3182bd"></div>150k – 400k</div>
+        <div class="leg-item"><div class="leg-color" style="background:#08519c"></div>400k – 1M</div>
+        <div class="leg-item"><div class="leg-color" style="background:#08306b"></div>&gt; 1M</div>
+        <div class="leg-item"><div class="leg-color" style="background:#d0d8e0"></div>Sem dados</div>
+      </div>
+    </div>
+    <div class="brazil-chart-pane">
+      <h3>Ranking por Estado</h3>
+      <p class="sub2">Clique em um estado no mapa para detalhar</p>
+      <div style="display:flex;gap:12px;margin-bottom:14px;font-size:11px;color:#5a7080;">
+        <span><span style="display:inline-block;width:10px;height:10px;background:#3182bd;border-radius:2px;margin-right:4px;vertical-align:middle;"></span>Automóveis 2025</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#e6550d;border-radius:2px;margin-right:4px;vertical-align:middle;"></span>Motos 2025</span>
+      </div>
+      <svg id="svg-bar" style="width:100%;display:block;overflow:visible;"></svg>
+    </div>
+  </div>
+</div>
+
+<!-- FENABRAVE VIEW -->
+<div class="view" id="view-fenabrave">
+  <div class="fen-wrap">
+    <div class="fen-subtabs">
+      <button class="fen-stab on" id="btn-stab-tabela" onclick="switchFenTab('tabela')">Tabelas</button>
+      <button class="fen-stab" id="btn-stab-evolucao" onclick="switchFenTab('evolucao')">Evolução de Modelos</button>
+      <button class="fen-stab" id="btn-stab-eletrica" onclick="switchFenTab('eletrica')">Eletrificação</button>
+      <button class="fen-stab" id="btn-stab-heavy" onclick="switchFenTab('heavy')">Caminhões e Ônibus</button>
+    </div>
+    <div class="fen-subview on" id="fsv-tabela">
+    <div class="fen-controls">
+      <div class="fen-ctrl-group">
+        <label>Período:</label>
+        <select id="fen-period" onchange="renderFen()"></select>
+      </div>
+      <div class="fen-ctrl-group">
+        <label>Veículo:</label>
+        <div class="fen-toggle">
+          <button class="fen-btn on" id="btn-vauto" onclick="setFenV('auto')">Autos</button>
+          <button class="fen-btn" id="btn-vmoto" onclick="setFenV('moto')">Motos</button>
+        </div>
+      </div>
+      <div class="fen-ctrl-group">
+        <label>Agrupamento:</label>
+        <div class="fen-toggle">
+          <button class="fen-btn on" id="btn-gmarca" onclick="setFenG('marca')">Por Marca</button>
+          <button class="fen-btn" id="btn-gmodelo" onclick="setFenG('modelo')">Por Modelo</button>
+        </div>
+      </div>
+    </div>
+    <div class="fen-table-wrap">
+      <table id="fen-table">
+        <thead>
+          <tr>
+            <th style="width:36px;text-align:center;font-size:10px;color:#9aafbe">&#10003;</th>
+            <th class="td-rank">#</th>
+            <th class="sortable" onclick="fenSortBy('name')" id="th-name">Marca / Modelo</th>
+            <th class="sortable td-qty" onclick="fenSortBy('qty')" id="th-qty">Emplacamentos &#9660;</th>
+            <th class="td-share sortable" onclick="fenSortBy('share')" id="th-share">Share %</th>
+            <th class="td-bar"></th>
+          </tr>
+        </thead>
+        <tbody id="fen-tbody"></tbody>
+      </table>
+      <div class="fen-total" id="fen-total"></div>
+    </div>
+    </div><!-- /fsv-tabela -->
+
+    <div class="fen-subview" id="fsv-evolucao">
+      <div class="fen-controls">
+        <div class="fen-ctrl-group">
+          <label>Veículo:</label>
+          <div class="fen-toggle">
+            <button class="fen-btn on" id="btn-ev-auto" onclick="setEvV('auto')">Autos</button>
+            <button class="fen-btn" id="btn-ev-moto" onclick="setEvV('moto')">Motos</button>
+          </div>
+        </div>
+        <div class="fen-ctrl-group">
+          <label>Agrupamento:</label>
+          <div class="fen-toggle">
+            <button class="fen-btn on" id="btn-ev-marca" onclick="setEvG('marca')">Por Marca</button>
+            <button class="fen-btn" id="btn-ev-modelo" onclick="setEvG('modelo')">Por Modelo</button>
+          </div>
+        </div>
+        <div class="fen-ctrl-group">
+          <label>Métrica:</label>
+          <div class="fen-toggle">
+            <button class="fen-btn on" id="btn-ev-qty" onclick="setEvM('qty')">Quantidade</button>
+            <button class="fen-btn" id="btn-ev-share" onclick="setEvM('share')">Share %</button>
+          </div>
+        </div>
+        <div class="fen-ctrl-group" style="font-size:11px;color:#9aafbe">Clique para adicionar/remover (máx. 10)</div>
+      </div>
+      <div id="ev-chips" style="padding:0 0 12px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+      <div style="background:#fff;border:1px solid #e2e6ea;border-radius:8px;overflow:hidden;padding:16px 8px 8px;">
+        <svg id="svg-evolucao" style="width:100%;display:block;overflow:visible;"></svg>
+      </div>
+    </div><!-- /fsv-evolucao -->
+
+    <div class="fen-subview" id="fsv-eletrica">
+      <div class="fen-controls">
+        <div class="fen-ctrl-group">
+          <label>Métrica:</label>
+          <div class="fen-toggle">
+            <button class="fen-btn on" id="btn-el-share" onclick="setElM('share')">Share %</button>
+            <button class="fen-btn" id="btn-el-qty" onclick="setElM('qty')">Quantidade</button>
+          </div>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e6ea;border-radius:8px;overflow:hidden;padding:16px 8px 8px;">
+        <svg id="svg-eletrica" style="width:100%;display:block;overflow:visible;"></svg>
+      </div>
+      <div style="display:flex;gap:20px;padding:12px 4px 0;flex-wrap:wrap;" id="el-legend"></div>
+    </div><!-- /fsv-eletrica -->
+
+    <div class="fen-subview" id="fsv-heavy">
+      <div class="fen-controls">
+        <div class="fen-ctrl-group">
+          <label>Veículo:</label>
+          <div class="fen-toggle">
+            <button class="fen-btn on" id="btn-hv-cam" onclick="setHvV('caminhao')">Caminhões</button>
+            <button class="fen-btn" id="btn-hv-oni" onclick="setHvV('onibus')">Ônibus</button>
+          </div>
+        </div>
+        <div class="fen-ctrl-group">
+          <label>Métrica:</label>
+          <div class="fen-toggle">
+            <button class="fen-btn on" id="btn-hv-share" onclick="setHvM('share')">Share %</button>
+            <button class="fen-btn" id="btn-hv-qty" onclick="setHvM('qty')">Quantidade</button>
+          </div>
+        </div>
+        <div class="fen-ctrl-group" style="font-size:11px;color:#9aafbe">Clique para adicionar/remover (máx. 10)</div>
+      </div>
+      <div id="hv-chips" style="padding:0 0 12px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+      <div style="background:#fff;border:1px solid #e2e6ea;border-radius:8px;overflow:hidden;padding:16px 8px 8px;">
+        <svg id="svg-heavy" style="width:100%;display:block;overflow:visible;"></svg>
+      </div>
+    </div><!-- /fsv-heavy -->
+  </div>
+</div>
+
+<script>
+var DATA = {"world":{"AUT":{"name":"Austria","cars_2024":253789,"cars_2025":284978,"growth":12.29},"BEL":{"name":"Belgium","cars_2024":448277,"cars_2025":414770,"growth":-7.47},"BGR":{"name":"Bulgaria","cars_2024":42941,"cars_2025":49419,"growth":15.09},"HRV":{"name":"Croatia","cars_2024":65020,"cars_2025":69841,"growth":7.41},"CZE":{"name":"Czechia","cars_2024":231600,"cars_2025":248719,"growth":7.39},"DNK":{"name":"Denmark","cars_2024":172990,"cars_2025":184601,"growth":6.71},"FIN":{"name":"Finland","cars_2024":74070,"cars_2025":71881,"growth":-2.96},"FRA":{"name":"France","cars_2024":1718416,"cars_2025":1632152,"growth":-5.02},"DEU":{"name":"Germany","cars_2024":2817331,"cars_2025":2857591,"growth":1.43},"GRC":{"name":"Greece","cars_2024":137075,"cars_2025":144199,"growth":5.2},"HUN":{"name":"Hungary","cars_2024":121611,"cars_2025":129440,"growth":6.44},"IRL":{"name":"Ireland","cars_2024":121316,"cars_2025":124954,"growth":3.0},"ITA":{"name":"Italy","cars_2024":1558086,"cars_2025":1524668,"growth":-2.14},"NLD":{"name":"Netherlands","cars_2024":381463,"cars_2025":387625,"growth":1.62},"NOR":{"name":"Norway","cars_2024":128837,"cars_2025":179632,"growth":39.43},"POL":{"name":"Poland","cars_2024":551567,"cars_2025":597435,"growth":8.32},"PRT":{"name":"Portugal","cars_2024":209715,"cars_2025":225039,"growth":7.31},"ROU":{"name":"Romania","cars_2024":148900,"cars_2025":155855,"growth":4.67},"SVK":{"name":"Slovakia","cars_2024":93409,"cars_2025":93103,"growth":-0.33},"ESP":{"name":"Spain","cars_2024":1016963,"cars_2025":1148650,"growth":12.95},"SWE":{"name":"Sweden","cars_2024":269582,"cars_2025":272998,"growth":1.27},"CHE":{"name":"Switzerland","cars_2024":239535,"cars_2025":233737,"growth":-2.42},"GBR":{"name":"United Kingdom","cars_2024":1952778,"cars_2025":2020523,"growth":3.47},"RUS":{"name":"Russia","cars_2024":1550249,"cars_2025":1306299,"growth":-15.74},"TUR":{"name":"Turkey","cars_2024":980341,"cars_2025":1084496,"growth":10.62},"UKR":{"name":"Ukraine","cars_2024":69599,"cars_2025":81298,"growth":16.81},"CAN":{"name":"Canada","cars_2024":254195,"cars_2025":236941,"growth":-6.79},"MEX":{"name":"Mexico","cars_2024":634320,"cars_2025":622048,"growth":-1.93},"USA":{"name":"United States Of America","cars_2024":2977381,"cars_2025":2729101,"growth":-8.34},"ARG":{"name":"Argentina","cars_2024":261100,"cars_2025":410132,"growth":57.08},"BRA":{"name":"Brazil","cars_2024":1948681,"cars_2025":1997264,"growth":2.49},"CHL":{"name":"Chile","cars_2024":208979,"cars_2025":212977,"growth":1.91},"COL":{"name":"Colombia","cars_2024":164897,"cars_2025":208267,"growth":26.3},"ECU":{"name":"Ecuador","cars_2024":75986,"cars_2025":77276,"growth":1.7},"PER":{"name":"Peru","cars_2024":106411,"cars_2025":130568,"growth":22.7},"PRI":{"name":"Puerto Rico","cars_2024":100817,"cars_2025":97792,"growth":-3.0},"AUS":{"name":"Australia","cars_2024":898950,"cars_2025":891315,"growth":-0.85},"CHN":{"name":"China","cars_2024":27562989,"cars_2025":30103140,"growth":9.22},"IND":{"name":"India","cars_2024":4274793,"cars_2025":4489717,"growth":5.03},"IDN":{"name":"Indonesia","cars_2024":672986,"cars_2025":613000,"growth":-8.91},"ISR":{"name":"Israel","cars_2024":262240,"cars_2025":282920,"growth":7.89},"JPN":{"name":"Japan","cars_2024":3725200,"cars_2025":3836380,"growth":2.98},"KAZ":{"name":"Kazakhstan","cars_2024":188149,"cars_2025":193000,"growth":2.58},"KWT":{"name":"Kuwait","cars_2024":110813,"cars_2025":128390,"growth":15.86},"MYS":{"name":"Malaysia","cars_2024":748929,"cars_2025":759098,"growth":1.36},"NZL":{"name":"New Zealand","cars_2024":87514,"cars_2025":97985,"growth":11.96},"PAK":{"name":"Pakistan","cars_2024":97419,"cars_2025":128611,"growth":32.02},"PHL":{"name":"Philippines","cars_2024":351565,"cars_2025":365907,"growth":4.08},"SAU":{"name":"Saudi Arabia","cars_2024":705527,"cars_2025":726988,"growth":3.04},"KOR":{"name":"South Korea","cars_2024":1430765,"cars_2025":1490208,"growth":4.15},"THA":{"name":"Thailand","cars_2024":340056,"cars_2025":414024,"growth":21.75},"ARE":{"name":"United Arab Emirates","cars_2024":268876,"cars_2025":262616,"growth":-2.33},"UZB":{"name":"Uzbekistan","cars_2024":166058,"cars_2025":220000,"growth":32.48},"VNM":{"name":"Vietnam","cars_2024":291797,"cars_2025":279265,"growth":-4.29},"EGY":{"name":"Egypt","cars_2024":81475,"cars_2025":133973,"growth":64.43},"MAR":{"name":"Morocco","cars_2024":157087,"cars_2025":208797,"growth":32.92},"ZAF":{"name":"South Africa","cars_2024":351551,"cars_2025":422463,"growth":20.17}},"brazil":{"12":{"uf":"AC","name":"Acre","auto_2024":3424,"auto_2025":3882,"motos_2024":10884,"motos_2025":13350,"growth_auto":13.38,"growth_motos":22.66},"13":{"uf":"AM","name":"Amazonas","auto_2024":23591,"auto_2025":25733,"motos_2024":55393,"motos_2025":55677,"growth_auto":9.08,"growth_motos":0.51},"16":{"uf":"AP","name":"Amapá","auto_2024":4607,"auto_2025":4644,"motos_2024":7832,"motos_2025":15484,"growth_auto":0.8,"growth_motos":97.7},"15":{"uf":"PA","name":"Pará","auto_2024":27229,"auto_2025":27792,"motos_2024":122797,"motos_2025":148365,"growth_auto":2.07,"growth_motos":20.82},"11":{"uf":"RO","name":"Rondônia","auto_2024":9491,"auto_2025":10481,"motos_2024":22506,"motos_2025":25047,"growth_auto":10.43,"growth_motos":11.29},"14":{"uf":"RR","name":"Roraima","auto_2024":2662,"auto_2025":3034,"motos_2024":4417,"motos_2025":5109,"growth_auto":13.97,"growth_motos":15.67},"17":{"uf":"TO","name":"Tocantins","auto_2024":8599,"auto_2025":9058,"motos_2024":22613,"motos_2025":25271,"growth_auto":5.34,"growth_motos":11.75},"27":{"uf":"AL","name":"Alagoas","auto_2024":17714,"auto_2025":19214,"motos_2024":44510,"motos_2025":49538,"growth_auto":8.47,"growth_motos":11.3},"29":{"uf":"BA","name":"Bahia","auto_2024":60468,"auto_2025":67178,"motos_2024":122134,"motos_2025":154221,"growth_auto":11.1,"growth_motos":26.27},"23":{"uf":"CE","name":"Ceará","auto_2024":38926,"auto_2025":41890,"motos_2024":84845,"motos_2025":109938,"growth_auto":7.61,"growth_motos":29.58},"21":{"uf":"MA","name":"Maranhão","auto_2024":19612,"auto_2025":20910,"motos_2024":69677,"motos_2025":91432,"growth_auto":6.62,"growth_motos":31.22},"26":{"uf":"PE","name":"Pernambuco","auto_2024":49906,"auto_2025":55443,"motos_2024":107919,"motos_2025":128650,"growth_auto":11.09,"growth_motos":19.21},"25":{"uf":"PB","name":"Paraíba","auto_2024":23118,"auto_2025":25593,"motos_2024":47247,"motos_2025":60785,"growth_auto":10.71,"growth_motos":28.65},"28":{"uf":"SE","name":"Sergipe","auto_2024":12008,"auto_2025":14239,"motos_2024":29645,"motos_2025":33413,"growth_auto":18.58,"growth_motos":12.71},"22":{"uf":"PI","name":"Piauí","auto_2024":14722,"auto_2025":15799,"motos_2024":43284,"motos_2025":59178,"growth_auto":7.32,"growth_motos":36.72},"24":{"uf":"RN","name":"Rio Grande do Norte","auto_2024":16461,"auto_2025":17885,"motos_2024":31153,"motos_2025":41288,"growth_auto":8.65,"growth_motos":32.53},"53":{"uf":"DF","name":"Distrito Federal","auto_2024":64432,"auto_2025":64440,"motos_2024":28326,"motos_2025":27259,"growth_auto":0.01,"growth_motos":-3.77},"52":{"uf":"GO","name":"Goiás","auto_2024":55766,"auto_2025":55376,"motos_2024":69878,"motos_2025":78811,"growth_auto":-0.7,"growth_motos":12.78},"50":{"uf":"MS","name":"Mato Grosso do Sul","auto_2024":20759,"auto_2025":21139,"motos_2024":30163,"motos_2025":27801,"growth_auto":1.83,"growth_motos":-7.83},"51":{"uf":"MT","name":"Mato Grosso","auto_2024":31540,"auto_2025":31676,"motos_2024":56922,"motos_2025":65786,"growth_auto":0.43,"growth_motos":15.57},"32":{"uf":"ES","name":"Espírito Santo","auto_2024":36362,"auto_2025":38307,"motos_2024":43130,"motos_2025":53561,"growth_auto":5.35,"growth_motos":24.19},"31":{"uf":"MG","name":"Minas Gerais","auto_2024":410706,"auto_2025":445927,"motos_2024":135953,"motos_2025":154780,"growth_auto":8.58,"growth_motos":13.85},"35":{"uf":"SP","name":"São Paulo","auto_2024":586047,"auto_2025":520620,"motos_2024":360731,"motos_2025":351700,"growth_auto":-11.16,"growth_motos":-2.5},"33":{"uf":"RJ","name":"Rio de Janeiro","auto_2024":89545,"auto_2025":91173,"motos_2024":146607,"motos_2025":157489,"growth_auto":1.82,"growth_motos":7.42},"41":{"uf":"PR","name":"Paraná","auto_2024":126021,"auto_2025":162509,"motos_2024":83160,"motos_2025":159934,"growth_auto":28.95,"growth_motos":92.32},"43":{"uf":"RS","name":"Rio Grande do Sul","auto_2024":100608,"auto_2025":96173,"motos_2024":36970,"motos_2025":37376,"growth_auto":-4.41,"growth_motos":1.1},"42":{"uf":"SC","name":"Santa Catarina","auto_2024":100602,"auto_2025":101166,"motos_2024":58679,"motos_2025":63949,"growth_auto":0.56,"growth_motos":8.98}}};
+
+var n2i={40:'AUT',56:'BEL',100:'BGR',191:'HRV',203:'CZE',208:'DNK',246:'FIN',250:'FRA',276:'DEU',300:'GRC',348:'HUN',372:'IRL',380:'ITA',528:'NLD',578:'NOR',616:'POL',620:'PRT',642:'ROU',703:'SVK',724:'ESP',752:'SWE',756:'CHE',826:'GBR',643:'RUS',792:'TUR',804:'UKR',124:'CAN',484:'MEX',840:'USA',32:'ARG',76:'BRA',152:'CHL',170:'COL',218:'ECU',604:'PER',630:'PRI',156:'CHN',356:'IND',360:'IDN',376:'ISR',392:'JPN',398:'KAZ',414:'KWT',458:'MYS',554:'NZL',586:'PAK',608:'PHL',682:'SAU',410:'KOR',764:'THA',784:'ARE',860:'UZB',704:'VNM',36:'AUS',818:'EGY',504:'MAR',710:'ZAF'};
+
+function fmt(n){if(!n&&n!==0)return'—';if(n>=1e6)return(n/1e6).toFixed(2)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'k';return n.toLocaleString('pt-BR');}
+function badge(g){if(g==null)return'<span class="badge neu">—</span>';var s=g>0?'+':'';return'<span class="badge '+(g>0?'pos':g<0?'neg':'neu')+'">'+s+g.toFixed(1)+'%</span>';}
+
+var wScale=d3.scaleThreshold().domain([1e5,5e5,1e6,3e6,1e7]).range(['#c6dbef','#9ecae1','#6baed6','#3182bd','#08519c','#08306b']);
+var bScale=d3.scaleThreshold().domain([1e4,5e4,1.5e5,4e5,1e6]).range(['#c6dbef','#9ecae1','#6baed6','#3182bd','#08519c','#08306b']);
+
+// =========== WORLD MAP ===========
+function initWorld(){
+  var svg=d3.select('#svg-world');
+  var wrap=document.getElementById('wrap-world');
+  var W=wrap.clientWidth||960, H=Math.max(460, W*0.52);
+  svg.attr('viewBox','0 0 '+W+' '+H);
+  var proj=d3.geoNaturalEarth1().scale(W/6.3).translate([W/2, H/2]);
+  var pg=d3.geoPath(proj);
+  var tt=document.getElementById('tt-world');
+
+  svg.append('rect').attr('width',W).attr('height',H).attr('fill','#d4eaf7');
+  svg.append('path').datum({type:'Sphere'}).attr('d',pg).attr('fill','#d4eaf7').attr('stroke','none');
+  svg.append('path').datum(d3.geoGraticule10()).attr('d',pg).attr('fill','none').attr('stroke','rgba(255,255,255,0.3)').attr('stroke-width',0.4);
+
+  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+    .then(function(r){return r.json();})
+    .then(function(world){
+      var countries=topojson.feature(world,world.objects.countries);
+      svg.selectAll('.ctry').data(countries.features).join('path').attr('class','ctry')
+        .attr('d',pg)
+        .attr('fill',function(d){var iso=n2i[+d.id];var dat=DATA.world[iso];return dat?wScale(dat.cars_2025):'#d0d8e0';})
+        .attr('stroke','#fff').attr('stroke-width',0.5)
+        .on('mouseover',function(ev,d){
+          var iso=n2i[+d.id];var dat=DATA.world[iso];
+          if(!dat){tt.style.display='none';return;}
+          tt.innerHTML='<h4>'+dat.name+'</h4>'
+            +'<div class="tt-row"><span>Carros emplacados 2025</span><span class="tt-val">'+fmt(dat.cars_2025)+'</span></div>'
+            +'<div class="tt-row"><span>Carros emplacados 2024</span><span class="tt-val">'+fmt(dat.cars_2024)+'</span></div>'
+            +'<div class="tt-row"><span>Crescimento 2025/2024</span>'+badge(dat.growth)+'</div>'
+            +'<p class="tt-note">Dados de motos (2 rodas) não disponíveis globalmente</p>';
+          tt.style.display='block';
+          d3.select(this).raise().attr('stroke','#1a73e8').attr('stroke-width',1.8);
+        })
+        .on('mousemove',function(ev){
+          var r=wrap.getBoundingClientRect();
+          var x=ev.clientX-r.left+14, y=ev.clientY-r.top-14;
+          if(x+260>wrap.offsetWidth) x=ev.clientX-r.left-274;
+          if(y<0) y=4;
+          tt.style.left=x+'px'; tt.style.top=y+'px';
+        })
+        .on('mouseout',function(){
+          tt.style.display='none';
+          d3.select(this).attr('stroke','#fff').attr('stroke-width',0.5);
+        });
+    });
+}
+
+// =========== BRAZIL MAP ===========
+var brInited=false;
+function initBrazil(){
+  if(brInited) return;
+  brInited=true;
+  var svg=d3.select('#svg-brazil');
+  var wrap=document.getElementById('wrap-brazil');
+  var W=wrap.clientWidth||600;
+  var tt=document.getElementById('tt-brazil');
+
+  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+    .then(function(){
+      return fetch('https://cdn.jsdelivr.net/gh/codeforamerica/click_that_hood@master/public/data/brazil-states.geojson');
+    })
+    .then(function(r){return r.json();})
+    .then(function(geo){
+      var proj=d3.geoMercator().fitSize([W,700],geo);
+      var pg=d3.geoPath(proj);
+      var bb=pg.bounds({type:'FeatureCollection',features:geo.features});
+      var svgH=Math.ceil(bb[1][1])+20;
+      svg.attr('viewBox','0 0 '+W+' '+svgH);
+
+      svg.append('rect').attr('width',W).attr('height',svgH).attr('fill','#d4eaf7');
+
+      svg.selectAll('.state').data(geo.features).join('path').attr('class','state')
+        .attr('d',pg)
+        .attr('fill',function(f){
+          var uf=f.properties.sigla||f.properties.UF||f.properties.uf;
+          var d=findByUF(uf);
+          return d?bScale(d.auto_2025):'#d0d8e0';
+        })
+        .attr('stroke','#fff').attr('stroke-width',1)
+        .on('mouseover',function(ev,f){
+          var uf=f.properties.sigla||f.properties.UF||f.properties.uf;
+          var d=findByUF(uf);
+          if(!d){tt.style.display='none';return;}
+          tt.innerHTML='<h4>'+d.name+' ('+d.uf+')</h4>'
+            +'<div class="tt-row"><span>&#128663; Automóveis 2025</span><span class="tt-val">'+fmt(d.auto_2025)+'</span></div>'
+            +'<div class="tt-row"><span>&#128663; Automóveis 2024</span><span class="tt-val">'+fmt(d.auto_2024)+'</span></div>'
+            +'<div class="tt-row"><span>Crescimento autos</span>'+badge(d.growth_auto)+'</div>'
+            +'<div class="tt-row" style="margin-top:6px"><span>&#128757; Motos 2025</span><span class="tt-val">'+fmt(d.motos_2025)+'</span></div>'
+            +'<div class="tt-row"><span>&#128757; Motos 2024</span><span class="tt-val">'+fmt(d.motos_2024)+'</span></div>'
+            +'<div class="tt-row"><span>Crescimento motos</span>'+badge(d.growth_motos)+'</div>';
+          tt.style.display='block';
+          d3.select(this).attr('stroke','#1a73e8').attr('stroke-width',2);labelG.raise();
+        })
+        .on('mousemove',function(ev){
+          var r=wrap.getBoundingClientRect();
+          var x=ev.clientX-r.left+14, y=ev.clientY-r.top-14;
+          if(x+270>wrap.offsetWidth) x=ev.clientX-r.left-284;
+          if(y<0) y=4;
+          tt.style.left=x+'px'; tt.style.top=y+'px';
+        })
+        .on('mouseout',function(){
+          tt.style.display='none';
+          d3.select(this).attr('stroke','#fff').attr('stroke-width',1);
+        });
+
+      var labelG=svg.append('g').attr('class','labels-top');
+      labelG.selectAll('.slabel').data(geo.features).join('text').attr('class','slabel')
+        .attr('transform',function(f){var c=proj(d3.geoCentroid(f));return c?'translate('+c+')':'translate(-9999,-9999)';})
+        .attr('text-anchor','middle').attr('dy','0.35em')
+        .attr('font-size',9).attr('font-weight','700')
+        .attr('fill',function(f){
+          var uf=f.properties.sigla||f.properties.UF||f.properties.uf;
+          var d=findByUF(uf);
+          var fill=d?bScale(d.auto_2025):'#d0d8e0';
+          return (fill==='#c6dbef'||fill==='#9ecae1'||fill==='#6baed6'||fill==='#d0d8e0')?'#1a2230':'#fff';
+        })
+        .attr('pointer-events','none')
+        .text(function(f){return f.properties.sigla||f.properties.UF||f.properties.uf||'';});
+    })
+    .catch(function(e){console.error('Brazil GeoJSON error:',e);});
+
+  drawBarChart();
+}
+
+function findByUF(uf){
+  if(!uf) return null;
+  return Object.values(DATA.brazil).find(function(d){return d.uf===uf.toUpperCase();});
+}
+
+// =========== BAR CHART ===========
+function drawBarChart(){
+  var states=Object.values(DATA.brazil).sort(function(a,b){return b.auto_2025-a.auto_2025;});
+  var ml=38,mr=68,mt=4,mb=8,rH=20,W=340;
+  var iW=W-ml-mr;
+  var H=states.length*rH+mt+mb;
+  var svg=d3.select('#svg-bar');
+  svg.attr('viewBox','0 0 '+W+' '+H).attr('height',H);
+  var mx=d3.max(states,function(d){return Math.max(d.auto_2025,d.motos_2025);});
+  var x=d3.scaleLinear().domain([0,mx]).range([0,iW]);
+  var g=svg.append('g').attr('transform','translate('+ml+','+mt+')');
+  g.append('text').attr('x',iW+mr-4).attr('y',-2).attr('text-anchor','end').attr('font-size',9).attr('fill','#9aafbe').text('cresc. auto');
+  states.forEach(function(d,i){
+    var y=i*rH, bh=7;
+    g.append('text').attr('x',-4).attr('y',y+rH/2+3).attr('text-anchor','end').attr('font-size',10).attr('fill','#5a7080').text(d.uf);
+    g.append('rect').attr('x',0).attr('y',y+1).attr('width',x(d.auto_2025)).attr('height',bh).attr('rx',2).attr('fill','#3182bd');
+    g.append('rect').attr('x',0).attr('y',y+1+bh+2).attr('width',x(d.motos_2025)).attr('height',bh).attr('rx',2).attr('fill','#e6550d');
+    if(x(d.auto_2025)>28) g.append('text').attr('x',x(d.auto_2025)+3).attr('y',y+1+bh-1).attr('font-size',9).attr('fill','#7a8fa6').text(fmt(d.auto_2025));
+    if(x(d.motos_2025)>28) g.append('text').attr('x',x(d.motos_2025)+3).attr('y',y+1+bh*2+1).attr('font-size',9).attr('fill','#7a8fa6').text(fmt(d.motos_2025));
+    var gc=d.growth_auto>=0?'#1e7e34':'#c0392b';
+    g.append('text').attr('x',iW+mr-4).attr('y',y+rH/2+4).attr('text-anchor','end').attr('font-size',10).attr('font-weight','600').attr('fill',gc).text((d.growth_auto>=0?'+':'')+d.growth_auto+'%');
+  });
+}
+
+// =========== TAB SWITCH ===========
+function switchTab(tab){
+  ['world','brazil','fenabrave'].forEach(function(t){
+    document.getElementById('view-'+t).classList.toggle('on', t===tab);
+    document.getElementById('btn-'+t).classList.toggle('on', t===tab);
+  });
+  if(tab==='brazil') initBrazil();
+  if(tab==='fenabrave') initFen();
+}
+
+window.addEventListener('load', function(){ initWorld(); });
+window.addEventListener('resize', function(){
+  if(document.getElementById('view-world').classList.contains('on')) initWorld();
+});
+
+// =========== FENABRAVE ANALYSIS ===========
+var fenData=null, fenV='auto', fenG='marca', fenSort={col:'qty',dir:-1}, fenInited=false, fenExcluded={};
+
+function initFen(){
+  if(fenInited) return;
+  fenInited=true;
+  (function(){
+    var d=[{"period":"2025-01","brand_auto":{"FIAT":19518,"VW":17527,"GM":15935,"HYUNDAI":9729,"JEEP":9231,"TOYOTA":7829,"HONDA":7402,"BYD":6481,"RENAULT":5842,"NISSAN":5790,"CAOA CHERY":4686,"CITROEN":2677,"GWM":2590,"PEUGEOT":2192,"BMW":1210,"FORD":876,"MITSUBISHI":737,"VOLVO":656,"M.BENZ":558,"PORSCHE":458,"AUDI":405},"brand_moto":{"HONDA":105582,"YAMAHA":23149,"SHINERAY":9025,"AVELLOZ":1935,"ROYAL ENFIELD":1903,"MOTTU":1872,"BAJAJ":1730,"HAOJUE":1681,"BMW":1057,"TRIUMPH":915,"VMOTO":585,"KAWASAKI":569,"DAFRA":556,"SUZUKI":195,"ZONTES":190,"BULL":160,"H.DAVIDSON":141,"GCX":96,"DUCATI":90,"SHANSU":65,"WATTS":44},"model_auto":{"VW/POLO":5800,"GM/ONIX":5575,"GM/TRACKER":5414,"VW/T CROSS":5312,"FIAT/ARGO":5172,"HYUNDAI/CRETA":5148,"NISSAN/KICKS":4458,"JEEP/COMPASS":4436,"HONDA/HR-V":4273,"FIAT/MOBI":4024,"JEEP/RENEGADE":3679,"HYUNDAI/HB20":3678,"FIAT/PULSE":3587,"FIAT/FASTBACK":3423,"FIAT/CRONOS":3312,"BYD/SONG":3183,"GM/ONIX PLUS":3044,"VW/NIVUS":2914,"CAOA CHERY/TIGGO 7":2601,"TOYOTA/COROLLA":2568,"GWM/HAVAL H6":2241,"RENAULT/KWID":2090,"RENAULT/DUSTER":1958,"TOYOTA/COROLLA CROSS":1826,"BYD/DOLPHIN MINI":1723,"TOYOTA/HILUX SW4":1692,"RENAULT/KARDIAN":1675,"VW/VIRTUS":1635,"VW/TAOS":1613,"GM/SPIN":1470,"PEUGEOT/2008":1462,"HONDA/CITY":1354,"CITROEN/BASALT":1206,"HONDA/CITY HATCH":1199,"JEEP/COMMANDER":1087,"CAOA CHERY/TIGGO 8":1039,"CITROEN/C3":952,"CAOA CHERY/TIGGO 5X":947,"NISSAN/VERSA":892,"BYD/KING":824,"TOYOTA/YARIS SEDAN":731,"PEUGEOT/208":725,"HYUNDAI/HB20S":705,"FORD/TERRITORY":610,"TOYOTA/YARIS HB":610,"MITSUBISHI/ECLIPSE CROSS":586,"CITROEN/C3 AIRCROSS":510,"BYD/DOLPHIN":509,"NISSAN/SENTRA":438,"BMW/X1":433},"model_moto":{"HONDA/CG 160":34516,"HONDA/CB 300F":5001,"YAMAHA/YBR 150":3261,"YAMAHA/FAZER 150":2682,"YAMAHA/FAZER 250":2535,"MOTTU/SPORT 110I":1872,"SHINERAY/XY 150":1420,"YAMAHA/YS150 FAZER":774,"HAOJUE/DK150":523,"YAMAHA/YBR 125":401,"ROYAL ENFIELD/HUNTER 350":639,"ROYAL ENFIELD/METEOR":517,"ROYAL ENFIELD/SUPER METEOR 650":343,"ROYAL ENFIELD/CLASSIC 350":288,"TRIUMPH/SCRAMBLER 400":192,"HONDA/NXR160":13190,"YAMAHA/XTZ 250":3272,"YAMAHA/CROSSER 150":2885,"HONDA/XRE 300":2873,"HONDA/XRE 190":2826,"SHINERAY/XY 125":2823,"HONDA/XR 300L":798,"BMW/G310 GS":212,"HAOJUE/NK 150":164},"brand_caminhao":{"M.BENZ":2382,"VW TRUCK E BUS":2015,"VOLVO":1714,"SCANIA":1334,"DAF":830,"IVECO":794,"FOTON":69,"TESLA":7,"AGRALE":6,"JAC":6,"HYUNDAI":3,"FORD":2},"brand_onibus":{"M.BENZ":960,"VW TRUCK E BUS":424,"MARCOPOLO":284,"IVECO":262,"BYD":70,"VOLVO":62,"SCANIA":54,"INDUSCAR":42,"AGRALE":28},"ev":{"hybrid":12670,"electric":3636}},{"period":"2025-02","brand_auto":{"VW":22132,"FIAT":21042,"GM":13136,"TOYOTA":12835,"HYUNDAI":11504,"JEEP":9169,"HONDA":8315,"RENAULT":7990,"BYD":6958,"NISSAN":4717,"CAOA CHERY":4160,"CITROEN":3193,"GWM":2009,"PEUGEOT":1785,"BMW":1089,"FORD":901,"VOLVO":734,"MITSUBISHI":723,"M.BENZ":654,"AUDI":409,"PORSCHE":402},"brand_moto":{"HONDA":107345,"YAMAHA":23532,"SHINERAY":8708,"MOTTU":3430,"AVELLOZ":2282,"ROYAL ENFIELD":2166,"BAJAJ":1861,"HAOJUE":1621,"BMW":804,"VMOTO":753,"TRIUMPH":741,"KAWASAKI":621,"DAFRA":465,"ZONTES":343,"SUZUKI":234,"BULL":184,"GCX":98,"H.DAVIDSON":92,"SHANSU":61,"DUCATI":54,"SUPER SOCO":54},"model_auto":{"VW/POLO":7961,"VW/T CROSS":6555,"FIAT/ARGO":6305,"FIAT/MOBI":5548,"TOYOTA/COROLLA CROSS":5351,"HYUNDAI/CRETA":4961,"RENAULT/KWID":4907,"HONDA/HR-V":4792,"GM/ONIX":4712,"HYUNDAI/HB20":4561,"JEEP/COMPASS":4303,"GM/TRACKER":4035,"FIAT/FASTBACK":3772,"JEEP/RENEGADE":3628,"TOYOTA/COROLLA":3351,"FIAT/PULSE":3315,"NISSAN/KICKS":3217,"VW/NIVUS":2956,"BYD/SONG":2680,"VW/VIRTUS":2677,"GM/ONIX PLUS":2502,"BYD/DOLPHIN MINI":2399,"CAOA CHERY/TIGGO 7":2140,"FIAT/CRONOS":2101,"RENAULT/KARDIAN":1903,"HYUNDAI/HB20S":1751,"VW/TAOS":1747,"GWM/HAVAL H6":1747,"CITROEN/BASALT":1701,"TOYOTA/YARIS SEDAN":1689,"HONDA/CITY":1570,"GM/SPIN":1566,"TOYOTA/HILUX SW4":1413,"HONDA/CITY HATCH":1286,"JEEP/COMMANDER":1202,"PEUGEOT/2008":1144,"RENAULT/DUSTER":1138,"NISSAN/VERSA":1132,"CITROEN/C3":999,"CAOA CHERY/TIGGO 8":930,"CAOA CHERY/TIGGO 5X":918,"TOYOTA/YARIS HB":885,"BYD/KING":805,"PEUGEOT/208":640,"BYD/DOLPHIN":627,"FORD/TERRITORY":603,"MITSUBISHI/ECLIPSE CROSS":489,"CITROEN/C3 AIRCROSS":484,"NISSAN/SENTRA":365,"HONDA/CIVIC":357},"model_moto":{"HONDA/CG 160":34276,"HONDA/CB 300F":4903,"YAMAHA/YBR 150":4585,"YAMAHA/FAZER 150":3251,"YAMAHA/FAZER 250":3244,"MOTTU/SPORT 110I":3430,"SHINERAY/XY 150":1453,"YAMAHA/YS150 FAZER":235,"HAOJUE/DK150":350,"BAJAJ/DOMINAR D160":410,"ROYAL ENFIELD/HUNTER 350":696,"ROYAL ENFIELD/METEOR":515,"ROYAL ENFIELD/SUPER METEOR 650":554,"ROYAL ENFIELD/CLASSIC 350":274,"TRIUMPH/SCRAMBLER 400":127,"HONDA/NXR160":13258,"YAMAHA/XTZ 250":3279,"HONDA/XRE 300":3275,"HONDA/XRE 190":2821,"YAMAHA/CROSSER 150":2676,"SHINERAY/SHI 175":2118,"HONDA/XR 300L":787,"HAOJUE/NK 150":177,"BMW/G310 GS":100},"brand_caminhao":{"VW TRUCK E BUS":2380,"M.BENZ":2141,"VOLVO":1506,"SCANIA":1241,"IVECO":711,"DAF":635,"FOTON":87,"JAC":23,"AGRALE":10,"FORD":6,"TESLA":3,"JMC":1,"NANJING":1},"brand_onibus":{"M.BENZ":1102,"VW TRUCK E BUS":567,"IVECO":309,"MARCOPOLO":275,"VOLVO":56,"SCANIA":46,"ANKAI":5,"BYD":5,"AGRALE":4,"INDUSCAR":1},"ev":{"hybrid":11643,"electric":4470}},{"period":"2025-03","brand_auto":{"VW":24041,"FIAT":21955,"GM":16043,"HYUNDAI":12390,"TOYOTA":11278,"RENAULT":8746,"HONDA":8227,"JEEP":8168,"BYD":7939,"NISSAN":5926,"CAOA CHERY":3872,"CITROEN":3273,"GWM":2092,"PEUGEOT":1517,"BMW":1188,"MITSUBISHI":886,"VOLVO":707,"FORD":653,"M.BENZ":579,"PORSCHE":558,"AUDI":512},"brand_moto":{"HONDA":111894,"YAMAHA":23198,"SHINERAY":8978,"MOTTU":8004,"ROYAL ENFIELD":2294,"AVELLOZ":2247,"BAJAJ":1874,"HAOJUE":1712,"BMW":1099,"TRIUMPH":927,"KAWASAKI":788,"VMOTO":646,"ZONTES":585,"DAFRA":474,"SUZUKI":231,"BULL":209,"H.DAVIDSON":121,"GCX":117,"DUCATI":102,"WATTS":65,"SUPER SOCO":53},"model_auto":{"FIAT/ARGO":8247,"VW/POLO":8120,"VW/T CROSS":6512,"HYUNDAI/HB20":6122,"TOYOTA/COROLLA CROSS":5833,"GM/ONIX":5748,"HONDA/HR-V":5094,"RENAULT/KWID":4955,"FIAT/MOBI":4682,"NISSAN/KICKS":4513,"HYUNDAI/CRETA":4418,"GM/ONIX PLUS":4321,"GM/TRACKER":4169,"JEEP/COMPASS":4017,"VW/NIVUS":3792,"FIAT/FASTBACK":3550,"FIAT/PULSE":3048,"TOYOTA/COROLLA":3038,"VW/VIRTUS":2973,"JEEP/RENEGADE":2927,"BYD/SONG":2784,"BYD/DOLPHIN MINI":2432,"FIAT/CRONOS":2427,"VW/TAOS":2407,"RENAULT/KARDIAN":2269,"GWM/HAVAL H6":1777,"CITROEN/BASALT":1714,"CAOA CHERY/TIGGO 7":1707,"HYUNDAI/HB20S":1641,"RENAULT/DUSTER":1503,"BYD/KING":1427,"GM/SPIN":1398,"HONDA/CITY":1333,"CAOA CHERY/TIGGO 8":1307,"HONDA/CITY HATCH":1268,"TOYOTA/HILUX SW4":1229,"JEEP/COMMANDER":1198,"NISSAN/VERSA":1092,"CITROEN/C3":1087,"PEUGEOT/2008":931,"BYD/DOLPHIN":823,"CAOA CHERY/TIGGO 5X":715,"MITSUBISHI/ECLIPSE CROSS":703,"PEUGEOT/208":586,"TOYOTA/YARIS HB":565,"TOYOTA/YARIS SEDAN":504,"CITROEN/C3 AIRCROSS":466,"FORD/TERRITORY":462,"BMW/X1":408,"VOLVO/EX30":368},"model_moto":{"HONDA/CG 160":35422,"HONDA/CB 300F":5447,"MOTTU/SPORT 110I":8004,"YAMAHA/YBR 150":4574,"YAMAHA/FAZER 250":3509,"YAMAHA/FAZER 150":3340,"SHINERAY/XY 150":1429,"HAOJUE/DK150":357,"YAMAHA/YS150 FAZER":186,"BAJAJ/DOMINAR D160":403,"ROYAL ENFIELD/HUNTER 350":683,"ROYAL ENFIELD/METEOR":276,"ROYAL ENFIELD/SUPER METEOR 650":306,"ROYAL ENFIELD/CLASSIC 350":296,"TRIUMPH/SCRAMBLER 400":198,"HONDA/NXR160":14244,"YAMAHA/XTZ 250":3260,"HONDA/XRE 300":3436,"HONDA/XRE 190":2828,"YAMAHA/CROSSER 150":2312,"SHINERAY/SHI 175":2174,"HONDA/XR 300L":844,"AVELLOZ/AZ160":351,"BMW/G310 GS":285,"HAOJUE/NK 150":230},"brand_caminhao":{"VW TRUCK E BUS":2322,"M.BENZ":2279,"VOLVO":1893,"SCANIA":1394,"DAF":601,"IVECO":593,"FOTON":79,"JAC":13,"AGRALE":10,"HYUNDAI":5,"FORD":2,"HIGER":1,"NANJING":1,"TESLA":1},"brand_onibus":{"M.BENZ":1277,"VW TRUCK E BUS":478,"MARCOPOLO":247,"IVECO":144,"VOLVO":36,"SCANIA":21,"AGRALE":14,"HIGER":10,"BYD":1,"FIAT":1,"INDUSCAR":1},"ev":{"hybrid":12876,"electric":4768}},{"period":"2025-04","brand_auto":{"VW":26687,"FIAT":24548,"HYUNDAI":16252,"GM":16016,"TOYOTA":12390,"JEEP":9288,"BYD":8341,"HONDA":8297,"RENAULT":6771,"NISSAN":5073,"CAOA CHERY":4643,"CITROEN":3612,"GWM":2331,"PEUGEOT":1685,"BMW":1398,"MITSUBISHI":1004,"VOLVO":792,"M.BENZ":754,"FORD":486,"PORSCHE":468,"AUDI":398},"brand_moto":{"HONDA":121872,"YAMAHA":25057,"SHINERAY":10687,"MOTTU":10241,"AVELLOZ":2644,"ROYAL ENFIELD":2325,"BAJAJ":2084,"HAOJUE":1843,"TRIUMPH":1211,"BMW":1135,"KAWASAKI":968,"ZONTES":553,"DAFRA":486,"SUZUKI":289,"BULL":196,"H.DAVIDSON":168,"DUCATI":140,"GCX":120,"VMOTO":94,"WATTS":79,"AMAZON":49},"model_auto":{"VW/POLO":10932,"FIAT/ARGO":8444,"VW/T CROSS":8114,"HYUNDAI/HB20":6922,"TOYOTA/COROLLA CROSS":6232,"FIAT/MOBI":6170,"GM/ONIX":5415,"HONDA/HR-V":5258,"HYUNDAI/CRETA":4904,"FIAT/FASTBACK":4676,"JEEP/COMPASS":4542,"GM/TRACKER":4297,"GM/ONIX PLUS":4274,"HYUNDAI/HB20S":4172,"NISSAN/KICKS":4001,"RENAULT/KWID":3759,"VW/NIVUS":3615,"JEEP/RENEGADE":3380,"TOYOTA/COROLLA":3202,"FIAT/PULSE":3141,"BYD/SONG":3139,"VW/VIRTUS":2851,"BYD/DOLPHIN MINI":2172,"FIAT/CRONOS":2115,"GWM/HAVAL H6":1979,"CITROEN/BASALT":1958,"CAOA CHERY/TIGGO 7":1935,"GM/SPIN":1744,"RENAULT/KARDIAN":1742,"CAOA CHERY/TIGGO 8":1646,"BYD/KING":1599,"HONDA/CITY":1351,"JEEP/COMMANDER":1339,"TOYOTA/HILUX SW4":1300,"CITROEN/C3":1262,"RENAULT/DUSTER":1253,"HONDA/CITY HATCH":1247,"PEUGEOT/2008":997,"BYD/DOLPHIN":973,"CAOA CHERY/TIGGO 5X":953,"VW/TAOS":920,"TOYOTA/YARIS HB":827,"MITSUBISHI/ECLIPSE CROSS":820,"NISSAN/VERSA":740,"PEUGEOT/208":685,"TOYOTA/YARIS SEDAN":599,"BMW/X1":429,"FORD/TERRITORY":380,"CITROEN/C3 AIRCROSS":378,"VOLVO/EX30":365},"model_moto":{"HONDA/CG 160":39019,"MOTTU/SPORT 110I":10241,"HONDA/CB 300F":5877,"YAMAHA/YBR 150":5517,"YAMAHA/FAZER 250":3604,"YAMAHA/FAZER 150":3425,"SHINERAY/XY 150":1640,"HAOJUE/DK150":371,"HAOJUE/DR160":448,"BAJAJ/DOMINAR D160":277,"ROYAL ENFIELD/HUNTER 350":600,"ROYAL ENFIELD/METEOR":228,"ROYAL ENFIELD/SUPER METEOR 650":310,"ROYAL ENFIELD/CLASSIC 350":237,"ROYAL ENFIELD/SHOTGUN 650":343,"TRIUMPH/SCRAMBLER 400":211,"HONDA/NXR160":16224,"HONDA/XRE 300":4013,"YAMAHA/XTZ 250":3445,"HONDA/XRE 190":3180,"YAMAHA/CROSSER 150":2510,"SHINERAY/SHI 175":2609,"HONDA/XR 300L":972,"AVELLOZ/AZ160":506,"BMW/G310 GS":295,"HAOJUE/NK 150":239},"brand_caminhao":{"M.BENZ":2502,"VW TRUCK E BUS":2378,"VOLVO":1656,"SCANIA":981,"DAF":693,"IVECO":690,"FOTON":97,"AGRALE":9,"JAC":9,"FORD":8,"TESLA":5,"NANJING":4,"HYUNDAI":3},"brand_onibus":{"M.BENZ":1326,"VW TRUCK E BUS":511,"MARCOPOLO":317,"IVECO":211,"INDUSCAR":50,"SCANIA":46,"VOLVO":45,"AGRALE":35,"ANKAI":4},"ev":{"hybrid":14925,"electric":4678}},{"period":"2025-05","brand_auto":{"VW":31630,"FIAT":26363,"HYUNDAI":18649,"GM":16889,"TOYOTA":11189,"JEEP":10530,"BYD":9293,"HONDA":9260,"RENAULT":8128,"CAOA CHERY":6152,"NISSAN":4710,"GWM":3216,"CITROEN":3116,"PEUGEOT":1988,"BMW":1443,"MITSUBISHI":1040,"M.BENZ":825,"VOLVO":790,"PORSCHE":456,"AUDI":329,"JAECOO":275},"brand_moto":{"HONDA":128758,"YAMAHA":26375,"SHINERAY":11438,"MOTTU":10893,"AVELLOZ":2738,"ROYAL ENFIELD":2693,"BAJAJ":2190,"HAOJUE":1843,"TRIUMPH":1410,"BMW":1292,"KAWASAKI":985,"ZONTES":492,"DAFRA":486,"SUZUKI":296,"VMOTO":222,"BULL":209,"H.DAVIDSON":196,"GCX":132,"DUCATI":88,"WATTS":57,"AMAZON":48},"model_auto":{"VW/POLO":12911,"VW/T CROSS":9408,"FIAT/ARGO":9063,"HYUNDAI/HB20":8673,"FIAT/MOBI":6459,"HONDA/HR-V":6406,"GM/ONIX":6157,"JEEP/COMPASS":5687,"TOYOTA/COROLLA CROSS":5513,"RENAULT/KWID":5344,"HYUNDAI/CRETA":5333,"FIAT/FASTBACK":4809,"VW/NIVUS":4590,"HYUNDAI/HB20S":4421,"GM/TRACKER":4331,"GM/ONIX PLUS":3924,"JEEP/RENEGADE":3641,"NISSAN/KICKS":3607,"FIAT/PULSE":3351,"VW/VIRTUS":3317,"TOYOTA/COROLLA":3233,"CAOA CHERY/TIGGO 7":3211,"BYD/SONG":2899,"FIAT/CRONOS":2677,"BYD/DOLPHIN MINI":2575,"GWM/HAVAL H6":2432,"GM/SPIN":2195,"CITROEN/BASALT":1873,"BYD/DOLPHIN":1862,"CAOA CHERY/TIGGO 8":1483,"RENAULT/KARDIAN":1455,"TOYOTA/HILUX SW4":1330,"RENAULT/DUSTER":1321,"HONDA/CITY":1301,"CAOA CHERY/TIGGO 5X":1257,"PEUGEOT/2008":1217,"JEEP/COMMANDER":1198,"HONDA/CITY HATCH":1195,"VW/TAOS":975,"CITROEN/C3":870,"MITSUBISHI/ECLIPSE CROSS":842,"BYD/KING":802,"PEUGEOT/208":771,"BYD/YUAN":751,"GWM/TANK":300,"NISSAN/VERSA":562,"NISSAN/SENTRA":538,"TOYOTA/YARIS HB":530,"BMW/X1":463,"VOLVO/EX30":429},"model_moto":{"HONDA/CG 160":42478,"MOTTU/SPORT 110I":10893,"HONDA/CB 300F":5612,"YAMAHA/YBR 150":6063,"YAMAHA/FAZER 250":4067,"YAMAHA/FAZER 150":3442,"SHINERAY/XY 150":1832,"HAOJUE/DR160":426,"HAOJUE/DK150":264,"HAOJUE/DK160":496,"ROYAL ENFIELD/HUNTER 350":569,"ROYAL ENFIELD/SUPER METEOR 650":708,"ROYAL ENFIELD/METEOR":338,"ROYAL ENFIELD/CLASSIC 350":167,"ROYAL ENFIELD/SHOTGUN 650":334,"TRIUMPH/SCRAMBLER 400":276,"HONDA/NXR160":17992,"HONDA/XRE 300":4110,"YAMAHA/XTZ 250":3642,"HONDA/XRE 190":3498,"YAMAHA/CROSSER 150":2688,"SHINERAY/SHI 175":2716,"HONDA/XR 300L":1106,"AVELLOZ/AZ160":577,"BMW/G310 GS":181,"HAOJUE/NK 150":197},"brand_caminhao":{"VW TRUCK E BUS":2550,"M.BENZ":2489,"VOLVO":1581,"SCANIA":876,"IVECO":673,"DAF":600,"FOTON":98,"AGRALE":7,"JAC":5,"FORD":4,"HYUNDAI":1,"TESLA":1},"brand_onibus":{"M.BENZ":1190,"VW TRUCK E BUS":524,"IVECO":262,"MARCOPOLO":258,"SCANIA":107,"AGRALE":40,"VOLVO":31,"BYD":1,"HIGER":1},"ev":{"hybrid":15155,"electric":6936}},{"period":"2025-06","brand_auto":{"VW":32192,"FIAT":24258,"GM":17554,"HYUNDAI":15851,"TOYOTA":10331,"HONDA":9186,"JEEP":9156,"BYD":8077,"RENAULT":7997,"NISSAN":4867,"CAOA CHERY":4742,"CITROEN":3349,"GWM":3021,"PEUGEOT":1666,"BMW":1300,"MITSUBISHI":1179,"M.BENZ":815,"VOLVO":796,"FORD":502,"PORSCHE":469,"JAECOO":381},"brand_moto":{"HONDA":121078,"YAMAHA":24101,"SHINERAY":10110,"MOTTU":9418,"AVELLOZ":2562,"ROYAL ENFIELD":2517,"BAJAJ":1890,"HAOJUE":1738,"TRIUMPH":1332,"BMW":1177,"KAWASAKI":957,"ZONTES":507,"DAFRA":489,"SUZUKI":210,"H.DAVIDSON":193,"BULL":189,"GCX":103,"VMOTO":102,"DUCATI":80,"SUPER SOCO":74,"TAILING":74},"model_auto":{"VW/POLO":11492,"VW/T CROSS":8629,"FIAT/ARGO":7235,"HYUNDAI/HB20":6917,"GM/ONIX":6782,"HYUNDAI/CRETA":6415,"FIAT/MOBI":6347,"HONDA/HR-V":6179,"TOYOTA/COROLLA CROSS":5335,"RENAULT/KWID":5324,"GM/TRACKER":4993,"FIAT/FASTBACK":4930,"VW/NIVUS":4731,"JEEP/COMPASS":4546,"FIAT/PULSE":3823,"VW/VIRTUS":3719,"GM/ONIX PLUS":3494,"JEEP/RENEGADE":3411,"NISSAN/KICKS":3394,"TOYOTA/COROLLA":3004,"BYD/SONG":2805,"CAOA CHERY/TIGGO 7":2589,"VW/TERA":2555,"GWM/HAVAL H6":2497,"HYUNDAI/HB20S":2241,"GM/SPIN":1975,"FIAT/CRONOS":1919,"BYD/DOLPHIN MINI":1913,"CITROEN/BASALT":1565,"BYD/DOLPHIN":1490,"HONDA/CITY":1453,"RENAULT/DUSTER":1426,"TOYOTA/HILUX SW4":1343,"RENAULT/KARDIAN":1240,"HONDA/CITY HATCH":1205,"JEEP/COMMANDER":1194,"CITROEN/C3":1146,"CAOA CHERY/TIGGO 8":1062,"NISSAN/VERSA":949,"VW/TAOS":889,"PEUGEOT/2008":869,"MITSUBISHI/ECLIPSE CROSS":833,"CAOA CHERY/TIGGO 5X":822,"BYD/KING":797,"PEUGEOT/208":796,"BYD/YUAN":743,"CITROEN/C3 AIRCROSS":636,"NISSAN/SENTRA":524,"JAECOO/7":381,"FORD/BRONCO":378},"model_moto":{"HONDA/CG 160":39039,"MOTTU/SPORT 110I":9418,"HONDA/CB 300F":4674,"YAMAHA/YBR 150":5663,"YAMAHA/FAZER 250":3808,"YAMAHA/FAZER 150":3220,"SHINERAY/XY 150":1594,"HAOJUE/DR160":385,"HAOJUE/DK160":547,"ROYAL ENFIELD/HUNTER 350":610,"ROYAL ENFIELD/SUPER METEOR 650":466,"ROYAL ENFIELD/METEOR":373,"ROYAL ENFIELD/SHOTGUN 650":306,"ROYAL ENFIELD/CLASSIC 350":111,"TRIUMPH/SCRAMBLER 400":230,"HONDA/NXR160":17035,"HONDA/XRE 300":4033,"YAMAHA/XTZ 250":3361,"HONDA/XRE 190":3476,"YAMAHA/CROSSER 150":2542,"SHINERAY/SHI 175":2450,"HONDA/XR 300L":1063,"AVELLOZ/AZ160":522,"BMW/G310 GS":146,"HAOJUE/NK 150":173},"brand_caminhao":{"VW TRUCK E BUS":2518,"M.BENZ":2229,"VOLVO":1376,"SCANIA":899,"IVECO":620,"DAF":567,"FOTON":124,"JAC":28,"FORD":5,"AGRALE":4,"SANY":2,"HYUNDAI":1,"XCMG":1},"brand_onibus":{"M.BENZ":1150,"VW TRUCK E BUS":447,"MARCOPOLO":282,"IVECO":246,"SCANIA":108,"VOLVO":62,"AGRALE":30,"BYD":19,"INDUSCAR":15},"ev":{"hybrid":15267,"electric":5873}},{"period":"2025-07","brand_auto":{"VW":35927,"FIAT":31011,"GM":20094,"HYUNDAI":16234,"TOYOTA":11921,"JEEP":9960,"BYD":9616,"NISSAN":7672,"HONDA":7433,"RENAULT":6912,"CAOA CHERY":6722,"GWM":3932,"CITROEN":3246,"PEUGEOT":1809,"BMW":1567,"FORD":1544,"MITSUBISHI":1524,"M.BENZ":743,"VOLVO":731,"OMODA JAECOO":721,"GAC":638},"brand_moto":{"HONDA":127643,"YAMAHA":28582,"SHINERAY":11592,"MOTTU":9043,"AVELLOZ":2975,"ROYAL ENFIELD":2800,"BAJAJ":2406,"HAOJUE":1889,"BMW":1261,"TRIUMPH":1261,"KAWASAKI":1088,"ZONTES":676,"DAFRA":411,"SUZUKI":284,"BULL":237,"H.DAVIDSON":201,"DUCATI":102,"GCX":97,"SUPER SOCO":78,"WATTS":59,"MORINI":38},"model_auto":{"VW/POLO":12940,"FIAT/ARGO":9966,"VW/T CROSS":9022,"FIAT/MOBI":8099,"HYUNDAI/CRETA":7856,"GM/ONIX":7689,"GM/TRACKER":6974,"TOYOTA/COROLLA CROSS":6866,"NISSAN/KICKS":6341,"FIAT/FASTBACK":6207,"VW/NIVUS":5777,"HYUNDAI/HB20":5519,"JEEP/COMPASS":4935,"FIAT/PULSE":4836,"HONDA/HR-V":4086,"VW/VIRTUS":3863,"RENAULT/KWID":3726,"CAOA CHERY/TIGGO 7":3721,"JEEP/RENEGADE":3711,"GWM/HAVAL H6":3339,"VW/TERA":3244,"TOYOTA/COROLLA":3170,"BYD/SONG":3164,"GM/ONIX PLUS":3108,"BYD/DOLPHIN MINI":3011,"HYUNDAI/HB20S":2638,"GM/SPIN":1942,"FIAT/CRONOS":1894,"RENAULT/DUSTER":1851,"CITROEN/BASALT":1613,"HONDA/CITY":1565,"TOYOTA/HILUX SW4":1500,"CAOA CHERY/TIGGO 8":1440,"CAOA CHERY/TIGGO 5X":1434,"HONDA/CITY HATCH":1427,"RENAULT/KARDIAN":1332,"JEEP/COMMANDER":1312,"BYD/DOLPHIN":1305,"MITSUBISHI/ECLIPSE CROSS":1096,"CITROEN/C3":1086,"BYD/KING":964,"PEUGEOT/2008":944,"NISSAN/VERSA":930,"FORD/TERRITORY":916,"VW/TAOS":882,"PEUGEOT/208":865,"BYD/YUAN":860,"OMODA JAECOO/JAECOO 7":620,"FORD/BRONCO":551,"BMW/X1":542},"model_moto":{"HONDA/CG 160":43230,"MOTTU/SPORT 110I":9043,"YAMAHA/YBR 150":7733,"HONDA/CB 300F":5739,"YAMAHA/FAZER 250":4237,"YAMAHA/FAZER 150":3597,"SHINERAY/XY 150":1709,"HAOJUE/DK160":644,"HAOJUE/DR160":439,"ROYAL ENFIELD/HUNTER 350":423,"ROYAL ENFIELD/SUPER METEOR 650":639,"ROYAL ENFIELD/METEOR":396,"ROYAL ENFIELD/SHOTGUN 650":248,"TRIUMPH/SCRAMBLER 400":248,"HONDA/NXR160":18988,"HONDA/XRE 300":3482,"YAMAHA/XTZ 250":3848,"HONDA/XRE 190":3612,"YAMAHA/CROSSER 150":2880,"SHINERAY/SHI 175":2900,"HONDA/XR 300L":1350,"AVELLOZ/AZ160":722,"BMW/G310 GS":216,"HAOJUE/NK 150":217},"brand_caminhao":{"VW TRUCK E BUS":2872,"M.BENZ":2688,"VOLVO":1733,"SCANIA":1369,"DAF":847,"IVECO":834,"FOTON":139,"AGRALE":13,"JAC":11,"FORD":5,"SANY":2,"TESLA":2,"HYUNDAI":1},"brand_onibus":{"M.BENZ":1356,"VW TRUCK E BUS":584,"MARCOPOLO":346,"IVECO":255,"SCANIA":64,"INDUSCAR":54,"VOLVO":36,"BYD":35,"AGRALE":24},"ev":{"hybrid":18015,"electric":6953}},{"period":"2025-08","brand_auto":{"VW":33869,"FIAT":27862,"GM":17933,"HYUNDAI":16682,"TOYOTA":12053,"BYD":9749,"JEEP":9043,"RENAULT":8327,"HONDA":7473,"CAOA CHERY":6750,"NISSAN":5819,"GWM":3825,"CITROEN":2344,"FORD":1707,"BMW":1576,"PEUGEOT":1414,"MITSUBISHI":1198,"VOLVO":812,"M.BENZ":720,"OMODA JAECOO":720,"GAC":539},"brand_moto":{"HONDA":119578,"YAMAHA":28452,"SHINERAY":11446,"MOTTU":9778,"AVELLOZ":2863,"ROYAL ENFIELD":2815,"BAJAJ":2759,"HAOJUE":1878,"BMW":1292,"KAWASAKI":1042,"TRIUMPH":940,"ZONTES":636,"DAFRA":552,"SUZUKI":315,"BULL":216,"H.DAVIDSON":174,"GCX":112,"DUCATI":85,"WATTS":51,"AMAZON":42,"KTM":31},"model_auto":{"VW/POLO":12908,"FIAT/ARGO":10097,"TOYOTA/COROLLA CROSS":7737,"VW/T CROSS":7702,"HYUNDAI/HB20":7590,"FIAT/MOBI":7045,"HYUNDAI/CRETA":6649,"GM/ONIX":5815,"FIAT/FASTBACK":5040,"RENAULT/KWID":5025,"GM/TRACKER":4942,"NISSAN/KICKS":4740,"JEEP/COMPASS":4717,"GM/ONIX PLUS":4632,"VW/NIVUS":4557,"FIAT/PULSE":4282,"VW/TERA":4157,"HONDA/HR-V":4028,"VW/VIRTUS":3646,"CAOA CHERY/TIGGO 7":3541,"BYD/DOLPHIN MINI":3300,"JEEP/RENEGADE":3228,"GWM/HAVAL H6":3102,"BYD/SONG":3011,"TOYOTA/COROLLA":2890,"HYUNDAI/HB20S":2251,"RENAULT/KARDIAN":1929,"CAOA CHERY/TIGGO 8":1916,"HONDA/CITY":1848,"GM/SPIN":1794,"FIAT/CRONOS":1395,"RENAULT/DUSTER":1369,"HONDA/CITY HATCH":1357,"BYD/DOLPHIN":1311,"CAOA CHERY/TIGGO 5X":1208,"FORD/TERRITORY":1191,"TOYOTA/HILUX SW4":1174,"BYD/KING":1086,"JEEP/COMMANDER":1068,"CITROEN/BASALT":991,"MITSUBISHI/ECLIPSE CROSS":894,"CITROEN/C3":852,"BYD/YUAN":773,"PEUGEOT/208":749,"VW/TAOS":726,"PEUGEOT/2008":663,"NISSAN/VERSA":655,"OMODA JAECOO/JAECOO 7":635,"CITROEN/C3 AIRCROSS":485,"BMW/X1":479},"model_moto":{"HONDA/CG 160":41456,"MOTTU/SPORT 110I":9778,"YAMAHA/YBR 150":7702,"HONDA/CB 300F":5636,"YAMAHA/FAZER 250":4207,"YAMAHA/FAZER 150":3618,"SHINERAY/XY 150":1479,"HAOJUE/DK160":666,"HAOJUE/DR160":436,"ROYAL ENFIELD/HUNTER 350":622,"ROYAL ENFIELD/SUPER METEOR 650":535,"ROYAL ENFIELD/METEOR":510,"ROYAL ENFIELD/SHOTGUN 650":288,"TRIUMPH/SCRAMBLER 400":169,"HONDA/NXR160":16317,"HONDA/XRE 300":2877,"YAMAHA/XTZ 250":3835,"HONDA/XRE 190":3479,"YAMAHA/CROSSER 150":2459,"SHINERAY/SHI 175":2772,"HONDA/XR 300L":1232,"AVELLOZ/AZ160":784,"BMW/G310 GS":210,"HAOJUE/NK 150":236},"brand_caminhao":{"VW TRUCK E BUS":2518,"M.BENZ":2498,"VOLVO":1584,"SCANIA":936,"IVECO":652,"DAF":485,"FOTON":89,"AGRALE":10,"FORD":10,"JAC":7,"TESLA":4,"NANJING":2,"XCMG":2,"HYUNDAI":1},"brand_onibus":{"M.BENZ":1065,"VW TRUCK E BUS":409,"MARCOPOLO":267,"IVECO":216,"SCANIA":37,"VOLVO":16,"INDUSCAR":15,"AGRALE":14,"BYD":3},"ev":{"hybrid":17533,"electric":7594}},{"period":"2025-09","brand_auto":{"VW":31530,"FIAT":24932,"GM":20669,"HYUNDAI":18803,"TOYOTA":11907,"JEEP":11540,"BYD":9934,"RENAULT":8995,"HONDA":7982,"CAOA CHERY":7366,"NISSAN":7335,"GWM":3965,"CITROEN":2495,"PEUGEOT":1548,"BMW":1498,"FORD":1485,"MITSUBISHI":1263,"VOLVO":902,"M.BENZ":857,"OMODA JAECOO":838,"GAC":568},"brand_moto":{"HONDA":135054,"YAMAHA":30570,"SHINERAY":12213,"MOTTU":11071,"AVELLOZ":3131,"BAJAJ":2931,"ROYAL ENFIELD":2738,"HAOJUE":2083,"BMW":1254,"KAWASAKI":1169,"TRIUMPH":1109,"ZONTES":693,"DAFRA":402,"SUZUKI":312,"BULL":210,"H.DAVIDSON":180,"GCX":131,"DUCATI":102,"SUPER SOCO":44,"AMAZON":39,"WATTS":36},"model_auto":{"VW/POLO":10647,"FIAT/ARGO":9484,"HYUNDAI/HB20":8796,"VW/TERA":7610,"TOYOTA/COROLLA CROSS":7282,"GM/ONIX":7039,"NISSAN/KICKS":6319,"HYUNDAI/CRETA":5953,"GM/TRACKER":5657,"RENAULT/KWID":5439,"FIAT/FASTBACK":5344,"JEEP/COMPASS":5291,"GM/ONIX PLUS":5169,"HONDA/HR-V":5041,"FIAT/MOBI":4741,"VW/T CROSS":4736,"JEEP/RENEGADE":4547,"VW/NIVUS":4173,"HYUNDAI/HB20S":3883,"FIAT/PULSE":3756,"CAOA CHERY/TIGGO 7":3742,"BYD/DOLPHIN MINI":3392,"BYD/SONG":3246,"TOYOTA/COROLLA":3121,"VW/VIRTUS":2973,"GWM/HAVAL H6":2886,"CAOA CHERY/TIGGO 8":2137,"RENAULT/KARDIAN":2014,"GM/SPIN":1906,"JEEP/COMMANDER":1643,"FIAT/CRONOS":1606,"RENAULT/DUSTER":1513,"BYD/DOLPHIN":1454,"HONDA/CITY":1453,"CAOA CHERY/TIGGO 5X":1423,"TOYOTA/HILUX SW4":1310,"HONDA/CITY HATCH":1276,"CITROEN/BASALT":1226,"VW/TAOS":1144,"FORD/TERRITORY":1141,"BYD/KING":1001,"MITSUBISHI/ECLIPSE CROSS":988,"CITROEN/C3":953,"PEUGEOT/208":879,"OMODA JAECOO/JAECOO 7":740,"PEUGEOT/2008":668,"NISSAN/VERSA":628,"BYD/YUAN":553,"BMW/X1":512,"GWM/ORA 03":429},"model_moto":{"HONDA/CG 160":44862,"MOTTU/SPORT 110I":11071,"YAMAHA/YBR 150":8047,"HONDA/CB 300F":5816,"YAMAHA/FAZER 250":4666,"YAMAHA/FAZER 150":3795,"SHINERAY/XY 150":1086,"HAOJUE/DK160":849,"HAOJUE/DR160":470,"SHINERAY/XY 200":225,"ROYAL ENFIELD/HUNTER 350":495,"ROYAL ENFIELD/SUPER METEOR 650":558,"ROYAL ENFIELD/METEOR":435,"ROYAL ENFIELD/SHOTGUN 650":246,"TRIUMPH/SCRAMBLER 400":194,"HONDA/NXR160":18380,"YAMAHA/XTZ 250":4175,"HONDA/XRE 300":3800,"HONDA/XRE 190":3930,"YAMAHA/CROSSER 150":2453,"SHINERAY/SHI 175":2840,"HONDA/XR 300L":1392,"AVELLOZ/AZ160":821,"HAOJUE/NK 150":262,"BMW/G310 GS":238},"brand_caminhao":{"M.BENZ":2747,"VW TRUCK E BUS":2737,"VOLVO":1687,"SCANIA":1048,"IVECO":683,"DAF":545,"FOTON":85,"JAC":16,"AGRALE":15,"FORD":6,"SANY":3,"NANJING":2},"brand_onibus":{"M.BENZ":1044,"VW TRUCK E BUS":581,"IVECO":311,"MARCOPOLO":230,"SCANIA":75,"VOLVO":45,"AGRALE":23,"BYD":6,"INDUSCAR":1},"ev":{"hybrid":18955,"electric":8023}},{"period":"2025-10","brand_auto":{"VW":35303,"FIAT":27739,"HYUNDAI":24029,"GM":21630,"JEEP":12700,"BYD":10127,"HONDA":10067,"RENAULT":8839,"CAOA CHERY":8083,"TOYOTA":7452,"NISSAN":6997,"GWM":4796,"CITROEN":3383,"PEUGEOT":1577,"BMW":1530,"FORD":1427,"MITSUBISHI":1254,"M.BENZ":983,"VOLVO":979,"OMODA JAECOO":862,"GAC":599},"brand_moto":{"HONDA":139021,"YAMAHA":28295,"SHINERAY":12678,"MOTTU":11368,"AVELLOZ":3311,"BAJAJ":3084,"ROYAL ENFIELD":3056,"HAOJUE":2193,"BMW":1609,"KAWASAKI":1239,"TRIUMPH":1238,"ZONTES":741,"DAFRA":407,"SUZUKI":334,"BULL":233,"H.DAVIDSON":196,"DUCATI":104,"GCX":98,"AMAZON":54,"WATTS":42,"LEVA":32},"model_auto":{"VW/TERA":10162,"FIAT/ARGO":9981,"HYUNDAI/HB20":9687,"VW/POLO":9150,"HYUNDAI/CRETA":8679,"GM/ONIX":7439,"VW/T CROSS":7113,"HONDA/HR-V":6711,"FIAT/MOBI":6277,"JEEP/COMPASS":6257,"GM/ONIX PLUS":5853,"NISSAN/KICKS":5721,"FIAT/FASTBACK":5666,"HYUNDAI/HB20S":5517,"RENAULT/KWID":5316,"GM/TRACKER":5290,"JEEP/RENEGADE":4263,"VW/NIVUS":4257,"CAOA CHERY/TIGGO 7":4248,"FIAT/PULSE":3965,"VW/VIRTUS":3615,"TOYOTA/COROLLA CROSS":3609,"BYD/SONG":3444,"GWM/HAVAL H6":3375,"BYD/DOLPHIN MINI":2794,"TOYOTA/COROLLA":2287,"JEEP/COMMANDER":2162,"GM/SPIN":2103,"CAOA CHERY/TIGGO 5X":1994,"FIAT/CRONOS":1846,"CAOA CHERY/TIGGO 8":1772,"BYD/DOLPHIN":1731,"RENAULT/DUSTER":1680,"HONDA/CITY":1644,"CITROEN/BASALT":1562,"HONDA/CITY HATCH":1540,"RENAULT/KARDIAN":1533,"TOYOTA/HILUX SW4":1421,"CITROEN/C3":1383,"BYD/KING":1291,"FORD/TERRITORY":1138,"MITSUBISHI/ECLIPSE CROSS":1043,"PEUGEOT/208":842,"NISSAN/SENTRA":761,"PEUGEOT/2008":734,"OMODA JAECOO/JAECOO 7":677,"BYD/YUAN":551,"NISSAN/VERSA":515,"VW/TAOS":496,"VW/TIGUAN":486},"model_moto":{"HONDA/CG 160":44390,"MOTTU/SPORT 110I":11368,"YAMAHA/YBR 150":6872,"HONDA/CB 300F":5922,"YAMAHA/FAZER 250":4602,"YAMAHA/FAZER 150":3602,"SHINERAY/XY 150":786,"HAOJUE/DK160":840,"HAOJUE/DR160":519,"HAOJUE/MASTER RIDE 150":211,"ROYAL ENFIELD/HUNTER 350":651,"ROYAL ENFIELD/SUPER METEOR 650":512,"ROYAL ENFIELD/METEOR":399,"ROYAL ENFIELD/SHOTGUN 650":215,"TRIUMPH/SCRAMBLER 400":269,"ROYAL ENFIELD/CLASSIC 350":160,"HONDA/NXR160":19757,"HONDA/XRE 300":4237,"YAMAHA/XTZ 250":3833,"HONDA/XRE 190":4738,"SHINERAY/SHI 175":3141,"YAMAHA/CROSSER 150":2347,"HONDA/XR 300L":1471,"AVELLOZ/AZ160":969,"BMW/G310 GS":448,"HAOJUE/NK 150":287},"brand_caminhao":{"M.BENZ":2992,"VW TRUCK E BUS":2721,"VOLVO":2149,"SCANIA":1078,"IVECO":797,"DAF":571,"FOTON":119,"AGRALE":15,"FORD":6,"JAC":6,"HYUNDAI":2,"INTERNATIONAL":1,"NANJING":1,"SANY":1},"brand_onibus":{"M.BENZ":1148,"VW TRUCK E BUS":411,"IVECO":380,"MARCOPOLO":223,"SCANIA":140,"INDUSCAR":46,"VOLVO":45,"HIGER":17,"AGRALE":7,"BYD":2},"ev":{"hybrid":19702,"electric":7826}},{"period":"2025-11","brand_auto":{"VW":35740,"FIAT":25550,"GM":23023,"HYUNDAI":19890,"JEEP":11964,"RENAULT":11071,"BYD":9726,"HONDA":8975,"CAOA CHERY":7052,"NISSAN":6442,"GWM":4593,"TOYOTA":3980,"CITROEN":3208,"BMW":1479,"PEUGEOT":1328,"FORD":1225,"OMODA JAECOO":1213,"MITSUBISHI":1096,"GEELY":985,"M.BENZ":724,"VOLVO":684},"brand_moto":{"HONDA":120249,"YAMAHA":23410,"SHINERAY":11029,"MOTTU":9202,"AVELLOZ":3022,"BAJAJ":2835,"ROYAL ENFIELD":2805,"HAOJUE":2034,"BMW":1387,"TRIUMPH":1210,"KAWASAKI":941,"ZONTES":568,"DAFRA":481,"SUZUKI":322,"BULL":196,"H.DAVIDSON":147,"GCX":140,"DUCATI":80,"AMAZON":51,"WATTS":42,"LEVA":38},"model_auto":{"VW/TERA":9772,"GM/ONIX":9524,"VW/POLO":9381,"VW/T CROSS":9016,"FIAT/ARGO":8386,"HYUNDAI/CRETA":7689,"HYUNDAI/HB20":7640,"RENAULT/KWID":7302,"FIAT/MOBI":7188,"GM/ONIX PLUS":5995,"JEEP/COMPASS":5889,"NISSAN/KICKS":5646,"HONDA/HR-V":4963,"GM/TRACKER":4528,"HYUNDAI/HB20S":4425,"FIAT/FASTBACK":4381,"BYD/SONG":4380,"JEEP/RENEGADE":4230,"CAOA CHERY/TIGGO 7":4060,"VW/VIRTUS":3285,"GWM/HAVAL H6":3215,"FIAT/PULSE":3213,"VW/NIVUS":3124,"BYD/DOLPHIN MINI":2881,"FIAT/CRONOS":2375,"GM/SPIN":2317,"JEEP/COMMANDER":1830,"RENAULT/DUSTER":1789,"CAOA CHERY/TIGGO 8":1501,"TOYOTA/COROLLA CROSS":1465,"CAOA CHERY/TIGGO 5X":1437,"TOYOTA/HILUX SW4":1432,"CITROEN/BASALT":1404,"CITROEN/C3":1368,"HONDA/WR-V":1342,"HONDA/CITY":1292,"HONDA/CITY HATCH":1269,"RENAULT/KARDIAN":1097,"FORD/TERRITORY":1058,"TOYOTA/COROLLA":1034,"MITSUBISHI/ECLIPSE CROSS":899,"BYD/KING":857,"GEELY/EX2":835,"BYD/DOLPHIN":802,"PEUGEOT/208":674,"PEUGEOT/2008":654,"RENAULT/BOREAL":586,"GWM/HAVAL H9":570,"OMODA JAECOO/JAECOO 7":564,"OMODA JAECOO/OMODA 5":504},"model_moto":{"HONDA/CG 160":38406,"MOTTU/SPORT 110I":9202,"YAMAHA/YBR 150":5558,"HONDA/CB 300F":5490,"YAMAHA/FAZER 250":3712,"YAMAHA/FAZER 150":2938,"SHINERAY/XY 150":610,"HAOJUE/DK160":820,"HAOJUE/DR160":475,"SHINERAY/SHI 150":1037,"ROYAL ENFIELD/HUNTER 350":624,"ROYAL ENFIELD/SUPER METEOR 650":427,"ROYAL ENFIELD/METEOR":417,"ROYAL ENFIELD/SHOTGUN 650":176,"TRIUMPH/SCRAMBLER 400":213,"ROYAL ENFIELD/CLASSIC 350":139,"HONDA/NXR160":16303,"HONDA/XRE 300":3659,"YAMAHA/XTZ 250":3256,"HONDA/XRE 190":4532,"SHINERAY/SHI 175":2566,"YAMAHA/CROSSER 150":1914,"HONDA/XR 300L":1268,"AVELLOZ/AZ160":944,"BMW/G310 GS":476,"HAOJUE/NK 150":251},"brand_caminhao":{"M.BENZ":2631,"VW TRUCK E BUS":2380,"VOLVO":1406,"SCANIA":905,"IVECO":750,"DAF":548,"FOTON":117,"NANJING":16,"AGRALE":15,"JAC":7,"CNHTC":4,"FUSO":1,"JMC":1,"XCMG":1},"brand_onibus":{"M.BENZ":1320,"VW TRUCK E BUS":477,"IVECO":418,"MARCOPOLO":252,"SCANIA":117,"VOLVO":49,"AGRALE":8,"HIGER":1},"ev":{"hybrid":18609,"electric":7202}},{"period":"2025-12","brand_auto":{"VW":39245,"FIAT":29195,"GM":24252,"HYUNDAI":20585,"BYD":15530,"JEEP":13358,"HONDA":10832,"RENAULT":10172,"NISSAN":7374,"TOYOTA":7374,"CAOA CHERY":7208,"GWM":5144,"CITROEN":4900,"PEUGEOT":2629,"OMODA JAECOO":1943,"GEELY":1731,"BMW":1584,"FORD":1423,"VOLVO":1140,"MITSUBISHI":1002,"M.BENZ":762},"brand_moto":{"HONDA":130173,"YAMAHA":26295,"SHINERAY":12695,"MOTTU":5134,"AVELLOZ":3383,"BAJAJ":3231,"ROYAL ENFIELD":2965,"HAOJUE":2206,"BMW":1417,"TRIUMPH":1232,"KAWASAKI":1101,"ZONTES":707,"DAFRA":485,"SUZUKI":404,"BULL":299,"GCX":246,"H.DAVIDSON":201,"VMOTO":150,"DUCATI":87,"AMAZON":53,"MOBILLI":47},"model_auto":{"VW/T CROSS":10721,"VW/TERA":10448,"VW/POLO":10434,"FIAT/ARGO":10256,"HYUNDAI/HB20":8928,"HYUNDAI/CRETA":8160,"GM/ONIX":7995,"BYD/SONG":7475,"GM/ONIX PLUS":6642,"JEEP/COMPASS":6640,"NISSAN/KICKS":6433,"FIAT/MOBI":6432,"GM/TRACKER":6242,"RENAULT/KWID":5784,"FIAT/FASTBACK":5506,"CAOA CHERY/TIGGO 7":4944,"HONDA/HR-V":4401,"VW/NIVUS":4213,"JEEP/RENEGADE":4152,"FIAT/PULSE":4114,"BYD/DOLPHIN MINI":3889,"GWM/HAVAL H6":3381,"HYUNDAI/HB20S":3303,"HONDA/WR-V":3229,"CITROEN/BASALT":2980,"FIAT/CRONOS":2883,"TOYOTA/COROLLA CROSS":2628,"JEEP/COMMANDER":2555,"VW/VIRTUS":2425,"BYD/DOLPHIN":2347,"GM/SPIN":2331,"TOYOTA/COROLLA":2272,"TOYOTA/HILUX SW4":1913,"CAOA CHERY/TIGGO 8":1651,"RENAULT/DUSTER":1647,"HONDA/CITY":1618,"PEUGEOT/208":1600,"GEELY/EX2":1557,"HONDA/CITY HATCH":1493,"RENAULT/BOREAL":1384,"CITROEN/C3":1344,"RENAULT/KARDIAN":1161,"FORD/TERRITORY":1115,"PEUGEOT/2008":1029,"OMODA JAECOO/JAECOO 7":997,"BYD/KING":956,"MITSUBISHI/ECLIPSE CROSS":836,"OMODA JAECOO/OMODA 5":791,"GWM/HAVAL H9":774,"NISSAN/VERSA":715},"model_moto":{"HONDA/CG 160":41343,"MOTTU/SPORT 110I":5134,"YAMAHA/YBR 150":6273,"HONDA/CB 300F":6345,"YAMAHA/FAZER 250":3983,"YAMAHA/FAZER 150":3536,"SHINERAY/XY 150":657,"HAOJUE/DK160":920,"HAOJUE/DR160":552,"SHINERAY/SHI 150":1272,"ROYAL ENFIELD/HUNTER 350":681,"ROYAL ENFIELD/SUPER METEOR 650":475,"ROYAL ENFIELD/METEOR":451,"ROYAL ENFIELD/SHOTGUN 650":173,"TRIUMPH/SCRAMBLER 400":242,"ROYAL ENFIELD/CLASSIC 350":176,"HONDA/NXR160":17380,"HONDA/XRE 190":4830,"HONDA/XRE 300":3888,"YAMAHA/XTZ 250":3636,"SHINERAY/SHI 175":3026,"YAMAHA/CROSSER 150":2225,"HONDA/XR 300L":1325,"AVELLOZ/AZ160":1098,"BMW/G310 GS":418,"HAOJUE/NK 150":271},"brand_caminhao":{"VW TRUCK E BUS":2810,"M.BENZ":2490,"VOLVO":1789,"SCANIA":1055,"IVECO":832,"DAF":562,"FOTON":161,"JAC":36,"AGRALE":18,"FORD":3,"INTERNATIONAL":2,"GM":1,"NANJING":1},"brand_onibus":{"M.BENZ":1306,"VW TRUCK E BUS":405,"IVECO":281,"MARCOPOLO":266,"VOLVO":72,"INDUSCAR":63,"BYD":53,"SCANIA":51,"AGRALE":41},"ev":{"hybrid":27823,"electric":11456}},{"period":"2026-01","brand_auto":{"VW":22656,"FIAT":17191,"GM":13229,"HYUNDAI":10176,"BYD":9755,"JEEP":8893,"HONDA":6722,"RENAULT":5489,"TOYOTA":5310,"NISSAN":4460,"GWM":4171,"CAOA CHERY":3548,"CITROEN":2452,"OMODA JAECOO":1689,"PEUGEOT":1342,"GEELY":1337,"FORD":1096,"BMW":960,"VOLVO":719,"GAC":709,"MITSUBISHI":647},"brand_moto":{"HONDA":116492,"YAMAHA":25202,"SHINERAY":12920,"MOTTU":6067,"AVELLOZ":3328,"BAJAJ":3006,"ROYAL ENFIELD":2783,"HAOJUE":2251,"BMW":1026,"KAWASAKI":1007,"TRIUMPH":996,"ZONTES":578,"DAFRA":401,"GCX":317,"VMOTO":297,"SUZUKI":294,"BULL":277,"MOBILLI":144,"H.DAVIDSON":101,"AIPAO":75,"MOTOCHEFE":65},"model_auto":{"VW/T CROSS":5741,"VW/POLO":5699,"FIAT/ARGO":5177,"VW/TERA":4992,"GM/ONIX":4948,"GM/TRACKER":4532,"JEEP/COMPASS":4503,"HYUNDAI/CRETA":4429,"HYUNDAI/HB20":4065,"FIAT/FASTBACK":3927,"BYD/SONG":3802,"FIAT/MOBI":3530,"FIAT/PULSE":3193,"VW/NIVUS":3167,"NISSAN/KICKS":3058,"JEEP/RENEGADE":3052,"BYD/DOLPHIN MINI":2840,"HONDA/HR-V":2773,"GWM/HAVAL H6":2628,"RENAULT/KWID":2613,"TOYOTA/COROLLA CROSS":2176,"CAOA CHERY/TIGGO 7":1937,"GM/ONIX PLUS":1869,"HONDA/WR-V":1812,"VW/VIRTUS":1645,"HYUNDAI/HB20S":1580,"BYD/DOLPHIN":1511,"TOYOTA/COROLLA":1399,"FIAT/CRONOS":1360,"JEEP/COMMANDER":1330,"CAOA CHERY/TIGGO 8":1271,"GM/SPIN":1235,"TOYOTA/HILUX SW4":1231,"VW/TAOS":1225,"RENAULT/KARDIAN":1210,"GEELY/EX2":1124,"HONDA/CITY HATCH":1071,"OMODA JAECOO/OMODA 5":1067,"CITROEN/BASALT":1027,"CITROEN/C3":1027,"HONDA/CITY":987,"RENAULT/DUSTER":936,"GWM/HAVAL H9":882,"FORD/TERRITORY":851,"BYD/KING":840,"PEUGEOT/2008":774,"NISSAN/VERSA":653,"NISSAN/KAIT":644,"RENAULT/BOREAL":641,"PEUGEOT/208":568},"model_moto":{"HONDA/CG 160":37671,"YAMAHA/YBR 150":6738,"MOTTU/SPORT 110I":6067,"HONDA/CB 300F":5785,"YAMAHA/FAZER 150":3463,"YAMAHA/FAZER 250":3451,"SHINERAY/SHI 150":1279,"HAOJUE/DK160":915,"BAJAJ/PULSAR N150":564,"SHINERAY/XY 150":555,"ROYAL ENFIELD/HUNTER 350":676,"ROYAL ENFIELD/SUPER METEOR 650":498,"ROYAL ENFIELD/METEOR":414,"TRIUMPH/SCRAMBLER 400":326,"ROYAL ENFIELD/SHOTGUN 650":156,"ROYAL ENFIELD/CLASSIC 350":153,"HONDA/NXR160":15101,"HONDA/XRE 190":4114,"YAMAHA/XTZ 250":3255,"HONDA/XRE 300":2997,"SHINERAY/SHI 175":2912,"YAMAHA/CROSSER 150":2170,"HONDA/XR 300L":1318,"AVELLOZ/AZ160":1008,"SHINERAY/SHI 250":671,"HAOJUE/DL 160":332},"brand_caminhao":{"VW TRUCK E BUS":1772,"M.BENZ":1726,"VOLVO":1093,"SCANIA":609,"IVECO":577,"DAF":489,"FOTON":79,"JAC":16,"AGRALE":9,"FORD":4,"HYUNDAI":1},"brand_onibus":{"M.BENZ":882,"VW TRUCK E BUS":339,"MARCOPOLO":223,"IVECO":169,"VOLVO":31,"SCANIA":15,"AGRALE":12,"INDUSCAR":2,"CRRC":1},"ev":{"hybrid":18995,"electric":8198}},{"period":"2026-02","brand_auto":{"VW":26046,"FIAT":21789,"GM":14144,"HYUNDAI":12116,"BYD":11379,"JEEP":8235,"RENAULT":7962,"HONDA":7574,"TOYOTA":6976,"NISSAN":4872,"GWM":4640,"CAOA CHERY":3401,"CITROEN":2128,"OMODA JAECOO":1834,"BMW":1103,"PEUGEOT":993,"FORD":947,"MITSUBISHI":633,"M.BENZ":539,"GAC":467,"GEELY":422},"brand_moto":{"HONDA":111880,"YAMAHA":22532,"SHINERAY":11720,"MOTTU":9880,"AVELLOZ":3031,"BAJAJ":2562,"ROYAL ENFIELD":2400,"HAOJUE":2145,"KAWASAKI":956,"BMW":945,"TRIUMPH":744,"ZONTES":543,"DAFRA":430,"SUZUKI":294,"BULL":280,"GCX":223,"VMOTO":140,"H.DAVIDSON":98,"MOTOCHEFE":48,"SMARDA":48,"AIPAO":46},"model_auto":{"VW/POLO":7517,"FIAT/MOBI":6560,"FIAT/ARGO":6478,"GM/ONIX":6450,"VW/T CROSS":5667,"VW/TERA":5358,"RENAULT/KWID":5194,"HYUNDAI/HB20":5124,"HYUNDAI/CRETA":5045,"BYD/DOLPHIN MINI":4874,"JEEP/COMPASS":4169,"GM/TRACKER":4003,"VW/NIVUS":3851,"FIAT/FASTBACK":3833,"BYD/SONG":3702,"GWM/HAVAL H6":3237,"FIAT/PULSE":3057,"HONDA/HR-V":2948,"TOYOTA/COROLLA CROSS":2899,"NISSAN/KICKS":2875,"JEEP/RENEGADE":2686,"HONDA/WR-V":2630,"VW/VIRTUS":2489,"CAOA CHERY/TIGGO 7":2205,"TOYOTA/COROLLA":2149,"GM/ONIX PLUS":1994,"FIAT/CRONOS":1856,"HYUNDAI/HB20S":1855,"JEEP/COMMANDER":1371,"NISSAN/KAIT":1294,"BYD/DOLPHIN":1193,"OMODA JAECOO/OMODA 5":1179,"RENAULT/KARDIAN":1122,"HONDA/CITY":1058,"TOYOTA/HILUX SW4":1031,"GM/SPIN":1024,"VW/TAOS":1022,"CAOA CHERY/TIGGO 8":973,"CITROEN/BASALT":971,"RENAULT/DUSTER":951,"BYD/KING":907,"HONDA/CITY HATCH":873,"CITROEN/C3":779,"FORD/TERRITORY":682,"GWM/HAVAL H9":672,"NISSAN/VERSA":625,"RENAULT/BOREAL":611,"TOYOTA/YARIS CROSS":593,"MITSUBISHI/ECLIPSE CROSS":555,"PEUGEOT/2008":551},"model_moto":{"HONDA/CG 160":36155,"MOTTU/SPORT 110I":9880,"YAMAHA/YBR 150":5901,"HONDA/CB 300F":5082,"YAMAHA/FAZER 250":2940,"YAMAHA/FAZER 150":2798,"SHINERAY/SHI 150":1311,"HAOJUE/DK160":908,"BAJAJ/PULSAR N150":609,"HAOJUE/DR160":549,"ROYAL ENFIELD/HUNTER 350":634,"ROYAL ENFIELD/SUPER METEOR 650":416,"ROYAL ENFIELD/METEOR":357,"TRIUMPH/SCRAMBLER 400":211,"ROYAL ENFIELD/CLASSIC 350":136,"ROYAL ENFIELD/SHOTGUN 650":118,"HONDA/NXR160":13453,"HONDA/XRE 190":4082,"HONDA/XRE 300":3117,"YAMAHA/XTZ 250":2842,"SHINERAY/SHI 175":2617,"YAMAHA/CROSSER 150":1913,"HONDA/XR 300L":1211,"AVELLOZ/AZ160":957,"SHINERAY/SHI 250":565,"HAOJUE/DL 160":266},"brand_caminhao":{"VW TRUCK E BUS":1770,"M.BENZ":1755,"VOLVO":1214,"IVECO":645,"SCANIA":618,"DAF":461,"FOTON":102,"JAC":16,"AGRALE":15,"FORD":5,"SANY":2,"HYUNDAI":1,"INTERNATIONAL":1,"NANJING":1,"PETERBILT":1,"TESLA":1},"brand_onibus":{"M.BENZ":876,"VW TRUCK E BUS":377,"MARCOPOLO":198,"IVECO":114,"AGRALE":54,"INDUSCAR":50,"VOLVO":35,"BYD":22,"SCANIA":16},"ev":{"hybrid":19250,"electric":8654}},{"period":"2026-03","brand_auto":{"VW":37216,"FIAT":27264,"GM":23857,"HYUNDAI":19147,"BYD":16277,"TOYOTA":11736,"RENAULT":10308,"JEEP":10117,"HONDA":9910,"CAOA CHERY":8771,"NISSAN":8482,"GWM":5923,"CITROEN":2716,"OMODA JAECOO":2451,"PEUGEOT":1606,"BMW":1453,"GEELY":1375,"FORD":1227,"VOLVO":818,"MITSUBISHI":739,"M.BENZ":719},"brand_moto":{"HONDA":145665,"YAMAHA":31019,"SHINERAY":13659,"MOTTU":10185,"AVELLOZ":3554,"BAJAJ":3350,"ROYAL ENFIELD":3035,"HAOJUE":2652,"BMW":1394,"KAWASAKI":1306,"TRIUMPH":1258,"VMOTO":979,"ZONTES":758,"DAFRA":662,"SUZUKI":401,"BULL":299,"H.DAVIDSON":254,"GCX":179,"MOBILLI":177,"DUCATI":66,"AMAZON":59},"model_auto":{"VW/POLO":11051,"GM/ONIX":10182,"FIAT/ARGO":8281,"VW/TERA":7977,"HYUNDAI/HB20":7713,"VW/T CROSS":7622,"FIAT/MOBI":7241,"BYD/DOLPHIN MINI":7053,"HYUNDAI/CRETA":6674,"RENAULT/KWID":6454,"GM/TRACKER":5795,"VW/NIVUS":5795,"JEEP/COMPASS":5434,"FIAT/PULSE":5167,"BYD/SONG":5054,"CAOA CHERY/TIGGO 5X":5007,"GM/ONIX PLUS":4921,"HYUNDAI/HB20S":4655,"NISSAN/KAIT":4462,"FIAT/FASTBACK":4444,"HONDA/HR-V":3995,"TOYOTA/YARIS CROSS":3864,"TOYOTA/COROLLA CROSS":3747,"HONDA/WR-V":3540,"VW/VIRTUS":3410,"JEEP/RENEGADE":3319,"GWM/HAVAL H6":3318,"NISSAN/KICKS":3028,"TOYOTA/COROLLA":2900,"CAOA CHERY/TIGGO 7":2665,"FIAT/CRONOS":2126,"BYD/DOLPHIN":1852,"GM/SPIN":1658,"OMODA JAECOO/OMODA 5":1580,"RENAULT/KARDIAN":1389,"JEEP/COMMANDER":1355,"CITROEN/C3":1334,"BYD/KING":1274,"RENAULT/BOREAL":1272,"GWM/HAVAL H9":1170,"HONDA/CITY HATCH":1161,"HONDA/CITY":1159,"GEELY/EX2":1157,"VW/TAOS":1143,"RENAULT/DUSTER":1125,"TOYOTA/HILUX SW4":1117,"CAOA CHERY/TIGGO 8":1090,"CITROEN/BASALT":1015,"FORD/TERRITORY":995,"PEUGEOT/2008":972},"model_moto":{"HONDA/CG 160":47965,"MOTTU/SPORT 110I":10185,"YAMAHA/YBR 150":7092,"HONDA/CB 300F":6498,"YAMAHA/FAZER 250":4232,"YAMAHA/FAZER 150":3850,"SHINERAY/SHI 150":1643,"HAOJUE/DK160":1117,"BAJAJ/PULSAR N150":774,"HAOJUE/DR160":647,"ROYAL ENFIELD/HUNTER 350":728,"ROYAL ENFIELD/SUPER METEOR 650":455,"ROYAL ENFIELD/METEOR":458,"TRIUMPH/SCRAMBLER 400":329,"ROYAL ENFIELD/CLASSIC 350":164,"ROYAL ENFIELD/SHOTGUN 650":161,"HONDA/NXR160":17611,"HONDA/XRE 190":5457,"HONDA/XRE 300":4013,"YAMAHA/XTZ 250":3918,"SHINERAY/SHI 175":2899,"YAMAHA/CROSSER 150":2726,"HONDA/XR 300L":1552,"AVELLOZ/AZ160":1223,"SHINERAY/SHI 250":654,"HAOJUE/DL 160":330},"brand_caminhao":{"M.BENZ":2468,"VW TRUCK E BUS":2115,"VOLVO":1695,"SCANIA":1011,"IVECO":705,"DAF":606,"FOTON":108,"JAC":25,"AGRALE":15,"FORD":4,"SANY":3,"HYUNDAI":2,"NANJING":2,"TESLA":1},"brand_onibus":{"M.BENZ":1240,"VW TRUCK E BUS":597,"IVECO":284,"MARCOPOLO":224,"INDUSCAR":43,"SCANIA":38,"VOLVO":25,"AGRALE":12,"BYD":11},"ev":{"hybrid":25630,"electric":13991}},{"period":"2026-04","brand_auto":{"VW":31989,"FIAT":23638,"GM":20677,"HYUNDAI":18557,"BYD":18398,"TOYOTA":10364,"RENAULT":9809,"HONDA":9016,"JEEP":8529,"CAOA CHERY":7482,"NISSAN":5280,"GWM":4579,"GEELY":4003,"OMODA JAECOO":2826,"CITROEN":2530,"BMW":1167,"FORD":1136,"PEUGEOT":995,"GAC":918,"VOLVO":760,"M.BENZ":698},"brand_moto":{"HONDA":138660,"YAMAHA":29402,"SHINERAY":12507,"MOTTU":9764,"BAJAJ":3190,"AVELLOZ":3034,"ROYAL ENFIELD":3011,"HAOJUE":2413,"VMOTO":1317,"TRIUMPH":1316,"BMW":1264,"KAWASAKI":1264,"DAFRA":849,"ZONTES":762,"SUZUKI":371,"BULL":246,"H.DAVIDSON":193,"GCX":150,"MOBILLI":112,"DUCATI":87,"HORWIN":56},"model_auto":{"VW/POLO":8367,"FIAT/ARGO":7991,"GM/ONIX":7847,"VW/T CROSS":7810,"HYUNDAI/CRETA":7649,"BYD/DOLPHIN MINI":6880,"HYUNDAI/HB20":6764,"RENAULT/KWID":6451,"VW/TERA":6231,"BYD/SONG":6041,"FIAT/MOBI":5361,"VW/NIVUS":5346,"GM/TRACKER":5305,"FIAT/PULSE":4387,"FIAT/FASTBACK":4305,"JEEP/COMPASS":4219,"HONDA/HR-V":4078,"HYUNDAI/HB20S":4054,"CAOA CHERY/TIGGO 5X":3924,"GM/ONIX PLUS":3856,"TOYOTA/YARIS CROSS":3628,"GEELY/EX2":3602,"TOYOTA/COROLLA CROSS":3176,"JEEP/RENEGADE":3144,"BYD/DOLPHIN":3022,"HONDA/WR-V":2857,"VW/VIRTUS":2768,"GWM/HAVAL H6":2688,"NISSAN/KAIT":2503,"TOYOTA/COROLLA":2410,"CAOA CHERY/TIGGO 7":2402,"NISSAN/KICKS":2170,"OMODA JAECOO/OMODA 5":1872,"GM/SPIN":1851,"BYD/KING":1645,"FIAT/CRONOS":1589,"RENAULT/KARDIAN":1285,"CITROEN/C3":1227,"HONDA/CITY":1226,"JEEP/COMMANDER":1160,"CAOA CHERY/TIGGO 8":1150,"VW/TAOS":1131,"TOYOTA/HILUX SW4":1091,"GM/SPARK":1047,"RENAULT/BOREAL":1008,"RENAULT/DUSTER":1004,"CITROEN/BASALT":930,"GWM/HAVAL H9":922,"FORD/TERRITORY":868,"HONDA/CITY HATCH":826},"model_moto":{"HONDA/CG 160":46949,"MOTTU/SPORT 110I":9764,"YAMAHA/YBR 150":6758,"HONDA/CB 300F":5913,"YAMAHA/FAZER 250":3967,"YAMAHA/FAZER 150":3376,"SHINERAY/SHI 150":1431,"HAOJUE/DK160":1106,"BAJAJ/PULSAR N150":743,"HAOJUE/DR160":489,"ROYAL ENFIELD/HUNTER 350":695,"ROYAL ENFIELD/SUPER METEOR 650":423,"ROYAL ENFIELD/METEOR":508,"TRIUMPH/SCRAMBLER 400":340,"ROYAL ENFIELD/CLASSIC 350":156,"ROYAL ENFIELD/SHOTGUN 650":166,"ROYAL ENFIELD/BEAR 650":118,"HONDA/NXR160":17429,"HONDA/XRE 190":5064,"HONDA/XRE 300":3883,"YAMAHA/XTZ 250":3900,"SHINERAY/SHI 175":2556,"YAMAHA/CROSSER 150":2439,"HONDA/XR 300L":1376,"AVELLOZ/AZ160":1010,"SHINERAY/SHI 250":775,"SHINERAY/STORM 200":436},"brand_caminhao":{"VW TRUCK E BUS":2483,"M.BENZ":2436,"VOLVO":1599,"SCANIA":849,"IVECO":626,"DAF":506,"FOTON":103,"JAC":31,"AGRALE":11,"SANY":7,"FORD":3,"TESLA":1},"brand_onibus":{"M.BENZ":1169,"VW TRUCK E BUS":488,"IVECO":365,"MARCOPOLO":261,"SCANIA":71,"VOLVO":52,"AGRALE":11,"INDUSCAR":10,"BYD":3},"ev":{"hybrid":25767,"electric":17468}},{"period":"2026-05","brand_auto":{"VW":39505,"FIAT":25625,"GM":23172,"BYD":21674,"HYUNDAI":20234,"TOYOTA":10654,"JEEP":10395,"HONDA":10288,"RENAULT":9023,"NISSAN":6935,"GWM":6685,"CAOA CHERY":6660,"GEELY":5173,"CITROEN":4308,"OMODA JAECOO":3176,"PEUGEOT":1463,"BMW":1244,"CAOA CHANGAN":1164,"FORD":927,"LEAPMOTOR":893,"JETOUR":691},"brand_moto":{"HONDA":131783,"YAMAHA":27215,"SHINERAY":11816,"MOTTU":8649,"AVELLOZ":3075,"BAJAJ":2995,"ROYAL ENFIELD":2959,"HAOJUE":2141,"TRIUMPH":1281,"BMW":1188,"KAWASAKI":1128,"DAFRA":651,"ZONTES":596,"VMOTO":572,"SUZUKI":326,"BULL":196,"H.DAVIDSON":153,"MOBILLI":144,"GCX":118,"DUCATI":75,"CFMOTO":54},"model_auto":{"VW/POLO":10523,"VW/T CROSS":9455,"HYUNDAI/HB20":8357,"FIAT/ARGO":8274,"GM/ONIX":7713,"BYD/DOLPHIN MINI":7577,"VW/TERA":7574,"HYUNDAI/CRETA":6599,"BYD/SONG":6307,"VW/NIVUS":5806,"FIAT/MOBI":5728,"RENAULT/KWID":5237,"HYUNDAI/HB20S":5205,"GM/TRACKER":5099,"BYD/DOLPHIN":4963,"FIAT/PULSE":4763,"JEEP/COMPASS":4584,"HONDA/HR-V":4549,"GWM/HAVAL H6":4328,"JEEP/RENEGADE":4323,"GEELY/EX2":4321,"FIAT/FASTBACK":4121,"GM/ONIX PLUS":3806,"TOYOTA/YARIS CROSS":3641,"TOYOTA/COROLLA CROSS":3495,"NISSAN/KAIT":3352,"HONDA/WR-V":3254,"NISSAN/KICKS":3197,"VW/VIRTUS":2931,"CAOA CHERY/TIGGO 7":2883,"GM/SONIC":2778,"CITROEN/BASALT":2744,"FIAT/CRONOS":2734,"CAOA CHERY/TIGGO 5X":2482,"GM/SPIN":2254,"TOYOTA/COROLLA":2217,"BYD/KING":1896,"VW/TAOS":1670,"OMODA JAECOO/OMODA 5":1562,"HONDA/CITY":1502,"JEEP/COMMANDER":1456,"OMODA JAECOO/JAECOO 7":1391,"CAOA CHERY/TIGGO 8":1289,"CITROEN/C3":1267,"RENAULT/KARDIAN":1266,"RENAULT/BOREAL":1244,"RENAULT/DUSTER":1225,"GWM/HAVAL H9":1220,"TOYOTA/HILUX SW4":1187,"VW/TIGUAN":1187},"model_moto":{"HONDA/CG 160":45363,"MOTTU/SPORT 110I":8649,"YAMAHA/YBR 150":6714,"HONDA/CB 300F":5504,"YAMAHA/FAZER 250":3582,"YAMAHA/FAZER 150":3150,"SHINERAY/SHI 150":1301,"HAOJUE/DK160":1079,"BAJAJ/PULSAR N150":742,"SHINERAY/XY 150":583,"ROYAL ENFIELD/HUNTER 350":632,"ROYAL ENFIELD/SUPER METEOR 650":468,"ROYAL ENFIELD/METEOR":459,"TRIUMPH/SCRAMBLER 400":380,"ROYAL ENFIELD/CLASSIC 350":185,"ROYAL ENFIELD/SHOTGUN 650":148,"ROYAL ENFIELD/BEAR 650":109,"ROYAL ENFIELD/CLASSIC 650":109,"HONDA/NXR160":17387,"HONDA/XRE 190":4365,"HONDA/XRE 300":3510,"YAMAHA/XTZ 250":3560,"YAMAHA/CROSSER 150":2305,"HONDA/XR 300L":1229,"AVELLOZ/AZ160":1107,"SHINERAY/SHI 250":935,"SHINERAY/STORM 200":357},"brand_caminhao":{"VW TRUCK E BUS":2848,"M.BENZ":2199,"VOLVO":1355,"SCANIA":779,"IVECO":532,"DAF":298,"FOTON":127,"JAC":24,"AGRALE":14,"SANY":10,"FORD":7},"brand_onibus":{"M.BENZ":998,"VW TRUCK E BUS":400,"IVECO":262,"MARCOPOLO":242,"BYD":59,"INDUSCAR":44,"VOLVO":28,"AGRALE":19,"SCANIA":19},"ev":{"hybrid":30335,"electric":20878}}];
+    fenData=d;
+    var sel=document.getElementById('fen-period');
+    d.slice().reverse().forEach(function(rec){
+      var opt=document.createElement('option');
+      opt.value=rec.period;
+      var parts=rec.period.split('-');
+      var meses=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      opt.textContent=meses[+parts[1]]+'/'+parts[0];
+      sel.appendChild(opt);
+    });
+    renderFen();
+  })();
+}
+
+function setFenV(v){
+  fenV=v;
+  document.getElementById('btn-vauto').classList.toggle('on', v==='auto');
+  document.getElementById('btn-vmoto').classList.toggle('on', v==='moto');
+  renderFen();
+}
+
+function setFenG(g){
+  fenG=g;
+  document.getElementById('btn-gmarca').classList.toggle('on', g==='marca');
+  document.getElementById('btn-gmodelo').classList.toggle('on', g==='modelo');
+  renderFen();
+}
+
+function fenSortBy(col){
+  if(fenSort.col===col) fenSort.dir*=-1; else {fenSort.col=col; fenSort.dir=-1;}
+  ['name','qty','share'].forEach(function(c){
+    var th=document.getElementById('th-'+c);
+    if(!th) return;
+    th.textContent=th.textContent.replace(' ▲','').replace(' ▼','').replace(' ▲','').replace(' ▼','');
+    if(c===col) th.innerHTML=th.textContent+(fenSort.dir===-1?' &#9660;':' &#9650;');
+  });
+  renderFen();
+}
+
+// =========== FENABRAVE SUB-TABS ===========
+function switchFenTab(tab){
+  ['tabela','evolucao','eletrica','heavy'].forEach(function(t){
+    document.getElementById('fsv-'+t).classList.toggle('on', t===tab);
+    document.getElementById('btn-stab-'+t).classList.toggle('on', t===tab);
+  });
+  if(tab==='evolucao') renderEvChart();
+  if(tab==='eletrica') drawElChart();
+  if(tab==='heavy') renderHvChart();
+}
+
+// =========== CHART 2: EVOLUÇÃO MODELOS ===========
+var evV='auto', evG='marca', evM='qty', evSelected={}, evColors=d3.schemeTableau10;
+
+function setEvV(v){
+  evV=v;
+  document.getElementById('btn-ev-auto').classList.toggle('on', v==='auto');
+  document.getElementById('btn-ev-moto').classList.toggle('on', v==='moto');
+  evSelected={};
+  renderEvChart();
+}
+
+function setEvG(g){
+  evG=g;
+  document.getElementById('btn-ev-marca').classList.toggle('on', g==='marca');
+  document.getElementById('btn-ev-modelo').classList.toggle('on', g==='modelo');
+  evSelected={};
+  renderEvChart();
+}
+
+function evDataKey(){ return evG==='marca'?(evV==='auto'?'brand_auto':'brand_moto'):(evV==='auto'?'model_auto':'model_moto'); }
+
+function evTopItems(){
+  if(!fenData) return [];
+  var totals={};
+  var key=evDataKey();
+  fenData.forEach(function(rec){
+    Object.entries(rec[key]||{}).forEach(function(e){
+      if(e[1]>50) totals[e[0]]=(totals[e[0]]||0)+e[1];
+    });
+  });
+  return Object.entries(totals).sort(function(a,b){return b[1]-a[1];}).map(function(e){return e[0];});
+}
+
+function renderEvChart(){
+  if(!fenData) return;
+  var allItems=evTopItems();
+  if(Object.keys(evSelected).length===0){
+    allItems.slice(0,5).forEach(function(m,i){ evSelected[m]=evColors[i%10]; });
+  }
+  var chips=document.getElementById('ev-chips');
+  chips.innerHTML=allItems.slice(0,30).map(function(m){
+    var isOn=!!evSelected[m];
+    var bg=isOn?evSelected[m]:'#f1f3f4';
+    var col=isOn?'#fff':'#5a7080';
+    return '<span class="ev-chip'+(isOn?' on':'')+'" style="background:'+bg+';color:'+col+'" onclick="evToggle(\''+m.replace(/'/g,"\\'")+'\')" title="'+m+'">'+m+'</span>';
+  }).join('');
+  drawEvLine();
+}
+
+function evToggle(m){
+  if(evSelected[m]){
+    delete evSelected[m];
+  } else {
+    var n=Object.keys(evSelected).length;
+    if(n>=10) return;
+    // Pick unused color
+    var used=Object.values(evSelected);
+    var c=evColors.find(function(x){return used.indexOf(x)===-1;})||evColors[n%10];
+    evSelected[m]=c;
+  }
+  renderEvChart();
+}
+
+function setEvM(m){
+  evM=m;
+  document.getElementById('btn-ev-qty').classList.toggle('on', m==='qty');
+  document.getElementById('btn-ev-share').classList.toggle('on', m==='share');
+  drawEvLine();
+}
+
+function drawEvLine(){
+  var key=evDataKey();
+  var months=fenData.map(function(r){return r.period;});
+  var sel=Object.keys(evSelected);
+  var svg=d3.select('#svg-evolucao');
+  svg.selectAll('*').remove();
+  var wrap=document.getElementById('svg-evolucao').parentElement;
+  var W=wrap.clientWidth-32||700, H=320;
+  var ml=62, mr=16, mt=10, mb=56;
+  var iW=W-ml-mr, iH=H-mt-mb;
+  svg.attr('viewBox','0 0 '+W+' '+H).attr('height',H);
+  if(!sel.length){ svg.append('text').attr('x',W/2).attr('y',H/2).attr('text-anchor','middle').attr('fill','#9aafbe').attr('font-size',13).text('Selecione itens acima para visualizar'); return; }
+  // Totais por mês para cálculo de share
+  var monthTotals={};
+  months.forEach(function(p){
+    var rec=fenData.find(function(r){return r.period===p;});
+    monthTotals[p]=Object.values(rec[key]||{}).reduce(function(a,b){return a+b;},0)||1;
+  });
+  // Build series
+  var series=sel.map(function(m){
+    return {name:m, color:evSelected[m], values:months.map(function(p){
+      var rec=fenData.find(function(r){return r.period===p;});
+      var qty=(rec&&rec[key]&&rec[key][m])||0;
+      var share=qty/monthTotals[p]*100;
+      return {period:p, qty:qty, share:share};
+    })};
+  });
+  var yField=evM==='share'?'share':'qty';
+  var maxY=d3.max(series,function(s){return d3.max(s.values,function(v){return v[yField];});});
+  var x=d3.scalePoint().domain(months).range([0,iW]).padding(0.1);
+  var y=d3.scaleLinear().domain([0,maxY*1.1]).range([iH,0]);
+  var line=d3.line().x(function(v){return x(v.period);}).y(function(v){return y(v[yField]);}).curve(d3.curveMonotoneX);
+  var g=svg.append('g').attr('transform','translate('+ml+','+mt+')');
+  // Grid
+  y.ticks(5).forEach(function(t){
+    g.append('line').attr('x1',0).attr('x2',iW).attr('y1',y(t)).attr('y2',y(t)).attr('stroke','#f1f3f4').attr('stroke-width',1);
+    var label=evM==='share'?t.toFixed(1)+'%':fmt(t);
+    g.append('text').attr('x',-8).attr('y',y(t)+4).attr('text-anchor','end').attr('font-size',10).attr('fill','#9aafbe').text(label);
+  });
+  // X axis labels
+  var meses=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  months.forEach(function(p,i){
+    if(i%2===0||months.length<=12){
+      var parts=p.split('-');
+      g.append('text').attr('x',x(p)).attr('y',iH+18).attr('text-anchor','middle').attr('font-size',10).attr('fill','#9aafbe').text(meses[+parts[1]]+(+parts[1]===1||i===0?'/'+parts[0].slice(2):''));
+    }
+  });
+  // Lines + dots
+  var tooltip=d3.select('body').select('#ev-tooltip');
+  if(tooltip.empty()) tooltip=d3.select('body').append('div').attr('id','ev-tooltip').style('position','fixed').style('display','none').style('background','#fff').style('border','1px solid #d0dae6').style('border-radius','8px').style('padding','10px 14px').style('font-size','12px').style('pointer-events','none').style('z-index','200').style('box-shadow','0 4px 16px rgba(0,0,0,.1)');
+  series.forEach(function(s){
+    g.append('path').datum(s.values).attr('fill','none').attr('stroke',s.color).attr('stroke-width',2.5).attr('d',line);
+    s.values.forEach(function(v){
+      if(!v.qty) return;
+      g.append('circle').attr('cx',x(v.period)).attr('cy',y(v[yField])).attr('r',3.5).attr('fill',s.color)
+        .on('mouseover',function(ev){
+          var parts=v.period.split('-'); var label=meses[+parts[1]]+'/'+parts[0];
+          var rec=fenData.find(function(r){return r.period===v.period;});
+          var tot=monthTotals[v.period];
+          var rows=series.map(function(s2){
+            var q=(rec[key]||{})[s2.name]||0;
+            var val=evM==='share'?(q/tot*100).toFixed(1)+'%':q.toLocaleString('pt-BR');
+            return '<div style="display:flex;justify-content:space-between;gap:16px;margin:3px 0"><span style="color:'+s2.color+';font-weight:600">'+s2.name+'</span><span style="font-weight:600">'+val+'</span></div>';
+          }).join('');
+          tooltip.style('display','block').html('<div style="font-weight:700;margin-bottom:6px">'+label+'</div>'+rows);
+        })
+        .on('mousemove',function(ev){ var x=ev.clientX+14; if(x+220>window.innerWidth) x=ev.clientX-234; tooltip.style('left',x+'px').style('top',(ev.clientY-14)+'px'); })
+        .on('mouseout',function(){ tooltip.style('display','none'); });
+    });
+  });
+  // Legend
+  var legX=0;
+  sel.forEach(function(m,i){
+    var label=m.length>18?m.slice(0,17)+'…':m;
+    var lw=label.length*6+24;
+    if(legX+lw>iW){ legX=0; }
+    g.append('rect').attr('x',legX).attr('y',iH+32).attr('width',10).attr('height',10).attr('rx',2).attr('fill',evSelected[m]);
+    g.append('text').attr('x',legX+14).attr('y',iH+41).attr('font-size',10).attr('fill','#5a7080').text(label);
+    legX+=lw+8;
+  });
+}
+
+// =========== CHART 4: ELETRIFICAÇÃO ===========
+var elM='share';
+function setElM(m){
+  elM=m;
+  document.getElementById('btn-el-share').classList.toggle('on', m==='share');
+  document.getElementById('btn-el-qty').classList.toggle('on', m==='qty');
+  drawElChart();
+}
+
+function drawElChart(){
+  if(!fenData) return;
+  var months=fenData.map(function(r){return r.period;});
+  var meses=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var segments=[
+    {key:'combustion', label:'Combustível', color:'#aec7e8'},
+    {key:'hybrid',     label:'Híbridos',    color:'#2ca02c'},
+    {key:'electric',   label:'Elétricos',   color:'#1f77b4'}
+  ];
+  var rows=months.map(function(p){
+    var rec=fenData.find(function(r){return r.period===p;});
+    var totalAuto=Object.values(rec.brand_auto||{}).reduce(function(a,b){return a+b;},0);
+    var hyb=(rec.ev&&rec.ev.hybrid)||0;
+    var ele=(rec.ev&&rec.ev.electric)||0;
+    var comb=Math.max(0, totalAuto-hyb-ele);
+    return {period:p, combustion:comb, hybrid:hyb, electric:ele, total:totalAuto||1};
+  });
+
+  var svg=d3.select('#svg-eletrica');
+  svg.selectAll('*').remove();
+  var wrap=document.getElementById('svg-eletrica').parentElement;
+  var W=wrap.clientWidth-32||700, H=320;
+  var ml=62, mr=16, mt=10, mb=56;
+  var iW=W-ml-mr, iH=H-mt-mb;
+  svg.attr('viewBox','0 0 '+W+' '+H).attr('height',H);
+
+  var isShare=elM==='share';
+  var stack=d3.stack().keys(['combustion','hybrid','electric']);
+  var stackInput=rows.map(function(r){
+    return {combustion:r.combustion/r.total*100, hybrid:r.hybrid/r.total*100, electric:r.electric/r.total*100, period:r.period};
+  });
+  var stackData=stack(stackInput);
+
+  var maxY=isShare?100:d3.max(rows,function(r){return Math.max(r.combustion,r.hybrid,r.electric);});
+  var x=d3.scalePoint().domain(months).range([0,iW]).padding(0.1);
+  var y=d3.scaleLinear().domain([0,maxY*1.05]).range([iH,0]);
+  var area=d3.area()
+    .x(function(d,i){return x(rows[i].period);})
+    .y0(function(d){return y(d[0]);})
+    .y1(function(d){return y(d[1]);})
+    .curve(d3.curveMonotoneX);
+  var line=d3.line().x(function(d){return x(d.period);}).curve(d3.curveMonotoneX);
+
+  var g=svg.append('g').attr('transform','translate('+ml+','+mt+')');
+
+  // Grid
+  y.ticks(5).forEach(function(t){
+    g.append('line').attr('x1',0).attr('x2',iW).attr('y1',y(t)).attr('y2',y(t)).attr('stroke','#f1f3f4').attr('stroke-width',1);
+    var label=elM==='share'?t.toFixed(0)+'%':fmt(t);
+    g.append('text').attr('x',-8).attr('y',y(t)+4).attr('text-anchor','end').attr('font-size',10).attr('fill','#9aafbe').text(label);
+  });
+
+  // X labels
+  months.forEach(function(p,i){
+    if(i%2===0||months.length<=12){
+      var parts=p.split('-');
+      g.append('text').attr('x',x(p)).attr('y',iH+18).attr('text-anchor','middle').attr('font-size',10).attr('fill','#9aafbe').text(meses[+parts[1]]+(+parts[1]===1||i===0?'/'+parts[0].slice(2):''));
+    }
+  });
+
+  var colorMap={combustion:'#aec7e8', hybrid:'#2ca02c', electric:'#1f77b4'};
+  var tooltip2=d3.select('body').select('#el-tooltip');
+  if(tooltip2.empty()) tooltip2=d3.select('body').append('div').attr('id','el-tooltip').style('position','fixed').style('display','none').style('background','#fff').style('border','1px solid #d0dae6').style('border-radius','8px').style('padding','10px 14px').style('font-size','12px').style('pointer-events','none').style('z-index','200').style('box-shadow','0 4px 16px rgba(0,0,0,.1)');
+
+  if(isShare){
+    // Stacked area for share %
+    stackData.forEach(function(layer){
+      g.append('path').datum(layer).attr('fill',colorMap[layer.key]).attr('opacity',0.85).attr('d',area);
+    });
+  } else {
+    // Lines for absolute quantity (combustion excluded — too large, distorts; show only hybrid+electric)
+    segments.forEach(function(s){
+      var lineData=rows.map(function(r){return {period:r.period, val:r[s.key]};});
+      g.append('path').datum(lineData)
+        .attr('fill','none').attr('stroke',colorMap[s.key]).attr('stroke-width',2.5)
+        .attr('d',line.y(function(d){return y(d.val);}));
+      lineData.forEach(function(d){
+        g.append('circle').attr('cx',x(d.period)).attr('cy',y(d.val)).attr('r',3.5).attr('fill',colorMap[s.key]);
+      });
+    });
+  }
+
+  // Invisible hover rects per month for tooltip
+  months.forEach(function(p,i){
+    var row=rows.find(function(r){return r.period===p;});
+    var bw=iW/(months.length+1);
+    g.append('rect')
+      .attr('x',x(p)-bw/2).attr('y',0).attr('width',bw).attr('height',iH)
+      .attr('fill','transparent')
+      .on('mouseover',function(ev){
+        var parts=p.split('-'); var label=meses[+parts[1]]+'/'+parts[0];
+        var hyb=row.hybrid, ele=row.electric, comb=row.combustion, tot=row.total;
+        var fmt2=function(n,t){return elM==='share'?(n/t*100).toFixed(1)+'%':n.toLocaleString('pt-BR');};
+        var rows2=segments.map(function(s){
+          var val=s.key==='combustion'?fmt2(comb,tot):s.key==='hybrid'?fmt2(hyb,tot):fmt2(ele,tot);
+          return '<div style="display:flex;justify-content:space-between;gap:16px;margin:3px 0"><span style="color:'+s.color+';font-weight:600">'+s.label+'</span><span style="font-weight:600">'+val+'</span></div>';
+        }).join('');
+        tooltip2.style('display','block').html('<div style="font-weight:700;margin-bottom:6px">'+label+'</div>'+rows2+'<div style="margin-top:4px;font-size:10px;color:#9aafbe">Total: '+tot.toLocaleString('pt-BR')+'</div>');
+      })
+      .on('mousemove',function(ev){ var px=ev.clientX+14; if(px+220>window.innerWidth) px=ev.clientX-234; tooltip2.style('left',px+'px').style('top',(ev.clientY-14)+'px'); })
+      .on('mouseout',function(){ tooltip2.style('display','none'); });
+  });
+
+  // Legend
+  var legItems=segments;
+  var leg=document.getElementById('el-legend');
+  leg.innerHTML=legItems.map(function(s){
+    var shape=isShare
+      ? '<span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:'+s.color+'"></span>'
+      : '<span style="display:inline-block;width:20px;height:3px;background:'+s.color+';border-radius:2px;margin-bottom:1px"></span>';
+    return '<span style="display:flex;align-items:center;gap:6px;font-size:12px;color:#5a7080">'+shape+s.label+'</span>';
+  }).join('');
+}
+
+// =========== CHART 3: CAMINHÕES E ÔNIBUS ===========
+var hvV='caminhao', hvM='share', hvSelected={}, hvColors=d3.schemeTableau10;
+
+function setHvV(v){
+  hvV=v;
+  document.getElementById('btn-hv-cam').classList.toggle('on', v==='caminhao');
+  document.getElementById('btn-hv-oni').classList.toggle('on', v==='onibus');
+  hvSelected={};
+  renderHvChart();
+}
+
+function setHvM(m){
+  hvM=m;
+  document.getElementById('btn-hv-share').classList.toggle('on', m==='share');
+  document.getElementById('btn-hv-qty').classList.toggle('on', m==='qty');
+  drawHvLine();
+}
+
+function hvDataKey(){ return hvV==='caminhao'?'brand_caminhao':'brand_onibus'; }
+
+function hvTopItems(){
+  if(!fenData) return [];
+  var totals={};
+  var key=hvDataKey();
+  fenData.forEach(function(rec){
+    Object.entries(rec[key]||{}).forEach(function(e){
+      if(e[1]>0) totals[e[0]]=(totals[e[0]]||0)+e[1];
+    });
+  });
+  return Object.entries(totals).sort(function(a,b){return b[1]-a[1];}).map(function(e){return e[0];});
+}
+
+function renderHvChart(){
+  if(!fenData) return;
+  var allItems=hvTopItems();
+  if(Object.keys(hvSelected).length===0){
+    allItems.slice(0,5).forEach(function(m,i){ hvSelected[m]=hvColors[i%10]; });
+  }
+  var chips=document.getElementById('hv-chips');
+  chips.innerHTML=allItems.map(function(m){
+    var isOn=!!hvSelected[m];
+    var bg=isOn?hvSelected[m]:'#f1f3f4';
+    var col=isOn?'#fff':'#5a7080';
+    return '<span class="ev-chip'+(isOn?' on':'')+'" style="background:'+bg+';color:'+col+'" onclick="hvToggle(\''+m.replace(/'/g,"\\'")+'\')" title="'+m+'">'+m+'</span>';
+  }).join('');
+  drawHvLine();
+}
+
+function hvToggle(m){
+  if(hvSelected[m]){
+    delete hvSelected[m];
+  } else {
+    var n=Object.keys(hvSelected).length;
+    if(n>=10) return;
+    var used=Object.values(hvSelected);
+    var c=hvColors.find(function(x){return used.indexOf(x)===-1;})||hvColors[n%10];
+    hvSelected[m]=c;
+  }
+  renderHvChart();
+}
+
+function drawHvLine(){
+  var key=hvDataKey();
+  var months=fenData.map(function(r){return r.period;});
+  var sel=Object.keys(hvSelected);
+  var svg=d3.select('#svg-heavy');
+  svg.selectAll('*').remove();
+  var wrap=document.getElementById('svg-heavy').parentElement;
+  var W=wrap.clientWidth-32||700, H=320;
+  var ml=62, mr=16, mt=10, mb=56;
+  var iW=W-ml-mr, iH=H-mt-mb;
+  svg.attr('viewBox','0 0 '+W+' '+H).attr('height',H);
+  if(!sel.length){ svg.append('text').attr('x',W/2).attr('y',H/2).attr('text-anchor','middle').attr('fill','#9aafbe').attr('font-size',13).text('Selecione itens acima para visualizar'); return; }
+  var monthTotals={};
+  months.forEach(function(p){
+    var rec=fenData.find(function(r){return r.period===p;});
+    monthTotals[p]=Object.values(rec[key]||{}).reduce(function(a,b){return a+b;},0)||1;
+  });
+  var series=sel.map(function(m){
+    return {name:m, color:hvSelected[m], values:months.map(function(p){
+      var rec=fenData.find(function(r){return r.period===p;});
+      var qty=(rec&&rec[key]&&rec[key][m])||0;
+      var share=qty/monthTotals[p]*100;
+      return {period:p, qty:qty, share:share};
+    })};
+  });
+  var yField=hvM==='share'?'share':'qty';
+  var maxY=d3.max(series,function(s){return d3.max(s.values,function(v){return v[yField];});});
+  var x=d3.scalePoint().domain(months).range([0,iW]).padding(0.1);
+  var y=d3.scaleLinear().domain([0,maxY*1.1]).range([iH,0]);
+  var line=d3.line().x(function(v){return x(v.period);}).y(function(v){return y(v[yField]);}).curve(d3.curveMonotoneX);
+  var g=svg.append('g').attr('transform','translate('+ml+','+mt+')');
+  var meses=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  y.ticks(5).forEach(function(t){
+    g.append('line').attr('x1',0).attr('x2',iW).attr('y1',y(t)).attr('y2',y(t)).attr('stroke','#f1f3f4').attr('stroke-width',1);
+    var label=hvM==='share'?t.toFixed(1)+'%':fmt(t);
+    g.append('text').attr('x',-8).attr('y',y(t)+4).attr('text-anchor','end').attr('font-size',10).attr('fill','#9aafbe').text(label);
+  });
+  months.forEach(function(p,i){
+    if(i%2===0||months.length<=12){
+      var parts=p.split('-');
+      g.append('text').attr('x',x(p)).attr('y',iH+18).attr('text-anchor','middle').attr('font-size',10).attr('fill','#9aafbe').text(meses[+parts[1]]+(+parts[1]===1||i===0?'/'+parts[0].slice(2):''));
+    }
+  });
+  var tooltip3=d3.select('body').select('#hv-tooltip');
+  if(tooltip3.empty()) tooltip3=d3.select('body').append('div').attr('id','hv-tooltip').style('position','fixed').style('display','none').style('background','#fff').style('border','1px solid #d0dae6').style('border-radius','8px').style('padding','10px 14px').style('font-size','12px').style('pointer-events','none').style('z-index','200').style('box-shadow','0 4px 16px rgba(0,0,0,.1)');
+  series.forEach(function(s){
+    g.append('path').datum(s.values).attr('fill','none').attr('stroke',s.color).attr('stroke-width',2.5).attr('d',line);
+    s.values.forEach(function(v){
+      if(!v.qty) return;
+      g.append('circle').attr('cx',x(v.period)).attr('cy',y(v[yField])).attr('r',3.5).attr('fill',s.color)
+        .on('mouseover',function(ev){
+          var parts=v.period.split('-'); var label=meses[+parts[1]]+'/'+parts[0];
+          var rec=fenData.find(function(r){return r.period===v.period;});
+          var tot=monthTotals[v.period];
+          var rows=series.map(function(s2){
+            var q=(rec[key]||{})[s2.name]||0;
+            var val=hvM==='share'?(q/tot*100).toFixed(1)+'%':q.toLocaleString('pt-BR');
+            return '<div style="display:flex;justify-content:space-between;gap:16px;margin:3px 0"><span style="color:'+s2.color+';font-weight:600">'+s2.name+'</span><span style="font-weight:600">'+val+'</span></div>';
+          }).join('');
+          tooltip3.style('display','block').html('<div style="font-weight:700;margin-bottom:6px">'+label+'</div>'+rows);
+        })
+        .on('mousemove',function(ev){ var px=ev.clientX+14; if(px+220>window.innerWidth) px=ev.clientX-234; tooltip3.style('left',px+'px').style('top',(ev.clientY-14)+'px'); })
+        .on('mouseout',function(){ tooltip3.style('display','none'); });
+    });
+  });
+  var legX=0;
+  sel.forEach(function(m,i){
+    var label=m.length>18?m.slice(0,17)+'…':m;
+    var lw=label.length*6+24;
+    if(legX+lw>iW){ legX=0; }
+    g.append('rect').attr('x',legX).attr('y',iH+32).attr('width',10).attr('height',10).attr('rx',2).attr('fill',hvSelected[m]);
+    g.append('text').attr('x',legX+14).attr('y',iH+41).attr('font-size',10).attr('fill','#5a7080').text(label);
+    legX+=lw+8;
+  });
+}
+
+function fenToggleExclude(name){
+  if(fenExcluded[name]) delete fenExcluded[name]; else fenExcluded[name]=true;
+  renderFen();
+}
+
+function renderFen(){
+  if(!fenData) return;
+  var period=document.getElementById('fen-period').value;
+  var rec=fenData.find(function(d){return d.period===period;});
+  if(!rec) return;
+  var raw= fenG==='marca'
+    ? (fenV==='auto'? rec.brand_auto : rec.brand_moto)
+    : (fenV==='auto'? rec.model_auto : rec.model_moto);
+  var nExc=Object.keys(fenExcluded).length;
+  var entries=Object.entries(raw).map(function(e){return{name:e[0],qty:e[1]};});
+  var total=entries.filter(function(e){return !fenExcluded[e.name];}).reduce(function(s,e){return s+e.qty;},0);
+  entries.forEach(function(e){e.share=total>0&&!fenExcluded[e.name]?e.qty/total*100:0;});
+  entries.sort(function(a,b){
+    var v=fenSort.col==='name'?a.name.localeCompare(b.name):(a[fenSort.col]-b[fenSort.col]);
+    return v*fenSort.dir;
+  });
+  var maxQ=entries.length>0?entries[0].qty:1;
+  if(fenSort.col!=='qty') maxQ=Math.max.apply(null,entries.map(function(e){return e.qty;}));
+  var barColor=fenV==='auto'?'#3182bd':'#e6550d';
+  var tbody=document.getElementById('fen-tbody');
+  tbody.innerHTML=entries.map(function(e,i){
+    var w=Math.round(e.qty/maxQ*100);
+    var esc=e.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<tr style="opacity:'+(fenExcluded[e.name]?'0.35':'1')+'">'
+      +'<td style="width:36px;text-align:center"><input type="checkbox"'+(fenExcluded[e.name]?'':' checked')+' onchange="fenToggleExclude(\''+esc+'\')" style="cursor:pointer;width:14px;height:14px;accent-color:#1a73e8"></td>'
+      +'<td class="td-rank">'+(i+1)+'</td>'
+      +'<td class="td-name">'+e.name+'</td>'
+      +'<td class="td-qty">'+e.qty.toLocaleString('pt-BR')+'</td>'
+      +'<td class="td-share">'+e.share.toFixed(1)+'%</td>'
+      +'<td class="td-bar"><div class="bar-bg"><div class="bar-fill" style="width:'+w+'%;background:'+barColor+'"></div></div></td>'
+      +'</tr>';
+  }).join('');
+  var tipo=fenV==='auto'?'autos':'motos';
+  var grup=fenG==='marca'?'marcas':'modelos';
+  var excInfo=nExc>0?' · <span style="color:#c0392b;cursor:pointer" onclick="fenExcluded={};renderFen()">'+nExc+' excluída'+(nExc>1?'s':'')+' — Limpar</span>':'';
+  document.getElementById('fen-total').innerHTML=entries.length+' '+grup+' · Total: '+total.toLocaleString('pt-BR')+' '+tipo+excInfo;
+}
+</script>
+</body>
+</html>
