@@ -169,7 +169,14 @@
     </div>
 
     <section>
-      <h2>Crescimento da carteira ativa (LTM, %)</h2>
+      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap: 8px;">
+        <h2 style="margin:0;" id="tituloCarteira">Crescimento da carteira ativa (LTM, %)</h2>
+        <div class="filters" id="periodoCarteira" style="margin: 0;">
+          <button class="filter-btn" data-modo="estoque">Estoque</button>
+          <button class="filter-btn" data-modo="mom">M/M</button>
+          <button class="filter-btn active" data-modo="cagr">LTM</button>
+        </div>
+      </div>
       <div style="display:flex; align-items:center; justify-content:flex-end; margin-bottom:4px;">
         <span id="chartCarteiraBrushPeriodo" style="font-size:11px; font-weight:600; color:var(--text-primary);"></span>
       </div>
@@ -180,7 +187,7 @@
         <input type="range" id="chartCarteiraBrushMin" min="0" max="1" value="0" step="1">
         <input type="range" id="chartCarteiraBrushMax" min="0" max="1" value="1" step="1">
       </div>
-      <p class="caveat" style="margin-top:6px;">Arraste as duas alças abaixo do gráfico para escolher o período exibido (zoom para qualquer janela). Duplo-clique no gráfico reseta para o período completo. Os rótulos do eixo se adaptam automaticamente ao período escolhido (sempre ~18 marcações).</p>
+      <p class="caveat" style="margin-top:6px;">Arraste as duas alças abaixo do gráfico para escolher o período exibido (zoom para qualquer janela). Duplo-clique no gráfico reseta para o período completo. Os rótulos do eixo se adaptam automaticamente ao período escolhido (sempre ~18 marcações). Estoque = carteira ativa somada de todos os segmentos (independente do filtro Todos/PF/PJ acima).</p>
     </section>
 
     <section>
@@ -329,7 +336,8 @@
       <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap: 8px;">
         <h2 style="margin:0;" id="tituloCresConsignado">Crescimento mês a mês por tipo de consignado (%)</h2>
         <div class="filters" id="periodoCres" style="margin: 0;">
-          <button class="filter-btn active" data-modo="mom">M/M</button>
+          <button class="filter-btn active" data-modo="estoque">Estoque</button>
+          <button class="filter-btn" data-modo="mom">M/M</button>
           <button class="filter-btn" data-modo="cagr">LTM</button>
         </div>
       </div>
@@ -450,7 +458,8 @@
       <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap: 8px;">
         <h2 style="margin:0;" id="tituloCresCartao">Crescimento mês a mês por tipo (%)</h2>
         <div class="filters" id="periodoCresCartao" style="margin: 0;">
-          <button class="filter-btn active" data-modo="mom">M/M</button>
+          <button class="filter-btn active" data-modo="estoque">Estoque</button>
+          <button class="filter-btn" data-modo="mom">M/M</button>
           <button class="filter-btn" data-modo="cagr">LTM</button>
         </div>
       </div>
@@ -526,7 +535,7 @@
       <p class="caveat">
         Coluna "share": participação do banco na carteira ativa de crédito de cartão de crédito de pessoa física do Sistema Financeiro Nacional, no trimestre indicado no título — fonte IF.data/BC (relatório "Carteira de crédito ativa Pessoa Física", nível Conglomerado Prudencial), diferente da fonte semanal de taxas usada nas demais colunas. Banco Pan não é exibido por estar consolidado no conglomerado prudencial do BTG Pactual nesse relatório.
         Coluna "Segmento": segmentação prudencial S1-S5 conforme Resolução CMN/BCB 4.553/2017, extraída diretamente do cadastro IF.data de cada banco (individual, não agrupada). Financeiras/fintechs de cartão fora desse cadastro de bancos aparecem como "Financeira".
-        A soma dos shares exibidos não fecha 100%: cartão de crédito tem uma cauda longa de financeiras/fintechs fora dos bancos tradicionais listados acima. Para cobrir os maiores desses players, a tabela inclui também Mercado Pago, Carrefour (CSF), Porto Seguro, BRB, Renner (Realize), Neon, Riachuelo (Midway) e Pefisa — que aparecem só com share (sem Rotativo/Parcelado, pois não entram no ranking semanal de taxas do BC). Com isso a tabela cobre ~92% do mercado; o restante (~8%) se pulveriza entre centenas de outras financeiras e cooperativas de crédito de menor porte, não listadas aqui.
+        A soma dos shares exibidos não fecha 100%: cartão de crédito tem uma cauda longa de financeiras/fintechs fora dos bancos tradicionais listados acima. Para cobrir os maiores desses players, a tabela inclui também Mercado Pago, Carrefour (CSF), Porto Seguro, BRB, Renner (Realize), Neon, Riachuelo (Midway) e Pefisa. Essas marcas não aparecem por esse nome no ranking semanal do BC — o crédito é concedido pela financeira/instituição de pagamento do grupo que de fato reporta ao BC (ex.: Mercado Pago → Mercado Crédito SCFI S.A.; Carrefour (CSF) → Bco CSF S.A.; Porto Seguro → Portoseg S.A. CFI; Renner → Realize SCFI S.A.; Riachuelo → Midway S.A. - SCFI; BRB → BRB - Bco de Brasília S.A.); Rotativo/Parcelado dessas linhas vêm dessas razões sociais. BRB não tem rotativo divulgado nessa semana (só parcelado). Com isso a tabela cobre ~92% do mercado; o restante (~8%) se pulveriza entre centenas de outras financeiras e cooperativas de crédito de menor porte, não listadas aqui.
       </p>
     </section>
 
@@ -556,7 +565,8 @@
       <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap: 8px;">
         <h2 style="margin:0;" id="tituloCresPessoal">Crescimento mês a mês por tipo (%)</h2>
         <div class="filters" id="periodoCresPessoal" style="margin: 0;">
-          <button class="filter-btn active" data-modo="mom">M/M</button>
+          <button class="filter-btn active" data-modo="estoque">Estoque</button>
+          <button class="filter-btn" data-modo="mom">M/M</button>
           <button class="filter-btn" data-modo="cagr">LTM</button>
         </div>
       </div>
@@ -647,7 +657,8 @@
       <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap: 8px;">
         <h2 style="margin:0;" id="tituloCresVeiculos">Crescimento mês a mês (%)</h2>
         <div class="filters" id="periodoCresVeiculos" style="margin: 0;">
-          <button class="filter-btn active" data-modo="mom">M/M</button>
+          <button class="filter-btn active" data-modo="estoque">Estoque</button>
+          <button class="filter-btn" data-modo="mom">M/M</button>
           <button class="filter-btn" data-modo="cagr">LTM</button>
         </div>
       </div>
@@ -696,8 +707,60 @@
     <section>
       <p class="caveat">
         <strong>Sobre os dados:</strong> "Aquisição de veículos" agrega as submodalidades SCR "Aquisição de bens - veículos automotores", "Arrendamento financeiro de veículos automotores" e "Aquisição de bens com interveniência - veículos autom.", considerando só pessoa física. Contagens de operações com valor -1 (sigilo estatístico do BC) foram tratadas como 0.
-        <strong>Limitação de dados:</strong> nem o SCR nem o SGS do Banco Central abrem essas operações por tipo de veículo (novo vs. seminovo/usado) — esse recorte não existe nas bases públicas do BC consultadas neste painel. Uma eventual segmentação novo/usado exigiria outra fonte (ex.: Fenabrave/associações do setor), fora do escopo deste painel.
+        <strong>Limitação de dados:</strong> nem o SCR nem o SGS do Banco Central abrem essas operações por tipo de veículo (novo vs. seminovo/usado) — esse recorte não existe nas bases públicas do BC. Os três gráficos abaixo complementam essa lacuna com dados da B3 (ex-SNG), fonte diferente do SCR/SGS usado no restante desta aba — ver caveat de cada gráfico.
       </p>
+    </section>
+
+    <section>
+      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap: 8px;">
+        <h2 style="margin:0;">Financiamento de veículos — novos vs. usados (B3)</h2>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); margin: 10px 0 10px;">Clique num item da legenda para ocultar/mostrar a série</p>
+      <div id="legendB3Financiamento" style="display:flex; gap:16px; margin-bottom:8px; font-size:12px; color:var(--text-secondary); flex-wrap: wrap;"></div>
+      <div class="chart-box" style="height: 300px;">
+        <canvas id="chartB3Financiamento"></canvas>
+      </div>
+      <p class="caveat">Quantidade de veículos financiados <strong>no mês</strong> (fluxo de novas operações, não estoque), calculada como a diferença entre o acumulado no ano (YTD) do mês e do mês anterior, a partir dos decks mensais "Mercado de Financiamentos de Veículos" da B3 (ex-SNG). Universo diferente do SCR: é o mercado de financiamento/consórcio de veículos leves apurado pela B3, com a segmentação novo/usado que o SCR não oferece — os totais não são diretamente comparáveis aos gráficos de estoque SCR desta aba. Série começa em jul/2025 (primeiro mês com deck do mês anterior disponível para o cálculo do YTD).</p>
+    </section>
+
+    <section>
+      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap: 8px;">
+        <h2 style="margin:0;" id="tituloB3Modalidade">Modalidade de financiamento de veículos (B3) — unidades (mil)</h2>
+        <div class="filters" id="periodoB3Modalidade" style="margin: 0;">
+          <button class="filter-btn active" data-modo="unidades">Unidades</button>
+          <button class="filter-btn" data-modo="share">Share %</button>
+        </div>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); margin: 10px 0 10px;" id="dicaB3Modalidade">Clique num item da legenda para ocultar/mostrar a série</p>
+      <div id="legendB3Modalidade" style="display:flex; gap:16px; margin-bottom:8px; font-size:12px; color:var(--text-secondary); flex-wrap: wrap;"></div>
+      <div class="chart-box" id="wrapB3ModalidadeLinha" style="height: 300px;">
+        <canvas id="chartB3Modalidade"></canvas>
+      </div>
+      <div id="wrapB3ModalidadePizza" style="display:none; gap:24px; flex-wrap:wrap; justify-content:center; align-items:flex-start;">
+        <div style="flex:1 1 260px; max-width:340px;">
+          <p style="text-align:center;font-weight:600;margin:0 0 4px;color:var(--text-secondary);" id="tituloB3PizzaA">—</p>
+          <div class="chart-box" style="height:260px;"><canvas id="chartB3ModalidadePizzaA"></canvas></div>
+        </div>
+        <div style="flex:1 1 260px; max-width:340px;">
+          <p style="text-align:center;font-weight:600;margin:0 0 4px;color:var(--text-secondary);" id="tituloB3PizzaB">—</p>
+          <div class="chart-box" style="height:260px;"><canvas id="chartB3ModalidadePizzaB"></canvas></div>
+        </div>
+      </div>
+      <p class="caveat">Modalidade usada para financiar a compra do veículo (CDC = Crédito Direto ao Consumidor, Consórcio ou Leasing — categoria "Outros", residual e &lt;1% do total, foi excluída deste gráfico). Em milhares de unidades (linha) ou em % do total das 3 modalidades no mês (pizza, comparando dezembro do último ano completo com o período mais recente disponível). Fonte: decks mensais B3 (ex-SNG) "Mercado de Financiamentos de Veículos". Série disponível a partir de jun/2025.</p>
+    </section>
+
+    <section>
+      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap: 8px;">
+        <h2 style="margin:0;" id="tituloB3Prazo">Prazo médio da carteira de financiamento de veículos (B3)</h2>
+        <div class="filters" id="periodoB3Prazo" style="margin: 0;">
+          <button class="filter-btn active" data-modo="prazo">Prazo médio</button>
+          <button class="filter-btn" data-modo="estoque">Estoque da carteira</button>
+        </div>
+      </div>
+      <div class="chart-box" style="height: 300px;">
+        <canvas id="chartB3Prazo"></canvas>
+      </div>
+      <p class="caveat" id="caveatB3Prazo">Prazo médio (em meses) da carteira ativa de financiamento de veículos leves. Fonte: decks mensais B3 (ex-SNG) "Mercado de Financiamentos de Veículos". Série disponível a partir de jun/2025.</p>
     </section>
 
     <section>
@@ -720,7 +783,8 @@
       <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap: 8px;">
         <h2 style="margin:0;" id="tituloCresHabitacional">Crescimento mês a mês por tipo (%)</h2>
         <div class="filters" id="periodoCresHabitacional" style="margin: 0;">
-          <button class="filter-btn active" data-modo="mom">M/M</button>
+          <button class="filter-btn active" data-modo="estoque">Estoque</button>
+          <button class="filter-btn" data-modo="mom">M/M</button>
           <button class="filter-btn" data-modo="cagr">LTM</button>
         </div>
       </div>
@@ -800,7 +864,8 @@
       <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap: 8px;">
         <h2 style="margin:0;" id="tituloCresRural">Crescimento mês a mês por tipo (%)</h2>
         <div class="filters" id="periodoCresRural" style="margin: 0;">
-          <button class="filter-btn active" data-modo="mom">M/M</button>
+          <button class="filter-btn active" data-modo="estoque">Estoque</button>
+          <button class="filter-btn" data-modo="mom">M/M</button>
           <button class="filter-btn" data-modo="cagr">LTM</button>
         </div>
       </div>
@@ -876,6 +941,14 @@
     </section>
 
     <section>
+      <h2>Estoque de crédito rural por tipo de instituição (R$ bi) — pessoa física</h2>
+      <div class="chart-box" style="height: 300px;">
+        <canvas id="chartRuralControle"></canvas>
+      </div>
+      <p class="caveat" id="caveatRuralControle">Fonte: IF.data/BC — carteira ativa "Rural e Agroindustrial" (pessoa física, relatório 123, grupo 10037), nível Conglomerado Prudencial. Classificação por tipo de controle de capital: <strong>Público</strong> = campo TCB do cadastro do BC igual a "Público" (BB, Caixa, bancos estaduais, BNDES, agências de fomento etc.); <strong>Cooperativa</strong> = instituições com "COOPERATIVA" no nome (Sicoob, Sicredi, Unicred e demais singulares/centrais, que o TCB do BC classifica como "Privado nacional"); <strong>Privado</strong> = demais instituições privadas nacionais e estrangeiras. Série trimestral disponível a partir de 1T25 (limite do período publicado pela API do IF.data) — cresce a cada trimestre novo divulgado pelo BC. Mostra apenas pessoa física: o equivalente PJ (relatório 128, grupo 10091) foi avaliado e descartado por subestimar em ~45% o saldo PJ rural frente ao SCR.data (87,4bi vs. 158,5bi em 1T26), limitação de escopo do COSIF e não um erro de cálculo. Escopo diferente do restante desta aba (que usa o estoque mensal do SCR); aqui a série é trimestral (IF.data).</p>
+    </section>
+
+    <section>
       <p class="caveat">
         <strong>Sobre os dados:</strong> Buckets = submodalidades SCR da modalidade "Financiamentos rurais (ex-financiamentos rurais e agroindustriais)": Custeio (insumos/despesas do ciclo produtivo), Investimento (bens de capital, infraestrutura rural), Comercialização (financiamento da venda da produção) e Industrialização (beneficiamento/industrialização de produtos agropecuários). O alternador acima troca entre pessoa física (R$ 690,0 bi em estoque, mai/2026) e pessoa jurídica (R$ 158,5 bi) — mesmas submodalidades, tomadores diferentes (produtor individual vs. empresa do agronegócio). Contagens de operações com valor -1 (sigilo estatístico do BC) foram tratadas como 0.
       </p>
@@ -901,7 +974,8 @@
       <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap: 8px;">
         <h2 style="margin:0;" id="tituloCresGrande">Crescimento mês a mês por tipo (%)</h2>
         <div class="filters" id="periodoCresGrande" style="margin: 0;">
-          <button class="filter-btn active" data-modo="mom">M/M</button>
+          <button class="filter-btn active" data-modo="estoque">Estoque</button>
+          <button class="filter-btn" data-modo="mom">M/M</button>
           <button class="filter-btn" data-modo="cagr">LTM</button>
         </div>
       </div>
@@ -960,7 +1034,8 @@
       <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap: 8px;">
         <h2 style="margin:0;" id="tituloCresMpme">Crescimento mês a mês por tipo (%)</h2>
         <div class="filters" id="periodoCresMpme" style="margin: 0;">
-          <button class="filter-btn active" data-modo="mom">M/M</button>
+          <button class="filter-btn active" data-modo="estoque">Estoque</button>
+          <button class="filter-btn" data-modo="mom">M/M</button>
           <button class="filter-btn" data-modo="cagr">LTM</button>
         </div>
       </div>
@@ -1019,9 +1094,11 @@ const DATA_RISCO = {"latest_month": "2026-05-31", "by_month_bucket": {"2017-01-3
 const DATA_TAXAS_RISCO = {"by_month": {"2017-01-01": {"nao_consignado": 140.88, "cartao_rotativo": 497.5, "cartao_parcelado": 161.92}, "2017-02-01": {"nao_consignado": 141.86, "cartao_rotativo": 487.77, "cartao_parcelado": 163.48}, "2017-03-01": {"nao_consignado": 135.03, "cartao_rotativo": 490.33, "cartao_parcelado": 158.46}, "2017-04-01": {"nao_consignado": 129.16, "cartao_rotativo": 424.36, "cartao_parcelado": 162.16}, "2017-05-01": {"nao_consignado": 132.64, "cartao_rotativo": 358.76, "cartao_parcelado": 159.59}, "2017-06-01": {"nao_consignado": 124.97, "cartao_rotativo": 383.16, "cartao_parcelado": 157.89}, "2017-07-01": {"nao_consignado": 133.15, "cartao_rotativo": 424.87, "cartao_parcelado": 159.64}, "2017-08-01": {"nao_consignado": 130.44, "cartao_rotativo": 428.02, "cartao_parcelado": 160.93}, "2017-09-01": {"nao_consignado": 127.31, "cartao_rotativo": 348.73, "cartao_parcelado": 165.29}, "2017-10-01": {"nao_consignado": 132.11, "cartao_rotativo": 354.88, "cartao_parcelado": 166.97}, "2017-11-01": {"nao_consignado": 125.96, "cartao_rotativo": 359.17, "cartao_parcelado": 168.45}, "2017-12-01": {"nao_consignado": 113.28, "cartao_rotativo": 352.7, "cartao_parcelado": 169.11}, "2018-01-01": {"nao_consignado": 122.58, "cartao_rotativo": 341.8, "cartao_parcelado": 167.89}, "2018-02-01": {"nao_consignado": 125.66, "cartao_rotativo": 347.13, "cartao_parcelado": 175.41}, "2018-03-01": {"nao_consignado": 124.99, "cartao_rotativo": 348.59, "cartao_parcelado": 170.37}, "2018-04-01": {"nao_consignado": 125.0, "cartao_rotativo": 349.69, "cartao_parcelado": 171.85}, "2018-05-01": {"nao_consignado": 114.84, "cartao_rotativo": 315.35, "cartao_parcelado": 165.49}, "2018-06-01": {"nao_consignado": 114.85, "cartao_rotativo": 297.91, "cartao_parcelado": 168.13}, "2018-07-01": {"nao_consignado": 118.72, "cartao_rotativo": 279.97, "cartao_parcelado": 167.13}, "2018-08-01": {"nao_consignado": 121.44, "cartao_rotativo": 283.38, "cartao_parcelado": 166.73}, "2018-09-01": {"nao_consignado": 122.29, "cartao_rotativo": 284.22, "cartao_parcelado": 164.5}, "2018-10-01": {"nao_consignado": 126.14, "cartao_rotativo": 282.56, "cartao_parcelado": 166.06}, "2018-11-01": {"nao_consignado": 123.07, "cartao_rotativo": 288.37, "cartao_parcelado": 161.56}, "2018-12-01": {"nao_consignado": 107.42, "cartao_rotativo": 292.86, "cartao_parcelado": 158.91}, "2019-01-01": {"nao_consignado": 116.38, "cartao_rotativo": 288.58, "cartao_parcelado": 163.07}, "2019-02-01": {"nao_consignado": 122.44, "cartao_rotativo": 297.11, "cartao_parcelado": 170.47}, "2019-03-01": {"nao_consignado": 123.68, "cartao_rotativo": 301.08, "cartao_parcelado": 178.46}, "2019-04-01": {"nao_consignado": 126.9, "cartao_rotativo": 298.17, "cartao_parcelado": 170.84}, "2019-05-01": {"nao_consignado": 119.94, "cartao_rotativo": 299.81, "cartao_parcelado": 174.11}, "2019-06-01": {"nao_consignado": 120.12, "cartao_rotativo": 300.56, "cartao_parcelado": 175.58}, "2019-07-01": {"nao_consignado": 119.2, "cartao_rotativo": 300.41, "cartao_parcelado": 175.24}, "2019-08-01": {"nao_consignado": 116.6, "cartao_rotativo": 306.21, "cartao_parcelado": 177.29}, "2019-09-01": {"nao_consignado": 112.9, "cartao_rotativo": 306.99, "cartao_parcelado": 178.24}, "2019-10-01": {"nao_consignado": 98.55, "cartao_rotativo": 315.48, "cartao_parcelado": 173.58}, "2019-11-01": {"nao_consignado": 102.31, "cartao_rotativo": 315.93, "cartao_parcelado": 177.77}, "2019-12-01": {"nao_consignado": 94.57, "cartao_rotativo": 316.91, "cartao_parcelado": 175.81}, "2020-01-01": {"nao_consignado": 103.59, "cartao_rotativo": 314.59, "cartao_parcelado": 184.08}, "2020-02-01": {"nao_consignado": 106.56, "cartao_rotativo": 321.67, "cartao_parcelado": 186.69}, "2020-03-01": {"nao_consignado": 94.74, "cartao_rotativo": 327.26, "cartao_parcelado": 188.94}, "2020-04-01": {"nao_consignado": 86.35, "cartao_rotativo": 313.46, "cartao_parcelado": 148.79}, "2020-05-01": {"nao_consignado": 86.51, "cartao_rotativo": 302.5, "cartao_parcelado": 138.39}, "2020-06-01": {"nao_consignado": 84.99, "cartao_rotativo": 288.19, "cartao_parcelado": 118.15}, "2020-07-01": {"nao_consignado": 82.32, "cartao_rotativo": 307.94, "cartao_parcelado": 129.88}, "2020-08-01": {"nao_consignado": 70.29, "cartao_rotativo": 305.65, "cartao_parcelado": 137.79}, "2020-09-01": {"nao_consignado": 69.53, "cartao_rotativo": 306.98, "cartao_parcelado": 142.03}, "2020-10-01": {"nao_consignado": 77.05, "cartao_rotativo": 314.92, "cartao_parcelado": 148.62}, "2020-11-01": {"nao_consignado": 80.3, "cartao_rotativo": 320.75, "cartao_parcelado": 146.84}, "2020-12-01": {"nao_consignado": 73.25, "cartao_rotativo": 328.18, "cartao_parcelado": 148.89}, "2021-01-01": {"nao_consignado": 84.84, "cartao_rotativo": 329.71, "cartao_parcelado": 161.52}, "2021-02-01": {"nao_consignado": 84.45, "cartao_rotativo": 327.04, "cartao_parcelado": 167.06}, "2021-03-01": {"nao_consignado": 85.21, "cartao_rotativo": 335.85, "cartao_parcelado": 167.55}, "2021-04-01": {"nao_consignado": 86.25, "cartao_rotativo": 336.42, "cartao_parcelado": 165.65}, "2021-05-01": {"nao_consignado": 80.7, "cartao_rotativo": 329.92, "cartao_parcelado": 164.44}, "2021-06-01": {"nao_consignado": 79.84, "cartao_rotativo": 329.1, "cartao_parcelado": 164.49}, "2021-07-01": {"nao_consignado": 76.99, "cartao_rotativo": 331.17, "cartao_parcelado": 163.67}, "2021-08-01": {"nao_consignado": 79.87, "cartao_rotativo": 335.46, "cartao_parcelado": 163.62}, "2021-09-01": {"nao_consignado": 77.41, "cartao_rotativo": 338.68, "cartao_parcelado": 168.66}, "2021-10-01": {"nao_consignado": 83.6, "cartao_rotativo": 342.22, "cartao_parcelado": 172.62}, "2021-11-01": {"nao_consignado": 84.37, "cartao_rotativo": 343.71, "cartao_parcelado": 167.44}, "2021-12-01": {"nao_consignado": 85.28, "cartao_rotativo": 347.38, "cartao_parcelado": 168.41}, "2022-01-01": {"nao_consignado": 79.81, "cartao_rotativo": 346.28, "cartao_parcelado": 172.46}, "2022-02-01": {"nao_consignado": 83.4, "cartao_rotativo": 355.19, "cartao_parcelado": 174.32}, "2022-03-01": {"nao_consignado": 87.95, "cartao_rotativo": 359.07, "cartao_parcelado": 172.49}, "2022-04-01": {"nao_consignado": 84.19, "cartao_rotativo": 363.97, "cartao_parcelado": 175.49}, "2022-05-01": {"nao_consignado": 86.28, "cartao_rotativo": 368.84, "cartao_parcelado": 172.73}, "2022-06-01": {"nao_consignado": 87.41, "cartao_rotativo": 370.35, "cartao_parcelado": 173.19}, "2022-07-01": {"nao_consignado": 86.5, "cartao_rotativo": 394.93, "cartao_parcelado": 181.7}, "2022-08-01": {"nao_consignado": 85.3, "cartao_rotativo": 399.61, "cartao_parcelado": 186.84}, "2022-09-01": {"nao_consignado": 81.58, "cartao_rotativo": 390.87, "cartao_parcelado": 185.55}, "2022-10-01": {"nao_consignado": 83.43, "cartao_rotativo": 409.49, "cartao_parcelado": 184.98}, "2022-11-01": {"nao_consignado": 86.35, "cartao_rotativo": 396.3, "cartao_parcelado": 180.66}, "2022-12-01": {"nao_consignado": 81.94, "cartao_rotativo": 411.93, "cartao_parcelado": 181.44}, "2023-01-01": {"nao_consignado": 84.24, "cartao_rotativo": 415.69, "cartao_parcelado": 183.12}, "2023-02-01": {"nao_consignado": 86.67, "cartao_rotativo": 420.42, "cartao_parcelado": 191.83}, "2023-03-01": {"nao_consignado": 88.01, "cartao_rotativo": 433.33, "cartao_parcelado": 193.16}, "2023-04-01": {"nao_consignado": 92.42, "cartao_rotativo": 447.33, "cartao_parcelado": 200.54}, "2023-05-01": {"nao_consignado": 91.47, "cartao_rotativo": 453.97, "cartao_parcelado": 194.2}, "2023-06-01": {"nao_consignado": 91.25, "cartao_rotativo": 435.84, "cartao_parcelado": 196.07}, "2023-07-01": {"nao_consignado": 92.61, "cartao_rotativo": 441.33, "cartao_parcelado": 198.2}, "2023-08-01": {"nao_consignado": 92.6, "cartao_rotativo": 445.51, "cartao_parcelado": 194.58}, "2023-09-01": {"nao_consignado": 91.3, "cartao_rotativo": 441.11, "cartao_parcelado": 193.79}, "2023-10-01": {"nao_consignado": 89.55, "cartao_rotativo": 444.92, "cartao_parcelado": 195.93}, "2023-11-01": {"nao_consignado": 93.92, "cartao_rotativo": 434.84, "cartao_parcelado": 195.69}, "2023-12-01": {"nao_consignado": 94.07, "cartao_rotativo": 442.1, "cartao_parcelado": 196.91}, "2024-01-01": {"nao_consignado": 90.04, "cartao_rotativo": 419.18, "cartao_parcelado": 188.44}, "2024-02-01": {"nao_consignado": 91.81, "cartao_rotativo": 412.05, "cartao_parcelado": 188.86}, "2024-03-01": {"nao_consignado": 96.32, "cartao_rotativo": 421.27, "cartao_parcelado": 190.67}, "2024-04-01": {"nao_consignado": 95.78, "cartao_rotativo": 423.44, "cartao_parcelado": 181.97}, "2024-05-01": {"nao_consignado": 95.58, "cartao_rotativo": 422.41, "cartao_parcelado": 185.86}, "2024-06-01": {"nao_consignado": 95.32, "cartao_rotativo": 428.68, "cartao_parcelado": 182.45}, "2024-07-01": {"nao_consignado": 99.16, "cartao_rotativo": 432.19, "cartao_parcelado": 178.09}, "2024-08-01": {"nao_consignado": 95.44, "cartao_rotativo": 426.9, "cartao_parcelado": 182.32}, "2024-09-01": {"nao_consignado": 94.23, "cartao_rotativo": 438.42, "cartao_parcelado": 185.77}, "2024-10-01": {"nao_consignado": 97.15, "cartao_rotativo": 438.92, "cartao_parcelado": 179.96}, "2024-11-01": {"nao_consignado": 99.33, "cartao_rotativo": 445.9, "cartao_parcelado": 183.18}, "2024-12-01": {"nao_consignado": 103.35, "cartao_rotativo": 451.6, "cartao_parcelado": 171.14}, "2025-01-01": {"nao_consignado": 99.89, "cartao_rotativo": 450.74, "cartao_parcelado": 176.16}, "2025-02-01": {"nao_consignado": 106.35, "cartao_rotativo": 455.66, "cartao_parcelado": 186.27}, "2025-03-01": {"nao_consignado": 105.25, "cartao_rotativo": 457.48, "cartao_parcelado": 187.6}, "2025-04-01": {"nao_consignado": 105.87, "cartao_rotativo": 456.94, "cartao_parcelado": 184.54}, "2025-05-01": {"nao_consignado": 104.3, "cartao_rotativo": 459.84, "cartao_parcelado": 186.51}, "2025-06-01": {"nao_consignado": 108.39, "cartao_rotativo": 454.19, "cartao_parcelado": 189.04}, "2025-07-01": {"nao_consignado": 104.55, "cartao_rotativo": 452.67, "cartao_parcelado": 187.92}, "2025-08-01": {"nao_consignado": 103.97, "cartao_rotativo": 453.64, "cartao_parcelado": 185.14}, "2025-09-01": {"nao_consignado": 101.1, "cartao_rotativo": 448.06, "cartao_parcelado": 182.93}, "2025-10-01": {"nao_consignado": 101.12, "cartao_rotativo": 447.09, "cartao_parcelado": 187.4}, "2025-11-01": {"nao_consignado": 111.48, "cartao_rotativo": 448.37, "cartao_parcelado": 190.63}, "2025-12-01": {"nao_consignado": 116.59, "cartao_rotativo": 442.41, "cartao_parcelado": 192.45}, "2026-01-01": {"nao_consignado": 118.02, "cartao_rotativo": 429.42, "cartao_parcelado": 194.87}, "2026-02-01": {"nao_consignado": 112.15, "cartao_rotativo": 442.26, "cartao_parcelado": 196.5}, "2026-03-01": {"nao_consignado": 117.05, "cartao_rotativo": 433.06, "cartao_parcelado": 192.07}, "2026-04-01": {"nao_consignado": 125.03, "cartao_rotativo": 431.97, "cartao_parcelado": 188.06}, "2026-05-01": {"nao_consignado": 120.41, "cartao_rotativo": 439.87, "cartao_parcelado": 189.55}}};
 const DATA_TAXAS_RISCO_MENSAL = {"by_month": {"2017-01-01": {"nao_consignado": 7.6, "cartao_rotativo": 16.06, "cartao_parcelado": 8.35}, "2017-02-01": {"nao_consignado": 7.64, "cartao_rotativo": 15.9, "cartao_parcelado": 8.41}, "2017-03-01": {"nao_consignado": 7.38, "cartao_rotativo": 15.95, "cartao_parcelado": 8.23}, "2017-04-01": {"nao_consignado": 7.15, "cartao_rotativo": 14.81, "cartao_parcelado": 8.36}, "2017-05-01": {"nao_consignado": 7.29, "cartao_rotativo": 13.54, "cartao_parcelado": 8.27}, "2017-06-01": {"nao_consignado": 6.99, "cartao_rotativo": 14.03, "cartao_parcelado": 8.21}, "2017-07-01": {"nao_consignado": 7.31, "cartao_rotativo": 14.82, "cartao_parcelado": 8.28}, "2017-08-01": {"nao_consignado": 7.2, "cartao_rotativo": 14.87, "cartao_parcelado": 8.32}, "2017-09-01": {"nao_consignado": 7.08, "cartao_rotativo": 13.33, "cartao_parcelado": 8.47}, "2017-10-01": {"nao_consignado": 7.27, "cartao_rotativo": 13.46, "cartao_parcelado": 8.53}, "2017-11-01": {"nao_consignado": 7.03, "cartao_rotativo": 13.54, "cartao_parcelado": 8.58}, "2017-12-01": {"nao_consignado": 6.52, "cartao_rotativo": 13.41, "cartao_parcelado": 8.6}, "2018-01-01": {"nao_consignado": 6.89, "cartao_rotativo": 13.18, "cartao_parcelado": 8.56}, "2018-02-01": {"nao_consignado": 7.02, "cartao_rotativo": 13.29, "cartao_parcelado": 8.81}, "2018-03-01": {"nao_consignado": 6.99, "cartao_rotativo": 13.32, "cartao_parcelado": 8.64}, "2018-04-01": {"nao_consignado": 6.99, "cartao_rotativo": 13.35, "cartao_parcelado": 8.69}, "2018-05-01": {"nao_consignado": 6.58, "cartao_rotativo": 12.6, "cartao_parcelado": 8.48}, "2018-06-01": {"nao_consignado": 6.58, "cartao_rotativo": 12.2, "cartao_parcelado": 8.57}, "2018-07-01": {"nao_consignado": 6.74, "cartao_rotativo": 11.77, "cartao_parcelado": 8.53}, "2018-08-01": {"nao_consignado": 6.85, "cartao_rotativo": 11.85, "cartao_parcelado": 8.52}, "2018-09-01": {"nao_consignado": 6.88, "cartao_rotativo": 11.87, "cartao_parcelado": 8.44}, "2018-10-01": {"nao_consignado": 7.04, "cartao_rotativo": 11.83, "cartao_parcelado": 8.5}, "2018-11-01": {"nao_consignado": 6.91, "cartao_rotativo": 11.97, "cartao_parcelado": 8.34}, "2018-12-01": {"nao_consignado": 6.27, "cartao_rotativo": 12.08, "cartao_parcelado": 8.25}, "2019-01-01": {"nao_consignado": 6.64, "cartao_rotativo": 11.98, "cartao_parcelado": 8.39}, "2019-02-01": {"nao_consignado": 6.89, "cartao_rotativo": 12.18, "cartao_parcelado": 8.65}, "2019-03-01": {"nao_consignado": 6.94, "cartao_rotativo": 12.27, "cartao_parcelado": 8.91}, "2019-04-01": {"nao_consignado": 7.07, "cartao_rotativo": 12.2, "cartao_parcelado": 8.66}, "2019-05-01": {"nao_consignado": 6.79, "cartao_rotativo": 12.24, "cartao_parcelado": 8.77}, "2019-06-01": {"nao_consignado": 6.8, "cartao_rotativo": 12.26, "cartao_parcelado": 8.81}, "2019-07-01": {"nao_consignado": 6.76, "cartao_rotativo": 12.26, "cartao_parcelado": 8.8}, "2019-08-01": {"nao_consignado": 6.65, "cartao_rotativo": 12.39, "cartao_parcelado": 8.87}, "2019-09-01": {"nao_consignado": 6.5, "cartao_rotativo": 12.41, "cartao_parcelado": 8.9}, "2019-10-01": {"nao_consignado": 5.88, "cartao_rotativo": 12.6, "cartao_parcelado": 8.75}, "2019-11-01": {"nao_consignado": 6.05, "cartao_rotativo": 12.61, "cartao_parcelado": 8.89}, "2019-12-01": {"nao_consignado": 5.7, "cartao_rotativo": 12.63, "cartao_parcelado": 8.82}, "2020-01-01": {"nao_consignado": 6.1, "cartao_rotativo": 12.58, "cartao_parcelado": 9.09}, "2020-02-01": {"nao_consignado": 6.23, "cartao_rotativo": 12.74, "cartao_parcelado": 9.17}, "2020-03-01": {"nao_consignado": 5.71, "cartao_rotativo": 12.86, "cartao_parcelado": 9.24}, "2020-04-01": {"nao_consignado": 5.32, "cartao_rotativo": 12.56, "cartao_parcelado": 7.89}, "2020-05-01": {"nao_consignado": 5.33, "cartao_rotativo": 12.3, "cartao_parcelado": 7.51}, "2020-06-01": {"nao_consignado": 5.26, "cartao_rotativo": 11.97, "cartao_parcelado": 6.72}, "2020-07-01": {"nao_consignado": 5.13, "cartao_rotativo": 12.43, "cartao_parcelado": 7.18}, "2020-08-01": {"nao_consignado": 4.54, "cartao_rotativo": 12.38, "cartao_parcelado": 7.49}, "2020-09-01": {"nao_consignado": 4.5, "cartao_rotativo": 12.41, "cartao_parcelado": 7.64}, "2020-10-01": {"nao_consignado": 4.88, "cartao_rotativo": 12.59, "cartao_parcelado": 7.89}, "2020-11-01": {"nao_consignado": 5.03, "cartao_rotativo": 12.72, "cartao_parcelado": 7.82}, "2020-12-01": {"nao_consignado": 4.69, "cartao_rotativo": 12.88, "cartao_parcelado": 7.89}, "2021-01-01": {"nao_consignado": 5.25, "cartao_rotativo": 12.92, "cartao_parcelado": 8.34}, "2021-02-01": {"nao_consignado": 5.23, "cartao_rotativo": 12.86, "cartao_parcelado": 8.53}, "2021-03-01": {"nao_consignado": 5.27, "cartao_rotativo": 13.05, "cartao_parcelado": 8.55}, "2021-04-01": {"nao_consignado": 5.32, "cartao_rotativo": 13.06, "cartao_parcelado": 8.48}, "2021-05-01": {"nao_consignado": 5.05, "cartao_rotativo": 12.92, "cartao_parcelado": 8.44}, "2021-06-01": {"nao_consignado": 5.01, "cartao_rotativo": 12.91, "cartao_parcelado": 8.44}, "2021-07-01": {"nao_consignado": 4.87, "cartao_rotativo": 12.95, "cartao_parcelado": 8.41}, "2021-08-01": {"nao_consignado": 5.01, "cartao_rotativo": 13.04, "cartao_parcelado": 8.41}, "2021-09-01": {"nao_consignado": 4.89, "cartao_rotativo": 13.11, "cartao_parcelado": 8.58}, "2021-10-01": {"nao_consignado": 5.19, "cartao_rotativo": 13.19, "cartao_parcelado": 8.72}, "2021-11-01": {"nao_consignado": 5.23, "cartao_rotativo": 13.22, "cartao_parcelado": 8.54}, "2021-12-01": {"nao_consignado": 5.27, "cartao_rotativo": 13.3, "cartao_parcelado": 8.58}, "2022-01-01": {"nao_consignado": 5.01, "cartao_rotativo": 13.27, "cartao_parcelado": 8.71}, "2022-02-01": {"nao_consignado": 5.18, "cartao_rotativo": 13.46, "cartao_parcelado": 8.77}, "2022-03-01": {"nao_consignado": 5.4, "cartao_rotativo": 13.54, "cartao_parcelado": 8.71}, "2022-04-01": {"nao_consignado": 5.22, "cartao_rotativo": 13.64, "cartao_parcelado": 8.81}, "2022-05-01": {"nao_consignado": 5.32, "cartao_rotativo": 13.74, "cartao_parcelado": 8.72}, "2022-06-01": {"nao_consignado": 5.37, "cartao_rotativo": 13.77, "cartao_parcelado": 8.74}, "2022-07-01": {"nao_consignado": 5.33, "cartao_rotativo": 14.26, "cartao_parcelado": 9.01}, "2022-08-01": {"nao_consignado": 5.27, "cartao_rotativo": 14.35, "cartao_parcelado": 9.18}, "2022-09-01": {"nao_consignado": 5.1, "cartao_rotativo": 14.18, "cartao_parcelado": 9.14}, "2022-10-01": {"nao_consignado": 5.19, "cartao_rotativo": 14.53, "cartao_parcelado": 9.12}, "2022-11-01": {"nao_consignado": 5.32, "cartao_rotativo": 14.28, "cartao_parcelado": 8.98}, "2022-12-01": {"nao_consignado": 5.11, "cartao_rotativo": 14.58, "cartao_parcelado": 9.01}, "2023-01-01": {"nao_consignado": 5.22, "cartao_rotativo": 14.65, "cartao_parcelado": 9.06}, "2023-02-01": {"nao_consignado": 5.34, "cartao_rotativo": 14.74, "cartao_parcelado": 9.34}, "2023-03-01": {"nao_consignado": 5.4, "cartao_rotativo": 14.97, "cartao_parcelado": 9.38}, "2023-04-01": {"nao_consignado": 5.61, "cartao_rotativo": 15.22, "cartao_parcelado": 9.6}, "2023-05-01": {"nao_consignado": 5.56, "cartao_rotativo": 15.33, "cartao_parcelado": 9.41}, "2023-06-01": {"nao_consignado": 5.55, "cartao_rotativo": 15.01, "cartao_parcelado": 9.47}, "2023-07-01": {"nao_consignado": 5.61, "cartao_rotativo": 15.11, "cartao_parcelado": 9.53}, "2023-08-01": {"nao_consignado": 5.61, "cartao_rotativo": 15.19, "cartao_parcelado": 9.42}, "2023-09-01": {"nao_consignado": 5.55, "cartao_rotativo": 15.11, "cartao_parcelado": 9.4}, "2023-10-01": {"nao_consignado": 5.47, "cartao_rotativo": 15.18, "cartao_parcelado": 9.46}, "2023-11-01": {"nao_consignado": 5.67, "cartao_rotativo": 15.0, "cartao_parcelado": 9.46}, "2023-12-01": {"nao_consignado": 5.68, "cartao_rotativo": 15.13, "cartao_parcelado": 9.49}, "2024-01-01": {"nao_consignado": 5.5, "cartao_rotativo": 14.71, "cartao_parcelado": 9.23}, "2024-02-01": {"nao_consignado": 5.58, "cartao_rotativo": 14.58, "cartao_parcelado": 9.24}, "2024-03-01": {"nao_consignado": 5.78, "cartao_rotativo": 14.75, "cartao_parcelado": 9.3}, "2024-04-01": {"nao_consignado": 5.76, "cartao_rotativo": 14.79, "cartao_parcelado": 9.02}, "2024-05-01": {"nao_consignado": 5.75, "cartao_rotativo": 14.77, "cartao_parcelado": 9.15}, "2024-06-01": {"nao_consignado": 5.74, "cartao_rotativo": 14.89, "cartao_parcelado": 9.04}, "2024-07-01": {"nao_consignado": 5.91, "cartao_rotativo": 14.95, "cartao_parcelado": 8.9}, "2024-08-01": {"nao_consignado": 5.74, "cartao_rotativo": 14.85, "cartao_parcelado": 9.03}, "2024-09-01": {"nao_consignado": 5.69, "cartao_rotativo": 15.06, "cartao_parcelado": 9.14}, "2024-10-01": {"nao_consignado": 5.82, "cartao_rotativo": 15.07, "cartao_parcelado": 8.96}, "2024-11-01": {"nao_consignado": 5.92, "cartao_rotativo": 15.19, "cartao_parcelado": 9.06}, "2024-12-01": {"nao_consignado": 6.09, "cartao_rotativo": 15.29, "cartao_parcelado": 8.67}, "2025-01-01": {"nao_consignado": 5.94, "cartao_rotativo": 15.28, "cartao_parcelado": 8.83}, "2025-02-01": {"nao_consignado": 6.22, "cartao_rotativo": 15.36, "cartao_parcelado": 9.16}, "2025-03-01": {"nao_consignado": 6.18, "cartao_rotativo": 15.39, "cartao_parcelado": 9.2}, "2025-04-01": {"nao_consignado": 6.2, "cartao_rotativo": 15.39, "cartao_parcelado": 9.11}, "2025-05-01": {"nao_consignado": 6.13, "cartao_rotativo": 15.44, "cartao_parcelado": 9.17}, "2025-06-01": {"nao_consignado": 6.31, "cartao_rotativo": 15.34, "cartao_parcelado": 9.25}, "2025-07-01": {"nao_consignado": 6.15, "cartao_rotativo": 15.31, "cartao_parcelado": 9.21}, "2025-08-01": {"nao_consignado": 6.12, "cartao_rotativo": 15.33, "cartao_parcelado": 9.12}, "2025-09-01": {"nao_consignado": 5.99, "cartao_rotativo": 15.23, "cartao_parcelado": 9.05}, "2025-10-01": {"nao_consignado": 6.0, "cartao_rotativo": 15.21, "cartao_parcelado": 9.2}, "2025-11-01": {"nao_consignado": 6.44, "cartao_rotativo": 15.24, "cartao_parcelado": 9.3}, "2025-12-01": {"nao_consignado": 6.65, "cartao_rotativo": 15.13, "cartao_parcelado": 9.35}, "2026-01-01": {"nao_consignado": 6.71, "cartao_rotativo": 14.9, "cartao_parcelado": 9.43}, "2026-02-01": {"nao_consignado": 6.47, "cartao_rotativo": 15.13, "cartao_parcelado": 9.48}, "2026-03-01": {"nao_consignado": 6.67, "cartao_rotativo": 14.96, "cartao_parcelado": 9.34}, "2026-04-01": {"nao_consignado": 6.99, "cartao_rotativo": 14.95, "cartao_parcelado": 9.22}, "2026-05-01": {"nao_consignado": 6.81, "cartao_rotativo": 15.09, "cartao_parcelado": 9.26}}};
 const DATA_BANCOS_CONSIGNADO = {"periodo": "17/06/2026 a 23/06/2026", "bancos": {"Itaú": {"segmento": "S1", "inss": 23.89, "inss_am": 1.8, "privado": 43.42, "privado_am": 3.05, "publico": 22.37, "publico_am": 1.7, "share": 10.0}, "Banco do Brasil": {"segmento": "S1", "inss": 24.39, "inss_am": 1.84, "privado": 44.34, "privado_am": 3.11, "publico": 24.83, "publico_am": 1.87, "share": 19.33}, "Caixa Econômica Federal": {"segmento": "S1", "inss": 24.43, "inss_am": 1.84, "privado": 45.06, "privado_am": 3.15, "publico": 21.27, "publico_am": 1.62, "share": 14.41}, "Bradesco": {"segmento": "S1", "inss": 24.98, "inss_am": 1.88, "privado": 48.01, "privado_am": 3.32, "publico": 22.27, "publico_am": 1.69, "share": 13.61}, "Santander": {"segmento": "S1", "inss": 24.7, "inss_am": 1.86, "privado": 38.52, "privado_am": 2.75, "publico": 24.39, "publico_am": 1.84, "share": 7.37}, "BTG Pactual": {"segmento": "S1", "inss": null, "inss_am": null, "privado": 45.34, "privado_am": 3.17, "publico": null, "publico_am": null, "share": 2.86}, "Safra": {"segmento": "S2", "inss": 21.0, "inss_am": 1.6, "privado": 35.98, "privado_am": 2.59, "publico": 21.2, "publico_am": 1.62, "share": 1.27}, "Banrisul": {"segmento": "S2", "inss": 23.09, "inss_am": 1.75, "privado": 62.52, "privado_am": 4.13, "publico": 23.13, "publico_am": 1.75, "share": 2.43}, "Banco do Nordeste": {"segmento": "S2", "inss": null, "inss_am": null, "privado": 35.87, "privado_am": 2.59, "publico": 24.95, "publico_am": 1.87, "share": 0.02}, "BV": {"segmento": "S2", "inss": null, "inss_am": null, "privado": 49.13, "privado_am": 3.39, "publico": null, "publico_am": null, "share": 0.04}, "XP": {"segmento": "S2", "inss": null, "inss_am": null, "privado": 41.69, "privado_am": 2.95, "publico": null, "publico_am": null, "share": 0.0}, "Sicredi": {"segmento": "S2", "inss": 23.29, "inss_am": 1.76, "privado": null, "privado_am": null, "publico": 19.86, "publico_am": 1.52, "share": 0.22}, "Nubank": {"segmento": "S2", "inss": 19.83, "inss_am": 1.52, "privado": 55.07, "privado_am": 3.72, "publico": 20.44, "publico_am": 1.56, "share": 0.64}, "Mercantil do Brasil": {"segmento": "S3-S5", "inss": 25.04, "inss_am": 1.88, "privado": 74.26, "privado_am": 4.74, "publico": null, "publico_am": null, "share": 2.12}, "Inbursa": {"segmento": "S3-S5", "inss": 22.05, "inss_am": 1.67, "privado": 40.81, "privado_am": 2.89, "publico": 22.1, "publico_am": 1.68, "share": 1.48}, "Banco Pan": {"segmento": "S3-S5", "inss": 24.47, "inss_am": 1.84, "privado": 64.53, "privado_am": 4.24, "publico": 25.48, "publico_am": 1.91, "share": null}, "Paraná Banco": {"segmento": "S3-S5", "inss": 25.5, "inss_am": 1.91, "privado": 82.58, "privado_am": 5.14, "publico": 24.65, "publico_am": 1.85, "share": 0.79}, "Industrial do Brasil": {"segmento": "S3-S5", "inss": null, "inss_am": null, "privado": 34.47, "privado_am": 2.5, "publico": 30.85, "publico_am": 2.27, "share": 0.14}, "Inter": {"segmento": "S3-S5", "inss": 22.14, "inss_am": 1.68, "privado": 38.39, "privado_am": 2.74, "publico": 21.12, "publico_am": 1.61, "share": 0.97}, "Daycoval": {"segmento": "S3-S5", "inss": 24.44, "inss_am": 1.84, "privado": 79.05, "privado_am": 4.97, "publico": 29.36, "publico_am": 2.17, "share": 1.96}, "C6 Consig": {"segmento": "S3-S5", "inss": 24.58, "inss_am": 1.85, "privado": 71.2, "privado_am": 4.58, "publico": 22.19, "publico_am": 1.68, "share": 5.19}, "BMG": {"segmento": "S3-S5", "inss": 24.5, "inss_am": 1.84, "privado": 45.41, "privado_am": 3.17, "publico": 27.13, "publico_am": 2.02, "share": 0.61}, "PicPay": {"segmento": "S3-S5", "inss": 22.43, "inss_am": 1.7, "privado": 64.75, "privado_am": 4.25, "publico": 22.83, "publico_am": 1.73, "share": 0.93}, "Agibank": {"segmento": "S3-S5", "inss": 23.12, "inss_am": 1.75, "privado": 67.17, "privado_am": 4.38, "publico": 21.75, "publico_am": 1.65, "share": 3.33}, "Pine": {"segmento": "S3-S5", "inss": 20.37, "inss_am": 1.56, "privado": 56.1, "privado_am": 3.78, "publico": 78.33, "publico_am": 4.94, "share": 1.3}}, "share_trimestre": "1T26", "share_total_mercado_bi": 786.3};
-const DATA_BANCOS_CARTAO = {"periodo": "2026-06-17 a 2026-06-23", "bancos": {"Itaú": {"rotativo_aa": 370.36, "rotativo_am": 13.77, "parcelado_aa": 204.0, "parcelado_am": 9.71, "share": 20.43, "segmento": "S1"}, "Santander": {"rotativo_aa": 477.09, "rotativo_am": 15.73, "parcelado_aa": 161.38, "parcelado_am": 8.34, "share": 8.58, "segmento": "S1"}, "Bradesco": {"rotativo_aa": 371.99, "rotativo_am": 13.81, "parcelado_aa": 127.33, "parcelado_am": 7.08, "share": 10.64, "segmento": "S1"}, "BB": {"rotativo_aa": 329.78, "rotativo_am": 12.92, "parcelado_aa": 133.24, "parcelado_am": 7.31, "share": 9.87, "segmento": "S1"}, "Caixa": {"rotativo_aa": 293.7, "rotativo_am": 12.1, "parcelado_aa": 167.92, "parcelado_am": 8.56, "share": 3.04, "segmento": "S1"}, "Nubank": {"rotativo_aa": 342.64, "rotativo_am": 13.2, "parcelado_aa": 179.61, "parcelado_am": 8.95, "share": 15.68, "segmento": "S2"}, "C6": {"rotativo_aa": 500.3, "rotativo_am": 16.11, "parcelado_aa": 80.49, "parcelado_am": 5.04, "share": 1.65, "segmento": "S3"}, "Inter": {"rotativo_aa": 500.59, "rotativo_am": 16.11, "parcelado_aa": 191.12, "parcelado_am": 9.31, "share": 1.99, "segmento": "S3"}, "BTG": {"rotativo_aa": 249.06, "rotativo_am": 10.98, "parcelado_aa": 110.57, "parcelado_am": 6.4, "share": 1.08, "segmento": "S1"}, "Banco do Nordeste": {"rotativo_aa": 286.23, "rotativo_am": 11.92, "parcelado_aa": 129.45, "parcelado_am": 7.17, "share": 0.01, "segmento": "S2"}, "XP": {"rotativo_aa": 261.45, "rotativo_am": 11.3, "parcelado_aa": 126.25, "parcelado_am": 7.04, "share": 1.25, "segmento": "S2"}, "Safra": {"rotativo_aa": 247.17, "rotativo_am": 10.93, "parcelado_aa": 107.13, "parcelado_am": 6.26, "share": 0.14, "segmento": "S2"}, "BMG": {"rotativo_aa": 564.14, "rotativo_am": 17.09, "parcelado_aa": 66.28, "parcelado_am": 4.33, "share": 1.86, "segmento": "S3"}, "Sicoob": {"rotativo_aa": 215.81, "rotativo_am": 10.06, "parcelado_aa": 132.71, "parcelado_am": 7.29, "share": 1.64, "segmento": "S2"}, "Mercado Pago": {"share": 3.79, "segmento": "Financeira"}, "Carrefour (CSF)": {"share": 3.49, "segmento": "Financeira"}, "Porto Seguro": {"share": 2.66, "segmento": "Financeira"}, "BRB": {"share": 1.29, "segmento": "Financeira"}, "Renner (Realize)": {"share": 0.89, "segmento": "Financeira"}, "Neon": {"share": 0.85, "segmento": "Financeira"}, "Riachuelo (Midway)": {"share": 0.75, "segmento": "Financeira"}, "Pefisa": {"share": 0.51, "segmento": "Financeira"}}, "share_trimestre": "1T26", "share_total_mercado_bi": 739.48};
+const DATA_BANCOS_CARTAO = {"periodo": "2026-06-17 a 2026-06-23", "bancos": {"Itaú": {"rotativo_aa": 370.36, "rotativo_am": 13.77, "parcelado_aa": 204.0, "parcelado_am": 9.71, "share": 20.43, "segmento": "S1"}, "Santander": {"rotativo_aa": 477.09, "rotativo_am": 15.73, "parcelado_aa": 161.38, "parcelado_am": 8.34, "share": 8.58, "segmento": "S1"}, "Bradesco": {"rotativo_aa": 371.99, "rotativo_am": 13.81, "parcelado_aa": 127.33, "parcelado_am": 7.08, "share": 10.64, "segmento": "S1"}, "BB": {"rotativo_aa": 329.78, "rotativo_am": 12.92, "parcelado_aa": 133.24, "parcelado_am": 7.31, "share": 9.87, "segmento": "S1"}, "Caixa": {"rotativo_aa": 293.7, "rotativo_am": 12.1, "parcelado_aa": 167.92, "parcelado_am": 8.56, "share": 3.04, "segmento": "S1"}, "Nubank": {"rotativo_aa": 342.64, "rotativo_am": 13.2, "parcelado_aa": 179.61, "parcelado_am": 8.95, "share": 15.68, "segmento": "S2"}, "C6": {"rotativo_aa": 500.3, "rotativo_am": 16.11, "parcelado_aa": 80.49, "parcelado_am": 5.04, "share": 1.65, "segmento": "S3"}, "Inter": {"rotativo_aa": 500.59, "rotativo_am": 16.11, "parcelado_aa": 191.12, "parcelado_am": 9.31, "share": 1.99, "segmento": "S3"}, "BTG": {"rotativo_aa": 249.06, "rotativo_am": 10.98, "parcelado_aa": 110.57, "parcelado_am": 6.4, "share": 1.08, "segmento": "S1"}, "Banco do Nordeste": {"rotativo_aa": 286.23, "rotativo_am": 11.92, "parcelado_aa": 129.45, "parcelado_am": 7.17, "share": 0.01, "segmento": "S2"}, "XP": {"rotativo_aa": 261.45, "rotativo_am": 11.3, "parcelado_aa": 126.25, "parcelado_am": 7.04, "share": 1.25, "segmento": "S2"}, "Safra": {"rotativo_aa": 247.17, "rotativo_am": 10.93, "parcelado_aa": 107.13, "parcelado_am": 6.26, "share": 0.14, "segmento": "S2"}, "BMG": {"rotativo_aa": 564.14, "rotativo_am": 17.09, "parcelado_aa": 66.28, "parcelado_am": 4.33, "share": 1.86, "segmento": "S3"}, "Sicoob": {"rotativo_aa": 215.81, "rotativo_am": 10.06, "parcelado_aa": 132.71, "parcelado_am": 7.29, "share": 1.64, "segmento": "S2"}, "Mercado Pago": {"rotativo_aa": 673.08, "rotativo_am": 18.58, "parcelado_aa": 464.89, "parcelado_am": 15.52, "share": 3.79, "segmento": "Financeira", "razao_social": "Mercado Crédito SCFI S.A."}, "Carrefour (CSF)": {"rotativo_aa": 714.63, "rotativo_am": 19.1, "parcelado_aa": 221.63, "parcelado_am": 10.23, "share": 3.49, "segmento": "Financeira", "razao_social": "Bco CSF S.A."}, "Porto Seguro": {"rotativo_aa": 545.52, "rotativo_am": 16.81, "parcelado_aa": 152.35, "parcelado_am": 8.02, "share": 2.66, "segmento": "Financeira", "razao_social": "Portoseg S.A. CFI"}, "BRB": {"parcelado_aa": 106.75, "parcelado_am": 6.24, "share": 1.29, "segmento": "Financeira", "razao_social": "BRB - Bco de Brasília S.A."}, "Renner (Realize)": {"rotativo_aa": 891.78, "rotativo_am": 21.07, "parcelado_aa": 470.14, "parcelado_am": 15.61, "share": 0.89, "segmento": "Financeira", "razao_social": "Realize SCFI S.A."}, "Neon": {"rotativo_aa": 890.1, "rotativo_am": 21.05, "parcelado_aa": 209.25, "parcelado_am": 9.87, "share": 0.85, "segmento": "Financeira", "razao_social": "Neon Financeira - SCFI S.A."}, "Riachuelo (Midway)": {"rotativo_aa": 798.36, "rotativo_am": 20.08, "parcelado_aa": 426.23, "parcelado_am": 14.84, "share": 0.75, "segmento": "Financeira", "razao_social": "Midway S.A. - SCFI"}, "Pefisa": {"rotativo_aa": 1100.43, "rotativo_am": 23.01, "parcelado_aa": 381.5, "parcelado_am": 13.99, "share": 0.51, "segmento": "Financeira", "razao_social": "Pefisa S.A. - C.F.I."}}, "share_trimestre": "1T26", "share_total_mercado_bi": 739.48};
 const DATA_BANCOS_PESSOAL = {"periodo": "2026-06-17 a 2026-06-23", "bancos": {"Itaú": {"aa": 66.22, "am": 4.33}, "Santander": {"aa": 41.73, "am": 2.95}, "Bradesco": {"aa": 88.98, "am": 5.45}, "BB": {"aa": 59.02, "am": 3.94}, "Caixa": {"aa": 28.3, "am": 2.1}, "Nubank": {"aa": 101.24, "am": 6.0}, "C6": {"aa": 33.18, "am": 2.42}, "Inter": {"aa": 22.44, "am": 1.7}, "BTG": {"aa": 39.0, "am": 2.78}, "Banco do Nordeste": {"aa": 74.43, "am": 4.75}, "XP": {"aa": 42.88, "am": 3.02}, "Safra": {"aa": 21.15, "am": 1.61}, "BMG": {"aa": 439.32, "am": 15.08}, "Daycoval": {"aa": 198.36, "am": 9.54}, "Banrisul": {"aa": 56.18, "am": 3.79}}};
 const DATA_BANCOS_VEICULOS = {"share_trimestre": "1T26", "share_total_mercado_bi": 431.18, "bancos": {"Itaú": {"share": 8.33}, "Banco do Brasil": {"share": 2.83}, "Caixa Econômica Federal": {"share": 0.02}, "Bradesco": {"share": 10.73}, "Santander": {"share": 19.11}, "BTG Pactual": {"share": 8.96}, "Safra": {"share": 6.0}, "BV": {"share": 12.96}, "Sicredi": {"share": 0.01}, "Inter": {"share": 0.01}, "Daycoval": {"share": 0.94}, "C6 Consig": {"share": 6.13}, "Volkswagen": {"share": 7.02}, "Stellantis": {"share": 3.41}, "GM": {"share": 2.57}, "Honda": {"share": 2.34}, "Toyota": {"share": 1.75}, "Yamaha": {"share": 0.76}, "BMW": {"share": 0.45}, "Mercedes-Benz": {"share": 0.13}, "Scania": {"share": 0.08}, "CNH Industrial": {"share": 0.06}, "Volvo": {"share": 0.06}, "Paccar": {"share": 0.06}, "Traton": {"share": 0.06}}};
+const DATA_RURAL_CONTROLE = {"fonte": "IF.data / Banco Central - Carteira de credito ativa Rural e Agroindustrial, somente Pessoa Fisica (relatorio 123, grupo 10037), nivel Conglomerado Prudencial. PJ (relatorio 128, grupo 10091) foi avaliado e descartado por subestimar em ~45% o saldo PJ rural frente ao SCR.data (limitacao de escopo do COSIF, nao um erro de calculo). Classificacao por tipo de controle via campo c7 (TCB) do cadastro; cooperativas identificadas pelo nome (c7 as classifica como 'Privado nacional').", "quarters": ["1T25", "2T25", "3T25", "4T25", "1T26"], "anomes": [202503, 202506, 202509, 202512, 202603], "publico_bi": [444.71, 442.3, 441.17, 449.59, 459.79], "privado_bi": [116.84, 113.05, 114.59, 120.73, 124.83], "cooperativa_bi": [100.37, 96.53, 105.34, 112.92, 115.97], "total_bi": [661.91, 651.87, 661.1, 683.23, 700.59]};
+const DATA_B3_FINANCIAMENTOS = {"fonte": "B3 - Mercado de Financiamentos de Veiculos (decks mensais, SNG)", "financiamento_mensal": [{"ano": 2025, "mes": 7, "label": "jul/25", "novos_mil": 230.0, "usados_mil": 409.0, "total_mil": 639.0}, {"ano": 2025, "mes": 8, "label": "ago/25", "novos_mil": 232.0, "usados_mil": 391.0, "total_mil": 623.0}, {"ano": 2025, "mes": 9, "label": "set/25", "novos_mil": 247.0, "usados_mil": 405.0, "total_mil": 652.0}, {"ano": 2025, "mes": 10, "label": "out/25", "novos_mil": 255.0, "usados_mil": 442.0, "total_mil": 697.0}, {"ano": 2025, "mes": 11, "label": "nov/25", "novos_mil": 222.0, "usados_mil": 401.0, "total_mil": 623.0}, {"ano": 2025, "mes": 12, "label": "dez/25", "novos_mil": 252.0, "usados_mil": 430.0, "total_mil": 682.0}, {"ano": 2026, "mes": 1, "label": "jan/26", "novos_mil": 203.0, "usados_mil": 412.0, "total_mil": 615.0}, {"ano": 2026, "mes": 2, "label": "fev/26", "novos_mil": 205.0, "usados_mil": 370.0, "total_mil": 575.0}, {"ano": 2026, "mes": 3, "label": "mar/26", "novos_mil": 267.0, "usados_mil": 436.0, "total_mil": 703.0}, {"ano": 2026, "mes": 4, "label": "abr/26", "novos_mil": 239.0, "usados_mil": 395.0, "total_mil": 634.0}, {"ano": 2026, "mes": 5, "label": "mai/26", "novos_mil": 240.0, "usados_mil": 391.0, "total_mil": 631.0}], "modalidade_mensal": [{"ano": 2025, "mes": 6, "label": "jun/25", "cdc_mil": 474.0, "consorcio_mil": 81.0, "leasing_mil": 1.0, "outros_mil": 3.0, "total_mil": 560.0, "cdc_share": 84.64, "consorcio_share": 14.46, "leasing_share": 0.18, "outros_share": 0.54}, {"ano": 2025, "mes": 7, "label": "jul/25", "cdc_mil": 548.0, "consorcio_mil": 86.0, "leasing_mil": 2.0, "outros_mil": 3.0, "total_mil": 639.0, "cdc_share": 85.76, "consorcio_share": 13.46, "leasing_share": 0.31, "outros_share": 0.47}, {"ano": 2025, "mes": 8, "label": "ago/25", "cdc_mil": 529.0, "consorcio_mil": 89.0, "leasing_mil": 2.0, "outros_mil": 3.0, "total_mil": 622.0, "cdc_share": 85.05, "consorcio_share": 14.31, "leasing_share": 0.32, "outros_share": 0.48}, {"ano": 2025, "mes": 9, "label": "set/25", "cdc_mil": 556.0, "consorcio_mil": 92.0, "leasing_mil": 2.0, "outros_mil": 3.0, "total_mil": 652.0, "cdc_share": 85.28, "consorcio_share": 14.11, "leasing_share": 0.31, "outros_share": 0.46}, {"ano": 2025, "mes": 10, "label": "out/25", "cdc_mil": 597.0, "consorcio_mil": 95.0, "leasing_mil": 2.0, "outros_mil": 3.0, "total_mil": 697.0, "cdc_share": 85.65, "consorcio_share": 13.63, "leasing_share": 0.29, "outros_share": 0.43}, {"ano": 2025, "mes": 11, "label": "nov/25", "cdc_mil": 543.0, "consorcio_mil": 76.0, "leasing_mil": 1.0, "outros_mil": 3.0, "total_mil": 623.0, "cdc_share": 87.16, "consorcio_share": 12.2, "leasing_share": 0.16, "outros_share": 0.48}, {"ano": 2025, "mes": 12, "label": "dez/25", "cdc_mil": 589.0, "consorcio_mil": 89.0, "leasing_mil": 1.0, "outros_mil": 4.0, "total_mil": 682.0, "cdc_share": 86.36, "consorcio_share": 13.05, "leasing_share": 0.15, "outros_share": 0.59}, {"ano": 2026, "mes": 1, "label": "jan/26", "cdc_mil": 535.0, "consorcio_mil": 76.0, "leasing_mil": 1.0, "outros_mil": 3.0, "total_mil": 616.0, "cdc_share": 86.85, "consorcio_share": 12.34, "leasing_share": 0.16, "outros_share": 0.49}, {"ano": 2026, "mes": 2, "label": "fev/26", "cdc_mil": 491.0, "consorcio_mil": 80.0, "leasing_mil": 1.0, "outros_mil": 3.0, "total_mil": 575.0, "cdc_share": 85.39, "consorcio_share": 13.91, "leasing_share": 0.17, "outros_share": 0.52}, {"ano": 2026, "mes": 3, "label": "mar/26", "cdc_mil": 593.0, "consorcio_mil": 105.0, "leasing_mil": 1.0, "outros_mil": 4.0, "total_mil": 703.0, "cdc_share": 84.35, "consorcio_share": 14.94, "leasing_share": 0.14, "outros_share": 0.57}, {"ano": 2026, "mes": 4, "label": "abr/26", "cdc_mil": 543.0, "consorcio_mil": 88.0, "leasing_mil": 1.0, "outros_mil": 4.0, "total_mil": 635.0, "cdc_share": 85.51, "consorcio_share": 13.86, "leasing_share": 0.16, "outros_share": 0.63}, {"ano": 2026, "mes": 5, "label": "mai/26", "cdc_mil": 537.0, "consorcio_mil": 89.0, "leasing_mil": 1.0, "outros_mil": 3.0, "total_mil": 630.0, "cdc_share": 85.24, "consorcio_share": 14.13, "leasing_share": 0.16, "outros_share": 0.48}], "prazo_mensal": [{"ano": 2025, "mes": 6, "label": "jun/25", "prazo_meses": 46.3, "unidades_mil": 388.0}, {"ano": 2025, "mes": 7, "label": "jul/25", "prazo_meses": 45.4, "unidades_mil": 452.0}, {"ano": 2025, "mes": 8, "label": "ago/25", "prazo_meses": 45.0, "unidades_mil": 427.0}, {"ano": 2025, "mes": 9, "label": "set/25", "prazo_meses": 46.5, "unidades_mil": 448.0}, {"ano": 2025, "mes": 10, "label": "out/25", "prazo_meses": 45.8, "unidades_mil": 481.0}, {"ano": 2025, "mes": 11, "label": "nov/25", "prazo_meses": 46.5, "unidades_mil": 437.0}, {"ano": 2025, "mes": 12, "label": "dez/25", "prazo_meses": 46.0, "unidades_mil": 483.0}, {"ano": 2026, "mes": 1, "label": "jan/26", "prazo_meses": 46.9, "unidades_mil": 432.0}, {"ano": 2026, "mes": 2, "label": "fev/26", "prazo_meses": 47.0, "unidades_mil": 397.0}, {"ano": 2026, "mes": 3, "label": "mar/26", "prazo_meses": 47.1, "unidades_mil": 481.0}, {"ano": 2026, "mes": 4, "label": "abr/26", "prazo_meses": 46.9, "unidades_mil": 441.0}, {"ano": 2026, "mes": 5, "label": "mai/26", "prazo_meses": 47.0, "unidades_mil": 446.0}]};
 const DATA_VEICULOS = {"latest_month": "2026-05-31", "by_month_bucket": {"2017-01-31": {"Aquisição de veículos": [10301786, 147202671425.13, 3647094769.14, 7175388638.66, 9492043087.55]}, "2017-02-28": {"Aquisição de veículos": [10271646, 147055223730.6, 3550117461.09, 7040664287.75, 9352643247.33]}, "2017-03-31": {"Aquisição de veículos": [10141721, 146427997555.37, 3589871669.08, 6949639631.62, 9200013707.73]}, "2017-04-30": {"Aquisição de veículos": [10073460, 145952657624.11, 3563164231.72, 6864806700.0, 9140923922.81]}, "2017-05-31": {"Aquisição de veículos": [9971976, 145688840731.83, 3483100853.29, 6864071262.6, 9105342856.14]}, "2017-06-30": {"Aquisição de veículos": [9910232, 145698807997.27, 3337048586.05, 6611804723.03, 8870808828.65]}, "2017-07-31": {"Aquisição de veículos": [9840535, 145883734296.87, 3264883701.93, 6428174107.34, 8710589820.72]}, "2017-08-31": {"Aquisição de veículos": [9788230, 146898464010.42, 3161518042.99, 6214610556.22, 8455765143.08]}, "2017-09-30": {"Aquisição de veículos": [9758251, 147662578307.42, 3069083146.77, 6091298869.59, 8311497567.92]}, "2017-10-31": {"Aquisição de veículos": [9726014, 148731212955.08, 3096354518.53, 6031631219.7, 8251790725.16]}, "2017-11-30": {"Aquisição de veículos": [9706904, 150375320135.98, 3070335018.08, 6059621820.12, 8260343671.06]}, "2017-12-31": {"Aquisição de veículos": [9642818, 152251505543.04, 2998523850.93, 6037933459.07, 8194325558.96]}, "2018-01-31": {"Aquisição de veículos": [9637611, 153880761157.66, 2985911412.92, 6062682284.57, 8218844405.89]}, "2018-02-28": {"Aquisição de veículos": [9633836, 154409066373.82, 2941316478.81, 5999774721.78, 8143072418.41]}, "2018-03-31": {"Aquisição de veículos": [9618630, 156136174731.89, 3015346328.5, 5950628402.55, 8095518202.25]}, "2018-04-30": {"Aquisição de veículos": [9632572, 157590756122.1, 2978891169.25, 5936726110.58, 8100932429.1]}, "2018-05-31": {"Aquisição de veículos": [9612408, 158816047254.63, 2983752997.11, 6063949546.62, 8209656548.74]}, "2018-06-30": {"Aquisição de veículos": [9612539, 159598069029.25, 2967976525.28, 6070260418.67, 8217022876.23]}, "2018-07-31": {"Aquisição de veículos": [9594189, 160676391444.42, 2962416614.75, 6088713845.47, 8226335092.49]}, "2018-08-31": {"Aquisição de veículos": [9607305, 163027374299.25, 2868578559.45, 5985152626.95, 8113133118.71]}, "2018-09-30": {"Aquisição de veículos": [9618243, 164645037404.68, 2836920444.6, 5972918237.12, 8094880561.78]}, "2018-10-31": {"Aquisição de veículos": [9629500, 166664926676.14, 2845085661.16, 5896501107.65, 8043285834.95]}, "2018-11-30": {"Aquisição de veículos": [9666894, 169404390210.64, 2860688283.05, 5931116442.91, 8026320760.92]}, "2018-12-31": {"Aquisição de veículos": [9669147, 172085331258.33, 2868029161.13, 6014098297.32, 8124696087.3]}, "2019-01-31": {"Aquisição de veículos": [9713858, 174513431180.21, 2876204753.23, 6063355774.29, 8230043087.27]}, "2019-02-28": {"Aquisição de veículos": [9777552, 176592555253.52, 2798054067.64, 5962363314.9, 8176789788.49]}, "2019-03-31": {"Aquisição de veículos": [9807901, 178272768321.71, 2959444689.74, 6084269623.39, 8388603801.31]}, "2019-04-30": {"Aquisição de veículos": [9861275, 180555147975.52, 2936713977.45, 6112851153.66, 8453708261.0]}, "2019-05-31": {"Aquisição de veículos": [9917466, 183197985199.78, 2950792487.62, 6323472604.82, 8724905860.35]}, "2019-06-30": {"Aquisição de veículos": [9975509, 185500623334.3, 2989435412.86, 6411704820.7, 8873931488.47]}, "2019-07-31": {"Aquisição de veículos": [10033441, 188519497895.11, 3005611394.62, 6566571113.22, 9054675866.67]}, "2019-08-31": {"Aquisição de veículos": [10110164, 191820790535.17, 3012261511.61, 6631242958.35, 9204294090.7]}, "2019-09-30": {"Aquisição de veículos": [10182560, 194551364524.9, 3007983773.12, 6764693866.25, 9372680546.6]}, "2019-10-31": {"Aquisição de veículos": [10270183, 197981916145.02, 3104902819.87, 6820902679.45, 9371602772.53]}, "2019-11-30": {"Aquisição de veículos": [10368252, 201616375166.32, 3109975686.02, 7038749649.69, 9661279528.47]}, "2019-12-31": {"Aquisição de veículos": [10441162, 205266545736.74, 3144176170.86, 7313665530.44, 10023868125.82]}, "2020-01-31": {"Aquisição de veículos": [10545508, 208565512699.99, 3201911868.94, 7567976415.19, 10339284099.31]}, "2020-02-29": {"Aquisição de veículos": [10611267, 210450064369.04, 3274077751.08, 7805989841.48, 10635319180.33]}, "2020-03-31": {"Aquisição de veículos": [10640559, 210736891483.34, 3535378145.28, 8201097641.37, 11193127831.58]}, "2020-04-30": {"Aquisição de veículos": [10540617, 207579366932.24, 3686143420.63, 9002080771.18, 12264387331.45]}, "2020-05-31": {"Aquisição de veículos": [10456650, 206138457622.73, 3652408910.2, 9657080199.9, 13188554327.31]}, "2020-06-30": {"Aquisição de veículos": [10443909, 206257685399.15, 3373781268.38, 9073943694.69, 13372497984.04]}, "2020-07-31": {"Aquisição de veículos": [10450624, 207309588497.29, 3218786839.06, 8452361964.09, 14276162522.14]}, "2020-08-31": {"Aquisição de veículos": [10492943, 209139869366.18, 3108534881.95, 7892588056.85, 13863798931.43]}, "2020-09-30": {"Aquisição de veículos": [10553247, 211655483884.53, 2988030581.61, 7593961198.36, 13562354494.83]}, "2020-10-31": {"Aquisição de veículos": [10630134, 214660307383.93, 2952692304.56, 7238898473.47, 13200515557.89]}, "2020-11-30": {"Aquisição de veículos": [10719866, 218224045878.05, 2908563180.51, 7060734746.29, 13256756148.61]}, "2020-12-31": {"Aquisição de veículos": [10786288, 222444219644.66, 2837681042.45, 7001811518.73, 13052085820.07]}, "2021-01-31": {"Aquisição de veículos": [10811490, 224091175200.06, 2878262693.56, 7164533113.81, 12865106193.95]}, "2021-02-28": {"Aquisição de veículos": [10850891, 226167556617.41, 2850754713.35, 7150835569.48, 12635066172.24]}, "2021-03-31": {"Aquisição de veículos": [10828795, 226491636221.99, 3001302104.61, 7304382328.99, 12929404251.52]}, "2021-04-30": {"Aquisição de veículos": [10831147, 227630296631.54, 3077261552.42, 7598534190.42, 13073809539.84]}, "2021-05-31": {"Aquisição de veículos": [10853346, 229764398363.1, 3192959339.81, 8091527392.92, 13379929974.38]}, "2021-06-30": {"Aquisição de veículos": [10867411, 232176614109.3, 3146080759.07, 8169060745.96, 13399375268.82]}, "2021-07-31": {"Aquisição de veículos": [10840862, 234224604397.25, 3182789084.12, 8336259707.32, 13412445719.37]}, "2021-08-31": {"Aquisição de veículos": [10851266, 237151376686.52, 3255242280.73, 8466160476.08, 13627097237.31]}, "2021-09-30": {"Aquisição de veículos": [10862826, 239575490006.91, 3306861957.37, 8629416921.34, 13779313728.84]}, "2021-10-31": {"Aquisição de veículos": [10862493, 241920935036.52, 3466334143.95, 8861953514.36, 13985237296.06]}, "2021-11-30": {"Aquisição de veículos": [10844947, 243476696980.14, 3602812018.07, 9329866834.49, 14533408101.07]}, "2021-12-31": {"Aquisição de veículos": [10805264, 245599629067.73, 3622606715.14, 9707877145.22, 15765500053.3]}, "2022-01-31": {"Aquisição de veículos": [10777113, 246646308947.86, 3835673880.96, 10227455062.51, 16461882346.73]}, "2022-02-28": {"Aquisição de veículos": [10755556, 248135011320.49, 3837754088.69, 10497111960.98, 16778960809.2]}, "2022-03-31": {"Aquisição de veículos": [10708519, 248725971605.67, 4105137847.62, 10959125634.44, 17364064401.88]}, "2022-04-30": {"Aquisição de veículos": [10688766, 250074983913.58, 4257503546.68, 11551113029.24, 18018591622.23]}, "2022-05-31": {"Aquisição de veículos": [10666719, 251743370413.47, 4383675410.56, 12310557518.52, 18763056121.26]}, "2022-06-30": {"Aquisição de veículos": [10634725, 253032125735.72, 4376951238.11, 12419214567.3, 18732013454.93]}, "2022-07-31": {"Aquisição de veículos": [10600578, 254445249449.04, 4557346868.79, 12920861816.72, 19292856928.05]}, "2022-08-31": {"Aquisição de veículos": [10574792, 256385793610.82, 4669078874.25, 13321535072.77, 19677157179.96]}, "2022-09-30": {"Aquisição de veículos": [10549010, 258209488812.67, 4714243576.99, 13611355740.97, 19991686407.68]}, "2022-10-31": {"Aquisição de veículos": [10535556, 260102421583.24, 4953905622.44, 14133894554.21, 20365951895.57]}, "2022-11-30": {"Aquisição de veículos": [10524800, 262061501389.15, 5145384079.22, 14635996964.47, 20821190134.15]}, "2022-12-31": {"Aquisição de veículos": [10465758, 263635119141.88, 5061154200.06, 14520981555.31, 20488242303.62]}, "2023-01-31": {"Aquisição de veículos": [10455809, 265297992383.14, 5246052026.42, 14950307385.26, 21085512482.87]}, "2023-02-28": {"Aquisição de veículos": [10426462, 265601833076.49, 5323724967.05, 15154811336.15, 21363100045.49]}, "2023-03-31": {"Aquisição de veículos": [10430742, 267532135093.87, 5415543458.58, 14936429347.76, 21262213678.87]}, "2023-04-30": {"Aquisição de veículos": [10436973, 268727926615.01, 5547243434.96, 15235563763.87, 21640225876.81]}, "2023-05-31": {"Aquisição de veículos": [10436662, 270081383632.24, 5666885729.18, 15718094013.76, 22029837253.67]}, "2023-06-30": {"Aquisição de veículos": [10439342, 271915492706.88, 5540138074.44, 15411852306.94, 21734035037.45]}, "2023-07-31": {"Aquisição de veículos": [10453438, 274800361389.16, 5673621239.67, 15624168733.58, 22028330352.03]}, "2023-08-31": {"Aquisição de veículos": [10466222, 278128838019.06, 5611804758.09, 15417128960.79, 21951116018.42]}, "2023-09-30": {"Aquisição de veículos": [10476387, 281014569569.57, 5594683431.63, 15363825139.13, 21861434617.74]}, "2023-10-31": {"Aquisição de veículos": [10498835, 284338112438.16, 5766349045.29, 15499050604.39, 22066440312.14]}, "2023-11-30": {"Aquisição de veículos": [10544209, 288913355920.1, 5856111840.52, 15751752073.09, 21997130689.8]}, "2023-12-31": {"Aquisição de veículos": [10570736, 294191155996.29, 5711391023.03, 15423350893.49, 21627219736.38]}, "2024-01-31": {"Aquisição de veículos": [10638415, 298900535445.06, 5725177888.66, 15468240387.86, 21748390153.27]}, "2024-02-29": {"Aquisição de veículos": [10688543, 302269458153.02, 5635854006.57, 15233308374.42, 21512606019.22]}, "2024-03-31": {"Aquisição de veículos": [10756711, 306759742554.74, 5781970919.7, 15047636013.78, 21559292242.38]}, "2024-04-30": {"Aquisição de veículos": [10873636, 311737762401.42, 5768308753.5, 15033728830.0, 21423218240.79]}, "2024-05-31": {"Aquisição de veículos": [10963247, 316508012859.17, 5911709414.79, 15434880171.12, 21995100969.67]}, "2024-06-30": {"Aquisição de veículos": [11032731, 321484594575.21, 5716505299.69, 15056862814.16, 21471577812.17]}, "2024-07-31": {"Aquisição de veículos": [11109641, 327277315544.09, 5785860416.77, 15256873622.74, 21555015453.49]}, "2024-08-31": {"Aquisição de veículos": [11208579, 333562166965.54, 5861360381.75, 15331734963.32, 21519364387.2]}, "2024-09-30": {"Aquisição de veículos": [11289671, 338909593811.34, 5828548161.6, 15315389543.98, 21442240629.48]}, "2024-10-31": {"Aquisição de veículos": [11396662, 345591392680.66, 5887618914.69, 15360469053.21, 21463015173.62]}, "2024-11-30": {"Aquisição de veículos": [11480416, 351562119749.22, 5894466187.35, 15241177620.85, 21327401197.0]}, "2024-12-31": {"Aquisição de veículos": [11277578, 350699144255.59, 5774726834.02, 14966501595.24, 21051274173.41]}, "2025-01-31": {"Aquisição de veículos": [11370948, 355218255976.84, 6209043927.57, 16056958013.57, 23250183837.37]}, "2025-02-28": {"Aquisição de veículos": [11461250, 358748663690.44, 6350858170.42, 16604071998.54, 25052346637.56]}, "2025-03-31": {"Aquisição de veículos": [11534986, 361689734361.24, 7052803621.87, 17757371911.02, 28016666389.41]}, "2025-04-30": {"Aquisição de veículos": [11623380, 364972892154.68, 7390090646.47, 18472945831.33, 25892334383.44]}, "2025-05-31": {"Aquisição de veículos": [11703366, 369130896753.07, 7806409104.76, 19577772536.42, 26934546711.24]}, "2025-06-30": {"Aquisição de veículos": [11773840, 372426037783.3, 8048311717.36, 20093664464.2, 27945756066.53]}, "2025-07-31": {"Aquisição de veículos": [11847413, 376387587154.22, 8415960752.78, 20884741776.96, 28511290710.5]}, "2025-08-31": {"Aquisição de veículos": [11934944, 381241137794.87, 8793911382.02, 21456695560.89, 29174867471.67]}, "2025-09-30": {"Aquisição de veículos": [12042984, 386207866801.01, 8995662335.93, 21835689789.21, 29672943813.69]}, "2025-10-31": {"Aquisição de veículos": [12157957, 392644695023.29, 9239670236.29, 22083301206.8, 29832431558.19]}, "2025-11-30": {"Aquisição de veículos": [12274963, 399185420819.83, 9547897491.17, 22622077766.28, 30118520828.15]}, "2025-12-31": {"Aquisição de veículos": [12377433, 405391513233.74, 9984119499.91, 23476606967.6, 30931438461.02]}, "2026-01-31": {"Aquisição de veículos": [12511947, 411607377267.41, 10432283902.52, 24421362996.54, 31941378099.77]}, "2026-02-28": {"Aquisição de veículos": [12624838, 416351552773.69, 10799276065.12, 25336204014.33, 32674256302.11]}, "2026-03-31": {"Aquisição de veículos": [12717344, 421151501837.06, 11347056064.8, 26027266179.32, 33581278316.7]}, "2026-04-30": {"Aquisição de veículos": [12744522, 424429792753.98, 11720825022.53, 26770260823.48, 34435738762.61]}, "2026-05-31": {"Aquisição de veículos": [12715334, 426198575996.52, 12184080853.72, 27776973969.15, 35650457723.33]}}};
 const DATA_TAXAS_VEICULOS = {"by_month": {"2017-01-01": {"veiculos": 26.18}, "2017-02-01": {"veiculos": 25.71}, "2017-03-01": {"veiculos": 24.8}, "2017-04-01": {"veiculos": 24.39}, "2017-05-01": {"veiculos": 24.25}, "2017-06-01": {"veiculos": 24.03}, "2017-07-01": {"veiculos": 23.79}, "2017-08-01": {"veiculos": 23.22}, "2017-09-01": {"veiculos": 22.96}, "2017-10-01": {"veiculos": 22.51}, "2017-11-01": {"veiculos": 22.14}, "2017-12-01": {"veiculos": 22.23}, "2018-01-01": {"veiculos": 22.74}, "2018-02-01": {"veiculos": 22.47}, "2018-03-01": {"veiculos": 21.75}, "2018-04-01": {"veiculos": 21.53}, "2018-05-01": {"veiculos": 21.49}, "2018-06-01": {"veiculos": 21.96}, "2018-07-01": {"veiculos": 22.34}, "2018-08-01": {"veiculos": 22.17}, "2018-09-01": {"veiculos": 22.17}, "2018-10-01": {"veiculos": 22.36}, "2018-11-01": {"veiculos": 21.68}, "2018-12-01": {"veiculos": 21.68}, "2019-01-01": {"veiculos": 22.36}, "2019-02-01": {"veiculos": 22.01}, "2019-03-01": {"veiculos": 21.38}, "2019-04-01": {"veiculos": 21.26}, "2019-05-01": {"veiculos": 21.1}, "2019-06-01": {"veiculos": 20.8}, "2019-07-01": {"veiculos": 20.34}, "2019-08-01": {"veiculos": 20.1}, "2019-09-01": {"veiculos": 19.79}, "2019-10-01": {"veiculos": 19.65}, "2019-11-01": {"veiculos": 19.29}, "2019-12-01": {"veiculos": 19.15}, "2020-01-01": {"veiculos": 19.73}, "2020-02-01": {"veiculos": 19.4}, "2020-03-01": {"veiculos": 19.76}, "2020-04-01": {"veiculos": 20.38}, "2020-05-01": {"veiculos": 19.46}, "2020-06-01": {"veiculos": 18.99}, "2020-07-01": {"veiculos": 18.88}, "2020-08-01": {"veiculos": 18.88}, "2020-09-01": {"veiculos": 18.56}, "2020-10-01": {"veiculos": 18.88}, "2020-11-01": {"veiculos": 18.97}, "2020-12-01": {"veiculos": 19.2}, "2021-01-01": {"veiculos": 20.21}, "2021-02-01": {"veiculos": 19.96}, "2021-03-01": {"veiculos": 20.64}, "2021-04-01": {"veiculos": 21.31}, "2021-05-01": {"veiculos": 21.29}, "2021-06-01": {"veiculos": 21.59}, "2021-07-01": {"veiculos": 21.94}, "2021-08-01": {"veiculos": 22.65}, "2021-09-01": {"veiculos": 23.9}, "2021-10-01": {"veiculos": 24.81}, "2021-11-01": {"veiculos": 27.45}, "2021-12-01": {"veiculos": 26.79}, "2022-01-01": {"veiculos": 26.87}, "2022-02-01": {"veiculos": 26.46}, "2022-03-01": {"veiculos": 27.15}, "2022-04-01": {"veiculos": 27.23}, "2022-05-01": {"veiculos": 27.15}, "2022-06-01": {"veiculos": 27.43}, "2022-07-01": {"veiculos": 27.64}, "2022-08-01": {"veiculos": 27.42}, "2022-09-01": {"veiculos": 27.1}, "2022-10-01": {"veiculos": 27.2}, "2022-11-01": {"veiculos": 27.65}, "2022-12-01": {"veiculos": 28.68}, "2023-01-01": {"veiculos": 29.05}, "2023-02-01": {"veiculos": 28.96}, "2023-03-01": {"veiculos": 28.58}, "2023-04-01": {"veiculos": 28.46}, "2023-05-01": {"veiculos": 28.08}, "2023-06-01": {"veiculos": 26.81}, "2023-07-01": {"veiculos": 26.06}, "2023-08-01": {"veiculos": 26.18}, "2023-09-01": {"veiculos": 25.95}, "2023-10-01": {"veiculos": 26.19}, "2023-11-01": {"veiculos": 25.98}, "2023-12-01": {"veiculos": 25.52}, "2024-01-01": {"veiculos": 26.07}, "2024-02-01": {"veiculos": 25.85}, "2024-03-01": {"veiculos": 25.43}, "2024-04-01": {"veiculos": 25.44}, "2024-05-01": {"veiculos": 25.54}, "2024-06-01": {"veiculos": 25.52}, "2024-07-01": {"veiculos": 25.45}, "2024-08-01": {"veiculos": 25.72}, "2024-09-01": {"veiculos": 25.51}, "2024-10-01": {"veiculos": 25.9}, "2024-11-01": {"veiculos": 26.39}, "2024-12-01": {"veiculos": 27.51}, "2025-01-01": {"veiculos": 29.52}, "2025-02-01": {"veiculos": 29.14}, "2025-03-01": {"veiculos": 28.59}, "2025-04-01": {"veiculos": 28.06}, "2025-05-01": {"veiculos": 27.61}, "2025-06-01": {"veiculos": 27.59}, "2025-07-01": {"veiculos": 27.29}, "2025-08-01": {"veiculos": 27.34}, "2025-09-01": {"veiculos": 27.3}, "2025-10-01": {"veiculos": 27.43}, "2025-11-01": {"veiculos": 27.02}, "2025-12-01": {"veiculos": 26.44}, "2026-01-01": {"veiculos": 27.72}, "2026-02-01": {"veiculos": 27.28}, "2026-03-01": {"veiculos": 26.6}, "2026-04-01": {"veiculos": 26.64}, "2026-05-01": {"veiculos": 26.31}}};
 const DATA_TAXAS_VEICULOS_MENSAL = {"by_month": {"2017-01-01": {"veiculos": 1.96}, "2017-02-01": {"veiculos": 1.93}, "2017-03-01": {"veiculos": 1.86}, "2017-04-01": {"veiculos": 1.84}, "2017-05-01": {"veiculos": 1.83}, "2017-06-01": {"veiculos": 1.81}, "2017-07-01": {"veiculos": 1.79}, "2017-08-01": {"veiculos": 1.76}, "2017-09-01": {"veiculos": 1.74}, "2017-10-01": {"veiculos": 1.71}, "2017-11-01": {"veiculos": 1.68}, "2017-12-01": {"veiculos": 1.69}, "2018-01-01": {"veiculos": 1.72}, "2018-02-01": {"veiculos": 1.7}, "2018-03-01": {"veiculos": 1.65}, "2018-04-01": {"veiculos": 1.64}, "2018-05-01": {"veiculos": 1.64}, "2018-06-01": {"veiculos": 1.67}, "2018-07-01": {"veiculos": 1.69}, "2018-08-01": {"veiculos": 1.68}, "2018-09-01": {"veiculos": 1.68}, "2018-10-01": {"veiculos": 1.7}, "2018-11-01": {"veiculos": 1.65}, "2018-12-01": {"veiculos": 1.65}, "2019-01-01": {"veiculos": 1.7}, "2019-02-01": {"veiculos": 1.67}, "2019-03-01": {"veiculos": 1.63}, "2019-04-01": {"veiculos": 1.62}, "2019-05-01": {"veiculos": 1.61}, "2019-06-01": {"veiculos": 1.59}, "2019-07-01": {"veiculos": 1.55}, "2019-08-01": {"veiculos": 1.54}, "2019-09-01": {"veiculos": 1.52}, "2019-10-01": {"veiculos": 1.51}, "2019-11-01": {"veiculos": 1.48}, "2019-12-01": {"veiculos": 1.47}, "2020-01-01": {"veiculos": 1.51}, "2020-02-01": {"veiculos": 1.49}, "2020-03-01": {"veiculos": 1.51}, "2020-04-01": {"veiculos": 1.56}, "2020-05-01": {"veiculos": 1.49}, "2020-06-01": {"veiculos": 1.46}, "2020-07-01": {"veiculos": 1.45}, "2020-08-01": {"veiculos": 1.45}, "2020-09-01": {"veiculos": 1.43}, "2020-10-01": {"veiculos": 1.45}, "2020-11-01": {"veiculos": 1.46}, "2020-12-01": {"veiculos": 1.47}, "2021-01-01": {"veiculos": 1.55}, "2021-02-01": {"veiculos": 1.53}, "2021-03-01": {"veiculos": 1.58}, "2021-04-01": {"veiculos": 1.62}, "2021-05-01": {"veiculos": 1.62}, "2021-06-01": {"veiculos": 1.64}, "2021-07-01": {"veiculos": 1.67}, "2021-08-01": {"veiculos": 1.72}, "2021-09-01": {"veiculos": 1.8}, "2021-10-01": {"veiculos": 1.86}, "2021-11-01": {"veiculos": 2.04}, "2021-12-01": {"veiculos": 2.0}, "2022-01-01": {"veiculos": 2.0}, "2022-02-01": {"veiculos": 1.98}, "2022-03-01": {"veiculos": 2.02}, "2022-04-01": {"veiculos": 2.03}, "2022-05-01": {"veiculos": 2.02}, "2022-06-01": {"veiculos": 2.04}, "2022-07-01": {"veiculos": 2.05}, "2022-08-01": {"veiculos": 2.04}, "2022-09-01": {"veiculos": 2.02}, "2022-10-01": {"veiculos": 2.03}, "2022-11-01": {"veiculos": 2.06}, "2022-12-01": {"veiculos": 2.12}, "2023-01-01": {"veiculos": 2.15}, "2023-02-01": {"veiculos": 2.14}, "2023-03-01": {"veiculos": 2.12}, "2023-04-01": {"veiculos": 2.11}, "2023-05-01": {"veiculos": 2.08}, "2023-06-01": {"veiculos": 2.0}, "2023-07-01": {"veiculos": 1.95}, "2023-08-01": {"veiculos": 1.96}, "2023-09-01": {"veiculos": 1.94}, "2023-10-01": {"veiculos": 1.96}, "2023-11-01": {"veiculos": 1.94}, "2023-12-01": {"veiculos": 1.91}, "2024-01-01": {"veiculos": 1.95}, "2024-02-01": {"veiculos": 1.93}, "2024-03-01": {"veiculos": 1.91}, "2024-04-01": {"veiculos": 1.91}, "2024-05-01": {"veiculos": 1.91}, "2024-06-01": {"veiculos": 1.91}, "2024-07-01": {"veiculos": 1.91}, "2024-08-01": {"veiculos": 1.93}, "2024-09-01": {"veiculos": 1.91}, "2024-10-01": {"veiculos": 1.94}, "2024-11-01": {"veiculos": 1.97}, "2024-12-01": {"veiculos": 2.05}, "2025-01-01": {"veiculos": 2.18}, "2025-02-01": {"veiculos": 2.15}, "2025-03-01": {"veiculos": 2.12}, "2025-04-01": {"veiculos": 2.08}, "2025-05-01": {"veiculos": 2.05}, "2025-06-01": {"veiculos": 2.05}, "2025-07-01": {"veiculos": 2.03}, "2025-08-01": {"veiculos": 2.03}, "2025-09-01": {"veiculos": 2.03}, "2025-10-01": {"veiculos": 2.04}, "2025-11-01": {"veiculos": 2.01}, "2025-12-01": {"veiculos": 1.97}, "2026-01-01": {"veiculos": 2.06}, "2026-02-01": {"veiculos": 2.03}, "2026-03-01": {"veiculos": 1.98}, "2026-04-01": {"veiculos": 1.99}, "2026-05-01": {"veiculos": 1.97}}};
@@ -1144,6 +1221,9 @@ function ppDatalabelFormatter(value) {
 function mesesDatalabelFormatter(value) {
   return value == null ? '' : value.toFixed(1) + 'm';
 }
+function milDatalabelFormatter(value) {
+  return value == null ? '' : value.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) + ' mil';
+}
 function makeDatalabelsConfig(formatter) {
   return {
     display: sparseDatalabelDisplay,
@@ -1158,11 +1238,46 @@ function makeDatalabelsConfig(formatter) {
     offset: 3,
   };
 }
+// Variante com rótulo preto sobre chip branco, só para gráficos de barra (única série,
+// não empilhada) — ex.: os gaps convertidos para barra (Cartão, Habitacional).
+function makeDatalabelsConfigBar(formatter) {
+  return {
+    display: sparseDatalabelDisplay,
+    formatter,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    borderRadius: 4,
+    color: '#000',
+    font: { size: 9, weight: 'bold' },
+    padding: { top: 2, bottom: 2, left: 4, right: 4 },
+    anchor: 'end',
+    align: 'top',
+    offset: 3,
+  };
+}
 const datalabelsConfig = makeDatalabelsConfig(pctDatalabelFormatter);
 const datalabelsConfigBRLbi = makeDatalabelsConfig(brlBiDatalabelFormatter);
 const datalabelsConfigPP = makeDatalabelsConfig(ppDatalabelFormatter);
+const datalabelsConfigPPBar = makeDatalabelsConfigBar(ppDatalabelFormatter);
 const datalabelsConfigBps = makeDatalabelsConfig(bpsDatalabelFormatter);
 const datalabelsConfigMeses = makeDatalabelsConfig(mesesDatalabelFormatter);
+const datalabelsConfigMil = makeDatalabelsConfig(milDatalabelFormatter);
+// Variante para barras empilhadas: rótulo centralizado dentro de cada segmento
+// (o anchor:'end'/align:'top' da config normal flutuaria fora do segmento em barras
+// não-topo de uma pilha).
+function makeDatalabelsConfigStacked(formatter) {
+  return {
+    display: sparseDatalabelDisplay,
+    formatter,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    borderRadius: 3,
+    padding: { top: 1, bottom: 1, left: 3, right: 3 },
+    color: '#000',
+    font: { size: 9, weight: 'bold' },
+    anchor: 'center',
+    align: 'center',
+  };
+}
+const datalabelsConfigMilStacked = makeDatalabelsConfigStacked(milDatalabelFormatter);
 
 // --- Janela de zoom via slider duplo (teste no gráfico "Crescimento da carteira ativa") ---
 // Em vez de gestos de mouse (arrastar/roda) ou botões de atalho, a janela visível é
@@ -1291,6 +1406,8 @@ function sumCliente(entry, cliente) {
 
 let chartCarteira, chartRisco, chartUf, chartModalidade, chartSegmento, chartGapRisco, chartSeveridade, chartSeveridadeSegmentos;
 let activeCliente = 'all';
+let activoModoCarteira = 'cagr';
+let resetCarteiraZoom = false;
 
 function sumClienteSev(entry, cliente) {
   if (!entry) return [0, 0, 0];
@@ -1306,12 +1423,16 @@ function render() {
   const mesKeys = Object.keys(DATA.month_cliente).sort();
   const mesLabels = mesKeys.map(mesLabel);
   const carteiraRaw = mesKeys.map(k => sumCliente(DATA.month_cliente[k], activeCliente)[1]);
-  const cagrSeries = mesKeys.map((k, i) => {
-    if (i < 12 || carteiraRaw[i - 12] <= 0) return null;
-    return (carteiraRaw[i] / carteiraRaw[i - 12] - 1) * 100;
-  });
-  const cagrLabels = mesLabels.slice(12);
-  const cagrValues = cagrSeries.slice(12);
+  const lookbackCarteira = activoModoCarteira === 'cagr' ? 12 : (activoModoCarteira === 'mom' ? 1 : 0);
+  const carteiraStartIdx = lookbackCarteira;
+  const carteiraSeries = activoModoCarteira === 'estoque'
+    ? carteiraRaw.map(v => v == null ? null : v / 1e9)
+    : carteiraRaw.map((v, j) => {
+        if (j < lookbackCarteira || v == null || carteiraRaw[j - lookbackCarteira] == null || carteiraRaw[j - lookbackCarteira] <= 0) return null;
+        return (v / carteiraRaw[j - lookbackCarteira] - 1) * 100;
+      });
+  const cagrLabels = mesLabels.slice(carteiraStartIdx);
+  const cagrValues = carteiraSeries.slice(carteiraStartIdx);
   const apSeries = mesKeys.map(k => {
     const [n, ca, cv, ci, ap] = sumCliente(DATA.month_cliente[k], activeCliente);
     return ca > 0 ? (ap / ca * 100) : 0;
@@ -1349,17 +1470,39 @@ function render() {
   document.getElementById('kpiAtivoProblematico').textContent = caLatest > 0 ? fmtPct(apLatest / caLatest * 100) : '—';
   document.getElementById('kpiOps').textContent = fmtNum(nLatest);
 
+  document.getElementById('tituloCarteira').textContent =
+    activoModoCarteira === 'cagr' ? 'Crescimento da carteira ativa (LTM, %)' :
+    activoModoCarteira === 'mom' ? 'Crescimento da carteira ativa mês a mês (%)' :
+    'Estoque da carteira ativa (R$ bi)';
+  const carteiraLabel = activoModoCarteira === 'cagr' ? 'LTM (%)' : activoModoCarteira === 'mom' ? '% M/M' : 'Estoque (R$ bi)';
+  const carteiraYLabel = activoModoCarteira === 'cagr' ? '% ao ano' : activoModoCarteira === 'mom' ? '% M/M' : 'R$ bi';
+  const carteiraDlConfig = activoModoCarteira === 'estoque' ? datalabelsConfigBRLbi : datalabelsConfig;
+
   if (!chartCarteira) {
     chartCarteira = new Chart(document.getElementById('chartCarteira'), {
       type: 'line',
       plugins: [ChartDataLabels],
-      data: { labels: cagrLabels, datasets: [{ label: 'LTM (%)', data: cagrValues, borderColor: '#2a78d6', backgroundColor: 'rgba(42,120,214,0.1)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.1 }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
-        scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: '% ao ano' }, grid: { color: '#e1e0d9' } } } }
+      data: { labels: cagrLabels, datasets: [{ label: carteiraLabel, data: cagrValues, borderColor: '#2a78d6', backgroundColor: 'rgba(42,120,214,0.1)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.1 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: carteiraDlConfig },
+        scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: carteiraYLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartCarteira.data.labels = cagrLabels;
     chartCarteira.data.datasets[0].data = cagrValues;
+    chartCarteira.data.datasets[0].label = carteiraLabel;
+    chartCarteira.options.plugins.datalabels = carteiraDlConfig;
+    chartCarteira.options.scales.y.title.text = carteiraYLabel;
+    if (resetCarteiraZoom) {
+      // Força a janela do brush a mostrar a série completa no novo modo (total de
+      // pontos muda: LTM/M-M "comem" 12/1 meses de lookback, Estoque não).
+      const brushMin = document.getElementById('chartCarteiraBrushMin');
+      const brushMax = document.getElementById('chartCarteiraBrushMax');
+      if (brushMin) brushMin.value = '0';
+      if (brushMax) brushMax.value = String(cagrLabels.length - 1);
+      chartCarteira.options.scales.x.min = undefined;
+      chartCarteira.options.scales.x.max = undefined;
+      resetCarteiraZoom = false;
+    }
     chartCarteira.update();
   }
   initZoomBrush(chartCarteira, ensureBrushUI('chartCarteira'));
@@ -1703,15 +1846,17 @@ function renderConsignado() {
   renderCresConsignado();
 }
 
-let activoModoCres = 'mom';
+let activoModoCres = 'estoque';
 function renderCresConsignado() {
   const mesKeysC = Object.keys(DATA_CONSIGNADO.by_month_ocupacao).sort();
   const mesLabelsC = mesKeysC.map(mesLabel);
-  const lookback = activoModoCres === 'cagr' ? 12 : 1;
+  const lookback = activoModoCres === 'cagr' ? 12 : (activoModoCres === 'mom' ? 1 : 0);
   const cresStartIdx = Math.max(lookback, mesKeysC.indexOf('2018-07-31'));
 
   document.getElementById('tituloCresConsignado').textContent =
-    activoModoCres === 'cagr' ? 'Crescimento por tipo de consignado — LTM (%)' : 'Crescimento mês a mês por tipo de consignado (%)';
+    activoModoCres === 'cagr' ? 'Crescimento por tipo de consignado — LTM (%)' :
+    activoModoCres === 'mom' ? 'Crescimento mês a mês por tipo de consignado (%)' :
+    'Estoque por tipo de consignado (R$ bi)';
 
   document.getElementById('legendCresConsignado').innerHTML = CRES_KEYS.map((key, i) => {
     const hidden = chartCresConsignado ? chartCresConsignado.getDatasetMeta(i).hidden : false;
@@ -1729,13 +1874,15 @@ function renderCresConsignado() {
 
   const cresDatasets = CRES_KEYS.map((key) => {
     const raw = cresRawSeries(key, mesKeysC);
-    const growth = raw.map((v, j) => {
-      if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
-      return (v / raw[j - lookback] - 1) * 100;
-    });
+    const values = activoModoCres === 'estoque'
+      ? raw.map(v => v == null ? null : v / 1e9)
+      : raw.map((v, j) => {
+          if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
+          return (v / raw[j - lookback] - 1) * 100;
+        });
     return {
       label: TAXAS_LABELS[key],
-      data: growth.slice(cresStartIdx),
+      data: values.slice(cresStartIdx),
       borderColor: TAXAS_COLORS[key],
       backgroundColor: 'transparent',
       borderWidth: 1.5,
@@ -1745,20 +1892,24 @@ function renderCresConsignado() {
     };
   });
   const cresLabels = mesLabelsC.slice(cresStartIdx);
-  const yLabel = activoModoCres === 'cagr' ? 'LTM (%)' : '% M/M';
+  const yLabel = activoModoCres === 'cagr' ? 'LTM (%)' : activoModoCres === 'mom' ? '% M/M' : 'R$ bi';
+  const dlConfig = activoModoCres === 'estoque' ? datalabelsConfigBRLbi : datalabelsConfig;
 
   if (!chartCresConsignado) {
     chartCresConsignado = new Chart(document.getElementById('chartCresConsignado'), {
       type: 'line',
       plugins: [ChartDataLabels],
       data: { labels: cresLabels, datasets: cresDatasets },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: dlConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartCresConsignado.data.labels = cresLabels;
     chartCresConsignado.data.datasets.forEach((ds, i) => { ds.data = cresDatasets[i].data; ds.label = cresDatasets[i].label; ds.borderColor = cresDatasets[i].borderColor; });
     chartCresConsignado.options.scales.y.title.text = yLabel;
+    chartCresConsignado.options.plugins.datalabels = dlConfig;
+    chartCresConsignado.options.scales.x.min = undefined;
+    chartCresConsignado.options.scales.x.max = undefined;
     chartCresConsignado.update();
   }
   initZoomBrush(chartCresConsignado, ensureBrushUI('chartCresConsignado'));
@@ -1770,6 +1921,16 @@ document.getElementById('filters').addEventListener('click', (e) => {
   document.querySelectorAll('#filters .filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   activeCliente = btn.dataset.cliente;
+  render();
+});
+
+document.getElementById('periodoCarteira').addEventListener('click', (e) => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  document.querySelectorAll('#periodoCarteira .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activoModoCarteira = btn.dataset.modo;
+  resetCarteiraZoom = true;
   render();
 });
 
@@ -1863,15 +2024,17 @@ function renderCartao() {
 }
 
 let chartCresCartao;
-let activoModoCresCartao = 'mom';
+let activoModoCresCartao = 'estoque';
 function renderCresCartao() {
   const mesKeysR = Object.keys(DATA_RISCO.by_month_bucket).sort();
   const mesLabelsR = mesKeysR.map(mesLabel);
-  const lookback = activoModoCresCartao === 'cagr' ? 12 : 1;
+  const lookback = activoModoCresCartao === 'cagr' ? 12 : (activoModoCresCartao === 'mom' ? 1 : 0);
   const cresStartIdx = lookback;
 
   document.getElementById('tituloCresCartao').textContent =
-    activoModoCresCartao === 'cagr' ? 'Crescimento por tipo — LTM (%)' : 'Crescimento mês a mês por tipo (%)';
+    activoModoCresCartao === 'cagr' ? 'Crescimento por tipo — LTM (%)' :
+    activoModoCresCartao === 'mom' ? 'Crescimento mês a mês por tipo (%)' :
+    'Estoque por tipo (R$ bi)';
 
   document.getElementById('legendCresCartao').innerHTML = CARTAO_KEYS.map((key, i) => {
     const hidden = chartCresCartao ? chartCresCartao.getDatasetMeta(i).hidden : false;
@@ -1893,13 +2056,15 @@ function renderCresCartao() {
       const row = DATA_RISCO.by_month_bucket[k];
       return row && row[bucket] ? row[bucket][1] : null;
     });
-    const growth = raw.map((v, j) => {
-      if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
-      return (v / raw[j - lookback] - 1) * 100;
-    });
+    const values = activoModoCresCartao === 'estoque'
+      ? raw.map(v => v == null ? null : v / 1e9)
+      : raw.map((v, j) => {
+          if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
+          return (v / raw[j - lookback] - 1) * 100;
+        });
     return {
       label: CARTAO_LABELS[key],
-      data: growth.slice(cresStartIdx),
+      data: values.slice(cresStartIdx),
       borderColor: CARTAO_COLORS[key],
       backgroundColor: 'transparent',
       borderWidth: 1.5,
@@ -1909,20 +2074,24 @@ function renderCresCartao() {
     };
   });
   const cresLabels = mesLabelsR.slice(cresStartIdx);
-  const yLabel = activoModoCresCartao === 'cagr' ? 'LTM (%)' : '% M/M';
+  const yLabel = activoModoCresCartao === 'cagr' ? 'LTM (%)' : activoModoCresCartao === 'mom' ? '% M/M' : 'R$ bi';
+  const dlConfig = activoModoCresCartao === 'estoque' ? datalabelsConfigBRLbi : datalabelsConfig;
 
   if (!chartCresCartao) {
     chartCresCartao = new Chart(document.getElementById('chartCresCartao'), {
       type: 'line',
       plugins: [ChartDataLabels],
       data: { labels: cresLabels, datasets: cresDatasets },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: dlConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartCresCartao.data.labels = cresLabels;
     chartCresCartao.data.datasets.forEach((ds, i) => { ds.data = cresDatasets[i].data; ds.label = cresDatasets[i].label; ds.borderColor = cresDatasets[i].borderColor; });
     chartCresCartao.options.scales.y.title.text = yLabel;
+    chartCresCartao.options.plugins.datalabels = dlConfig;
+    chartCresCartao.options.scales.x.min = undefined;
+    chartCresCartao.options.scales.x.max = undefined;
     chartCresCartao.update();
   }
   initZoomBrush(chartCresCartao, ensureBrushUI('chartCresCartao'));
@@ -1970,15 +2139,17 @@ function renderPessoal() {
 }
 
 let chartCresPessoal;
-let activoModoCresPessoal = 'mom';
+let activoModoCresPessoal = 'estoque';
 function renderCresPessoal() {
   const mesKeysR = Object.keys(DATA_RISCO.by_month_bucket).sort();
   const mesLabelsR = mesKeysR.map(mesLabel);
-  const lookback = activoModoCresPessoal === 'cagr' ? 12 : 1;
+  const lookback = activoModoCresPessoal === 'cagr' ? 12 : (activoModoCresPessoal === 'mom' ? 1 : 0);
   const cresStartIdx = lookback;
 
   document.getElementById('tituloCresPessoal').textContent =
-    activoModoCresPessoal === 'cagr' ? 'Crescimento por tipo — LTM (%)' : 'Crescimento mês a mês por tipo (%)';
+    activoModoCresPessoal === 'cagr' ? 'Crescimento por tipo — LTM (%)' :
+    activoModoCresPessoal === 'mom' ? 'Crescimento mês a mês por tipo (%)' :
+    'Estoque por tipo (R$ bi)';
 
   document.getElementById('legendCresPessoal').innerHTML = PESSOAL_KEYS.map((key, i) => {
     const hidden = chartCresPessoal ? chartCresPessoal.getDatasetMeta(i).hidden : false;
@@ -2000,13 +2171,15 @@ function renderCresPessoal() {
       const row = DATA_RISCO.by_month_bucket[k];
       return row && row[bucket] ? row[bucket][1] : null;
     });
-    const growth = raw.map((v, j) => {
-      if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
-      return (v / raw[j - lookback] - 1) * 100;
-    });
+    const values = activoModoCresPessoal === 'estoque'
+      ? raw.map(v => v == null ? null : v / 1e9)
+      : raw.map((v, j) => {
+          if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
+          return (v / raw[j - lookback] - 1) * 100;
+        });
     return {
       label: PESSOAL_LABELS[key],
-      data: growth.slice(cresStartIdx),
+      data: values.slice(cresStartIdx),
       borderColor: PESSOAL_COLORS[key],
       backgroundColor: 'transparent',
       borderWidth: 1.5,
@@ -2016,20 +2189,24 @@ function renderCresPessoal() {
     };
   });
   const cresLabels = mesLabelsR.slice(cresStartIdx);
-  const yLabel = activoModoCresPessoal === 'cagr' ? 'LTM (%)' : '% M/M';
+  const yLabel = activoModoCresPessoal === 'cagr' ? 'LTM (%)' : activoModoCresPessoal === 'mom' ? '% M/M' : 'R$ bi';
+  const dlConfig = activoModoCresPessoal === 'estoque' ? datalabelsConfigBRLbi : datalabelsConfig;
 
   if (!chartCresPessoal) {
     chartCresPessoal = new Chart(document.getElementById('chartCresPessoal'), {
       type: 'line',
       plugins: [ChartDataLabels],
       data: { labels: cresLabels, datasets: cresDatasets },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: dlConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartCresPessoal.data.labels = cresLabels;
     chartCresPessoal.data.datasets.forEach((ds, i) => { ds.data = cresDatasets[i].data; ds.label = cresDatasets[i].label; ds.borderColor = cresDatasets[i].borderColor; });
     chartCresPessoal.options.scales.y.title.text = yLabel;
+    chartCresPessoal.options.plugins.datalabels = dlConfig;
+    chartCresPessoal.options.scales.x.min = undefined;
+    chartCresPessoal.options.scales.x.max = undefined;
     chartCresPessoal.update();
   }
   initZoomBrush(chartCresPessoal, ensureBrushUI('chartCresPessoal'));
@@ -2052,27 +2229,32 @@ function renderVeiculos() {
 }
 
 let chartCresVeiculos;
-let activoModoCresVeiculos = 'mom';
+let activoModoCresVeiculos = 'estoque';
 function renderCresVeiculos() {
   const mesKeysV = Object.keys(DATA_VEICULOS.by_month_bucket).sort();
   const mesLabelsV = mesKeysV.map(mesLabel);
-  const lookback = activoModoCresVeiculos === 'cagr' ? 12 : 1;
+  const lookback = activoModoCresVeiculos === 'cagr' ? 12 : (activoModoCresVeiculos === 'mom' ? 1 : 0);
   const cresStartIdx = lookback;
 
   document.getElementById('tituloCresVeiculos').textContent =
-    activoModoCresVeiculos === 'cagr' ? 'Crescimento — LTM (%)' : 'Crescimento mês a mês (%)';
+    activoModoCresVeiculos === 'cagr' ? 'Crescimento — LTM (%)' :
+    activoModoCresVeiculos === 'mom' ? 'Crescimento mês a mês (%)' :
+    'Estoque (R$ bi)';
 
   const raw = mesKeysV.map(k => {
     const row = DATA_VEICULOS.by_month_bucket[k];
     return row && row[VEICULOS_BUCKET] ? row[VEICULOS_BUCKET][1] : null;
   });
-  const growth = raw.map((v, j) => {
-    if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
-    return (v / raw[j - lookback] - 1) * 100;
-  });
+  const values = activoModoCresVeiculos === 'estoque'
+    ? raw.map(v => v == null ? null : v / 1e9)
+    : raw.map((v, j) => {
+        if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
+        return (v / raw[j - lookback] - 1) * 100;
+      });
   const cresLabels = mesLabelsV.slice(cresStartIdx);
-  const cresData = growth.slice(cresStartIdx);
-  const yLabel = activoModoCresVeiculos === 'cagr' ? 'LTM (%)' : '% M/M';
+  const cresData = values.slice(cresStartIdx);
+  const yLabel = activoModoCresVeiculos === 'cagr' ? 'LTM (%)' : activoModoCresVeiculos === 'mom' ? '% M/M' : 'R$ bi';
+  const dlConfig = activoModoCresVeiculos === 'estoque' ? datalabelsConfigBRLbi : datalabelsConfig;
 
   const dataset = { label: 'Aquisição de veículos', data: cresData, borderColor: '#2a9d8f', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.1, spanGaps: true };
 
@@ -2081,13 +2263,16 @@ function renderCresVeiculos() {
       type: 'line',
       plugins: [ChartDataLabels],
       data: { labels: cresLabels, datasets: [dataset] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: dlConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartCresVeiculos.data.labels = cresLabels;
     chartCresVeiculos.data.datasets[0].data = cresData;
     chartCresVeiculos.options.scales.y.title.text = yLabel;
+    chartCresVeiculos.options.plugins.datalabels = dlConfig;
+    chartCresVeiculos.options.scales.x.min = undefined;
+    chartCresVeiculos.options.scales.x.max = undefined;
     chartCresVeiculos.update();
   }
   initZoomBrush(chartCresVeiculos, ensureBrushUI('chartCresVeiculos'));
@@ -2133,6 +2318,232 @@ function renderTaxasVeiculos() {
     chartTaxasVeiculos.update();
   }
   initZoomBrush(chartTaxasVeiculos, ensureBrushUI('chartTaxasVeiculos'));
+}
+
+// =========== B3 (ex-SNG) — financiamento de veículos novos/usados ===========
+const B3_FIN_KEYS = ['novos', 'usados'];
+const B3_FIN_LABELS = { novos: 'Novos', usados: 'Usados' };
+const B3_FIN_COLORS = { novos: '#2a78d6', usados: '#eda100' };
+
+let chartB3Financiamento;
+function renderB3Financiamento() {
+  const rows = DATA_B3_FINANCIAMENTOS.financiamento_mensal;
+  const labels = rows.map(r => r.label);
+
+  document.getElementById('legendB3Financiamento').innerHTML = B3_FIN_KEYS.map((key, i) => {
+    const hidden = chartB3Financiamento ? chartB3Financiamento.getDatasetMeta(i).hidden : false;
+    return `<span class="legend-item" data-index="${i}" style="display:flex;align-items:center;gap:4px;cursor:pointer;user-select:none;opacity:${hidden ? '0.4' : '1'};"><span style="width:10px;height:10px;border-radius:2px;background:${B3_FIN_COLORS[key]};"></span>${B3_FIN_LABELS[key]}</span>`;
+  }).join('');
+  document.getElementById('legendB3Financiamento').onclick = (e) => {
+    const item = e.target.closest('.legend-item');
+    if (!item || !chartB3Financiamento) return;
+    const idx = Number(item.dataset.index);
+    const meta = chartB3Financiamento.getDatasetMeta(idx);
+    meta.hidden = !meta.hidden;
+    item.style.opacity = meta.hidden ? '0.4' : '1';
+    chartB3Financiamento.update();
+  };
+
+  const datasets = B3_FIN_KEYS.map(key => ({
+    label: B3_FIN_LABELS[key],
+    data: rows.map(r => r[key + '_mil']),
+    backgroundColor: B3_FIN_COLORS[key],
+    borderWidth: 0,
+    borderRadius: 2,
+  }));
+
+  if (!chartB3Financiamento) {
+    chartB3Financiamento = new Chart(document.getElementById('chartB3Financiamento'), {
+      type: 'bar',
+      plugins: [ChartDataLabels],
+      data: { labels, datasets },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfigMilStacked },
+        scales: { x: { stacked: true, ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { stacked: true, title: { display: true, text: 'mil unidades no mês' }, grid: { color: '#e1e0d9' } } } }
+    });
+  } else {
+    chartB3Financiamento.data.labels = labels;
+    chartB3Financiamento.data.datasets.forEach((ds, i) => { ds.data = datasets[i].data; });
+    chartB3Financiamento.update();
+  }
+  initZoomBrush(chartB3Financiamento, ensureBrushUI('chartB3Financiamento'));
+}
+
+// =========== B3 (ex-SNG) — modalidade de financiamento de veículos ===========
+// "Outros" (residual, <1% do total) fica de fora deste gráfico a pedido do usuário.
+const B3_MOD_KEYS = ['cdc', 'consorcio', 'leasing'];
+const B3_MOD_LABELS = { cdc: 'CDC', consorcio: 'Consórcio', leasing: 'Leasing' };
+const B3_MOD_COLORS = { cdc: '#2a78d6', consorcio: '#eda100', leasing: '#2a9d8f' };
+
+let chartB3Modalidade, chartB3ModalidadePizzaA, chartB3ModalidadePizzaB;
+let activoModoB3Modalidade = 'unidades';
+
+function renderB3Modalidade() {
+  const isShare = activoModoB3Modalidade === 'share';
+  document.getElementById('wrapB3ModalidadeLinha').style.display = isShare ? 'none' : '';
+  document.getElementById('wrapB3ModalidadePizza').style.display = isShare ? 'flex' : 'none';
+  document.getElementById('dicaB3Modalidade').style.display = isShare ? 'none' : '';
+
+  document.getElementById('tituloB3Modalidade').textContent =
+    'Modalidade de financiamento de veículos (B3) — ' + (isShare ? 'share por período (%)' : 'unidades (mil)');
+
+  document.getElementById('legendB3Modalidade').innerHTML = B3_MOD_KEYS.map((key, i) => {
+    const hidden = (!isShare && chartB3Modalidade) ? chartB3Modalidade.getDatasetMeta(i).hidden : false;
+    return `<span class="legend-item" data-index="${i}" style="display:flex;align-items:center;gap:4px;${isShare ? '' : 'cursor:pointer;'}user-select:none;opacity:${hidden ? '0.4' : '1'};"><span style="width:10px;height:10px;border-radius:2px;background:${B3_MOD_COLORS[key]};"></span>${B3_MOD_LABELS[key]}</span>`;
+  }).join('');
+  document.getElementById('legendB3Modalidade').onclick = (e) => {
+    if (isShare) return;
+    const item = e.target.closest('.legend-item');
+    if (!item || !chartB3Modalidade) return;
+    const idx = Number(item.dataset.index);
+    const meta = chartB3Modalidade.getDatasetMeta(idx);
+    meta.hidden = !meta.hidden;
+    item.style.opacity = meta.hidden ? '0.4' : '1';
+    chartB3Modalidade.update();
+  };
+
+  if (isShare) {
+    renderB3ModalidadePizzas();
+    return;
+  }
+
+  const rows = DATA_B3_FINANCIAMENTOS.modalidade_mensal;
+  const labels = rows.map(r => r.label);
+  const datasets = B3_MOD_KEYS.map(key => ({
+    label: B3_MOD_LABELS[key],
+    data: rows.map(r => r[key + '_mil']),
+    backgroundColor: B3_MOD_COLORS[key],
+    borderWidth: 0,
+    borderRadius: 2,
+  }));
+
+  if (!chartB3Modalidade) {
+    chartB3Modalidade = new Chart(document.getElementById('chartB3Modalidade'), {
+      type: 'bar',
+      plugins: [ChartDataLabels],
+      data: { labels, datasets },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfigMilStacked },
+        scales: { x: { stacked: true, ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { stacked: true, title: { display: true, text: 'mil unidades' }, grid: { color: '#e1e0d9' } } } }
+    });
+  } else {
+    chartB3Modalidade.data.labels = labels;
+    chartB3Modalidade.data.datasets.forEach((ds, i) => { ds.data = datasets[i].data; });
+    chartB3Modalidade.options.scales.y.title.text = 'mil unidades';
+    chartB3Modalidade.options.plugins.datalabels = datalabelsConfigMilStacked;
+    chartB3Modalidade.update();
+  }
+  initZoomBrush(chartB3Modalidade, ensureBrushUI('chartB3Modalidade'));
+}
+
+// Duas pizzas: dezembro do último ano completo disponível na série + período mais recente.
+function renderB3ModalidadePizzas() {
+  const rows = DATA_B3_FINANCIAMENTOS.modalidade_mensal;
+  const dezRows = rows.filter(r => r.mes === 12);
+  const rowDez = dezRows.length ? dezRows[dezRows.length - 1] : null;
+  const rowUltimo = rows[rows.length - 1];
+
+  const specs = [
+    { row: rowDez, canvasId: 'chartB3ModalidadePizzaA', tituloId: 'tituloB3PizzaA', getChart: () => chartB3ModalidadePizzaA, setChart: (c) => { chartB3ModalidadePizzaA = c; } },
+    { row: rowUltimo, canvasId: 'chartB3ModalidadePizzaB', tituloId: 'tituloB3PizzaB', getChart: () => chartB3ModalidadePizzaB, setChart: (c) => { chartB3ModalidadePizzaB = c; } },
+  ];
+
+  specs.forEach(spec => {
+    const tituloEl = document.getElementById(spec.tituloId);
+    if (!spec.row) { tituloEl.textContent = '—'; return; }
+    tituloEl.textContent = spec.row.label;
+
+    // Share recalculado só entre CDC/Consórcio/Leasing (sem "Outros"), soma 100%.
+    const totalTres = B3_MOD_KEYS.reduce((acc, k) => acc + spec.row[k + '_mil'], 0);
+    const data = B3_MOD_KEYS.map(k => totalTres > 0 ? (spec.row[k + '_mil'] / totalTres * 100) : 0);
+
+    const dataset = {
+      data,
+      backgroundColor: B3_MOD_KEYS.map(k => B3_MOD_COLORS[k]),
+      borderColor: '#fff',
+      borderWidth: 2,
+    };
+
+    let chart = spec.getChart();
+    if (!chart) {
+      chart = new Chart(document.getElementById(spec.canvasId), {
+        type: 'doughnut',
+        plugins: [ChartDataLabels],
+        data: { labels: B3_MOD_KEYS.map(k => B3_MOD_LABELS[k]), datasets: [dataset] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: true, position: 'bottom', labels: { font: { size: 11 }, boxWidth: 10, padding: 12 } },
+            datalabels: { color: '#fff', font: { size: 11, weight: 'bold' }, formatter: (v) => v.toFixed(1) + '%' },
+            tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed.toFixed(1)}%` } },
+          },
+        },
+      });
+      spec.setChart(chart);
+    } else {
+      chart.data.labels = B3_MOD_KEYS.map(k => B3_MOD_LABELS[k]);
+      chart.data.datasets[0] = dataset;
+      chart.update();
+    }
+  });
+}
+
+// =========== B3 (ex-SNG) — prazo médio da carteira de veículos ===========
+let chartB3Prazo;
+let activoModoB3Prazo = 'prazo';
+const B3_PRAZO_CAVEATS = {
+  prazo: 'Prazo médio (em meses) da carteira ativa de financiamento de veículos leves. Fonte: decks mensais B3 (ex-SNG) "Mercado de Financiamentos de Veículos". Série disponível a partir de jun/2025.',
+  estoque: 'Estoque da carteira ativa de financiamento de veículos leves, em milhares de unidades (contratos). Fonte: decks mensais B3 (ex-SNG) "Mercado de Financiamentos de Veículos" — universo diferente do estoque SCR (R$) mostrado no restante desta aba: aqui é quantidade de contratos, apurada pela B3 só para o mercado de financiamento/consórcio de veículos leves. Série disponível a partir de jun/2025.',
+};
+
+function renderB3Prazo() {
+  const isEstoque = activoModoB3Prazo === 'estoque';
+  const rows = DATA_B3_FINANCIAMENTOS.prazo_mensal;
+  const labels = rows.map(r => r.label);
+  const dataset = isEstoque ? {
+    label: 'Estoque da carteira',
+    data: rows.map(r => r.unidades_mil),
+    borderColor: '#e76f51',
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    pointRadius: 0,
+    tension: 0.1,
+    spanGaps: true,
+  } : {
+    label: 'Prazo médio',
+    data: rows.map(r => r.prazo_meses),
+    borderColor: '#2a9d8f',
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    pointRadius: 0,
+    tension: 0.1,
+    spanGaps: true,
+  };
+
+  document.getElementById('tituloB3Prazo').textContent = isEstoque
+    ? 'Estoque da carteira de financiamento de veículos (B3)'
+    : 'Prazo médio da carteira de financiamento de veículos (B3)';
+  document.getElementById('caveatB3Prazo').textContent = B3_PRAZO_CAVEATS[activoModoB3Prazo];
+
+  const dlConfig = isEstoque ? datalabelsConfigMil : datalabelsConfigMeses;
+  const yLabel = isEstoque ? 'mil unidades' : 'meses';
+
+  if (!chartB3Prazo) {
+    chartB3Prazo = new Chart(document.getElementById('chartB3Prazo'), {
+      type: 'line',
+      plugins: [ChartDataLabels],
+      data: { labels, datasets: [dataset] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: dlConfig },
+        scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
+    });
+  } else {
+    chartB3Prazo.data.labels = labels;
+    chartB3Prazo.data.datasets[0] = dataset;
+    chartB3Prazo.options.plugins.datalabels = dlConfig;
+    chartB3Prazo.options.scales.y.title.text = yLabel;
+    chartB3Prazo.options.scales.x.min = undefined;
+    chartB3Prazo.options.scales.x.max = undefined;
+    chartB3Prazo.update();
+  }
+  initZoomBrush(chartB3Prazo, ensureBrushUI('chartB3Prazo'));
 }
 
 const HABITACIONAL_BUCKET_MAP = {
@@ -2188,15 +2599,17 @@ function renderHabitacional() {
 }
 
 let chartCresHabitacional;
-let activoModoCresHabitacional = 'mom';
+let activoModoCresHabitacional = 'estoque';
 function renderCresHabitacional() {
   const mesKeysH = Object.keys(DATA_HABITACIONAL.by_month_bucket).sort();
   const mesLabelsH = mesKeysH.map(mesLabel);
-  const lookback = activoModoCresHabitacional === 'cagr' ? 12 : 1;
+  const lookback = activoModoCresHabitacional === 'cagr' ? 12 : (activoModoCresHabitacional === 'mom' ? 1 : 0);
   const cresStartIdx = lookback;
 
   document.getElementById('tituloCresHabitacional').textContent =
-    activoModoCresHabitacional === 'cagr' ? 'Crescimento por tipo — LTM (%)' : 'Crescimento mês a mês por tipo (%)';
+    activoModoCresHabitacional === 'cagr' ? 'Crescimento por tipo — LTM (%)' :
+    activoModoCresHabitacional === 'mom' ? 'Crescimento mês a mês por tipo (%)' :
+    'Estoque por tipo (R$ bi)';
 
   document.getElementById('legendCresHabitacional').innerHTML = HABITACIONAL_KEYS.map((key, i) => {
     const hidden = chartCresHabitacional ? chartCresHabitacional.getDatasetMeta(i).hidden : false;
@@ -2218,13 +2631,15 @@ function renderCresHabitacional() {
       const row = DATA_HABITACIONAL.by_month_bucket[k];
       return row && row[bucket] ? row[bucket][1] : null;
     });
-    const growth = raw.map((v, j) => {
-      if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
-      return (v / raw[j - lookback] - 1) * 100;
-    });
+    const values = activoModoCresHabitacional === 'estoque'
+      ? raw.map(v => v == null ? null : v / 1e9)
+      : raw.map((v, j) => {
+          if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
+          return (v / raw[j - lookback] - 1) * 100;
+        });
     return {
       label: HABITACIONAL_LABELS[key],
-      data: growth.slice(cresStartIdx),
+      data: values.slice(cresStartIdx),
       borderColor: HABITACIONAL_COLORS[key],
       backgroundColor: 'transparent',
       borderWidth: 1.5,
@@ -2234,20 +2649,24 @@ function renderCresHabitacional() {
     };
   });
   const cresLabels = mesLabelsH.slice(cresStartIdx);
-  const yLabel = activoModoCresHabitacional === 'cagr' ? 'LTM (%)' : '% M/M';
+  const yLabel = activoModoCresHabitacional === 'cagr' ? 'LTM (%)' : activoModoCresHabitacional === 'mom' ? '% M/M' : 'R$ bi';
+  const dlConfig = activoModoCresHabitacional === 'estoque' ? datalabelsConfigBRLbi : datalabelsConfig;
 
   if (!chartCresHabitacional) {
     chartCresHabitacional = new Chart(document.getElementById('chartCresHabitacional'), {
       type: 'line',
       plugins: [ChartDataLabels],
       data: { labels: cresLabels, datasets: cresDatasets },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: dlConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartCresHabitacional.data.labels = cresLabels;
     chartCresHabitacional.data.datasets.forEach((ds, i) => { ds.data = cresDatasets[i].data; ds.label = cresDatasets[i].label; ds.borderColor = cresDatasets[i].borderColor; });
     chartCresHabitacional.options.scales.y.title.text = yLabel;
+    chartCresHabitacional.options.plugins.datalabels = dlConfig;
+    chartCresHabitacional.options.scales.x.min = undefined;
+    chartCresHabitacional.options.scales.x.max = undefined;
     chartCresHabitacional.update();
   }
   initZoomBrush(chartCresHabitacional, ensureBrushUI('chartCresHabitacional'));
@@ -2330,10 +2749,10 @@ function renderTaxasHabitacional() {
 
   if (!chartGapHabitacional) {
     chartGapHabitacional = new Chart(document.getElementById('chartGapHabitacional'), {
-      type: 'line',
+      type: 'bar',
       plugins: [ChartDataLabels],
-      data: { labels: mesLabels, datasets: [{ label: 'Gap fora do SFH − SFH', data: gapValues, borderColor: '#eda100', backgroundColor: 'rgba(237,161,0,0.1)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.1 }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfigPP },
+      data: { labels: mesLabels, datasets: [{ label: 'Gap fora do SFH − SFH', data: gapValues, backgroundColor: '#eda100', borderWidth: 0, borderRadius: 2 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfigPPBar },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: 'p.p.' }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
@@ -2651,16 +3070,18 @@ function renderDurationConsignado() {
 }
 
 let chartCresRural;
-let activoModoCresRural = 'mom';
+let activoModoCresRural = 'estoque';
 function renderCresRural() {
   const sourceRural = activoClienteRural === 'pf' ? DATA_RURAL : DATA_RURAL_PJ;
   const mesKeysRu = Object.keys(sourceRural.by_month_bucket).sort();
   const mesLabelsRu = mesKeysRu.map(mesLabel);
-  const lookback = activoModoCresRural === 'cagr' ? 12 : 1;
+  const lookback = activoModoCresRural === 'cagr' ? 12 : (activoModoCresRural === 'mom' ? 1 : 0);
   const cresStartIdx = lookback;
 
   document.getElementById('tituloCresRural').textContent =
-    activoModoCresRural === 'cagr' ? 'Crescimento por tipo — LTM (%)' : 'Crescimento mês a mês por tipo (%)';
+    activoModoCresRural === 'cagr' ? 'Crescimento por tipo — LTM (%)' :
+    activoModoCresRural === 'mom' ? 'Crescimento mês a mês por tipo (%)' :
+    'Estoque por tipo (R$ bi)';
 
   document.getElementById('legendCresRural').innerHTML = RURAL_KEYS.map((key, i) => {
     const hidden = chartCresRural ? chartCresRural.getDatasetMeta(i).hidden : false;
@@ -2682,13 +3103,15 @@ function renderCresRural() {
       const row = sourceRural.by_month_bucket[k];
       return row && row[bucket] ? row[bucket][1] : null;
     });
-    const growth = raw.map((v, j) => {
-      if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
-      return (v / raw[j - lookback] - 1) * 100;
-    });
+    const values = activoModoCresRural === 'estoque'
+      ? raw.map(v => v == null ? null : v / 1e9)
+      : raw.map((v, j) => {
+          if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
+          return (v / raw[j - lookback] - 1) * 100;
+        });
     return {
       label: RURAL_LABELS[key],
-      data: growth.slice(cresStartIdx),
+      data: values.slice(cresStartIdx),
       borderColor: RURAL_COLORS[key],
       backgroundColor: 'transparent',
       borderWidth: 1.5,
@@ -2698,20 +3121,24 @@ function renderCresRural() {
     };
   });
   const cresLabels = mesLabelsRu.slice(cresStartIdx);
-  const yLabel = activoModoCresRural === 'cagr' ? 'LTM (%)' : '% M/M';
+  const yLabel = activoModoCresRural === 'cagr' ? 'LTM (%)' : activoModoCresRural === 'mom' ? '% M/M' : 'R$ bi';
+  const dlConfig = activoModoCresRural === 'estoque' ? datalabelsConfigBRLbi : datalabelsConfig;
 
   if (!chartCresRural) {
     chartCresRural = new Chart(document.getElementById('chartCresRural'), {
       type: 'line',
       plugins: [ChartDataLabels],
       data: { labels: cresLabels, datasets: cresDatasets },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: dlConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartCresRural.data.labels = cresLabels;
     chartCresRural.data.datasets.forEach((ds, i) => { ds.data = cresDatasets[i].data; ds.label = cresDatasets[i].label; ds.borderColor = cresDatasets[i].borderColor; });
     chartCresRural.options.scales.y.title.text = yLabel;
+    chartCresRural.options.plugins.datalabels = dlConfig;
+    chartCresRural.options.scales.x.min = undefined;
+    chartCresRural.options.scales.x.max = undefined;
     chartCresRural.update();
   }
   initZoomBrush(chartCresRural, ensureBrushUI('chartCresRural'));
@@ -2818,18 +3245,18 @@ function renderComposicaoRural() {
   const pctRegulado = mesKeys.map(m => DATA_COMPOSICAO_RURAL.by_month[m].pct_regulado);
 
   const datasets = [
-    { label: 'Regulado', data: pctRegulado, borderColor: '#2a78d6', backgroundColor: 'rgba(42,120,214,0.15)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.1 },
-    { label: 'Livre (mercado)', data: pctLivre, borderColor: '#3f9142', backgroundColor: 'rgba(63,145,66,0.15)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.1 },
+    { label: 'Regulado', data: pctRegulado, backgroundColor: '#2a78d6', borderWidth: 0 },
+    { label: 'Livre (mercado)', data: pctLivre, backgroundColor: '#3f9142', borderWidth: 0 },
   ];
 
   if (!chartComposicaoRural) {
     chartComposicaoRural = new Chart(document.getElementById('chartComposicaoRural'), {
-      type: 'line',
+      type: 'bar',
       plugins: [ChartDataLabels],
       data: { labels: mesLabels, datasets },
       options: { responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: true, position: 'top' }, datalabels: { display: false } },
-        scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { min: 0, max: 100, title: { display: true, text: '% do saldo' }, grid: { color: '#e1e0d9' } } } }
+        scales: { x: { stacked: true, ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { stacked: true, min: 0, max: 100, title: { display: true, text: '% do saldo' }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartComposicaoRural.data.labels = mesLabels;
@@ -2838,6 +3265,39 @@ function renderComposicaoRural() {
     chartComposicaoRural.update();
   }
   initZoomBrush(chartComposicaoRural, ensureBrushUI('chartComposicaoRural'));
+}
+
+let chartRuralControle;
+function renderRuralControle() {
+  const d = DATA_RURAL_CONTROLE;
+  const labels = d.quarters;
+  const datasets = [
+    { label: 'Público', data: d.publico_bi, backgroundColor: '#2a78d6', stack: 's' },
+    { label: 'Privado', data: d.privado_bi, backgroundColor: '#eda100', stack: 's' },
+    { label: 'Cooperativa', data: d.cooperativa_bi, backgroundColor: '#3f9142', stack: 's' },
+  ];
+
+  if (!chartRuralControle) {
+    chartRuralControle = new Chart(document.getElementById('chartRuralControle'), {
+      type: 'bar',
+      plugins: [ChartDataLabels],
+      data: { labels, datasets },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, position: 'top' },
+          datalabels: { display: true, color: '#000', backgroundColor: 'rgba(255,255,255,0.85)', borderRadius: 3, padding: { top: 1, bottom: 1, left: 3, right: 3 }, font: { size: 10, weight: '600' },
+            formatter: (v) => v >= 10 ? v.toFixed(0) : '' },
+        },
+        scales: {
+          x: { stacked: true, grid: { display: false } },
+          y: { stacked: true, title: { display: true, text: 'R$ bi' }, grid: { color: '#e1e0d9' } },
+        } }
+    });
+  } else {
+    chartRuralControle.data.labels = labels;
+    chartRuralControle.data.datasets.forEach((ds, i) => { ds.data = datasets[i].data; });
+    chartRuralControle.update();
+  }
 }
 
 document.getElementById('periodoTaxas').addEventListener('click', (e) => {
@@ -2967,6 +3427,24 @@ document.getElementById('periodoTaxasVeiculos').addEventListener('click', (e) =>
   btn.classList.add('active');
   activoPeriodoTaxasVeiculos = btn.dataset.periodo;
   renderTaxasVeiculos();
+});
+
+document.getElementById('periodoB3Modalidade').addEventListener('click', (e) => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  document.querySelectorAll('#periodoB3Modalidade .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activoModoB3Modalidade = btn.dataset.modo;
+  renderB3Modalidade();
+});
+
+document.getElementById('periodoB3Prazo').addEventListener('click', (e) => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  document.querySelectorAll('#periodoB3Prazo .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activoModoB3Prazo = btn.dataset.modo;
+  renderB3Prazo();
 });
 
 document.getElementById('periodoCresHabitacional').addEventListener('click', (e) => {
@@ -3258,10 +3736,10 @@ function renderTaxasCartao() {
 
   if (!chartGapCartao) {
     chartGapCartao = new Chart(document.getElementById('chartGapCartao'), {
-      type: 'line',
+      type: 'bar',
       plugins: [ChartDataLabels],
-      data: { labels: mesLabels, datasets: [{ label: 'Gap rotativo − parcelado', data: gapValues, borderColor: '#e34948', backgroundColor: 'rgba(227,73,72,0.1)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.1 }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfigPP },
+      data: { labels: mesLabels, datasets: [{ label: 'Gap rotativo − parcelado', data: gapValues, backgroundColor: '#e34948', borderWidth: 0, borderRadius: 2 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfigPPBar },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: 'p.p.' }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
@@ -3540,6 +4018,9 @@ renderBancosConsignado();
 renderVeiculos();
 renderTaxasVeiculos();
 renderBancosVeiculos();
+renderB3Financiamento();
+renderB3Modalidade();
+renderB3Prazo();
 
 const GRANDE_BUCKET_MAP = {
   financiamentos: 'Financiamentos',
@@ -3605,15 +4086,17 @@ function renderGrande() {
 }
 
 let chartCresGrande;
-let activoModoCresGrande = 'mom';
+let activoModoCresGrande = 'estoque';
 function renderCresGrande() {
   const mesKeysGrande = Object.keys(DATA_GRANDE.by_month_bucket).sort();
   const mesLabelsGrande = mesKeysGrande.map(mesLabel);
-  const lookback = activoModoCresGrande === 'cagr' ? 12 : 1;
+  const lookback = activoModoCresGrande === 'cagr' ? 12 : (activoModoCresGrande === 'mom' ? 1 : 0);
   const cresStartIdx = lookback;
 
   document.getElementById('tituloCresGrande').textContent =
-    activoModoCresGrande === 'cagr' ? 'Crescimento por tipo — LTM (%)' : 'Crescimento mês a mês por tipo (%)';
+    activoModoCresGrande === 'cagr' ? 'Crescimento por tipo — LTM (%)' :
+    activoModoCresGrande === 'mom' ? 'Crescimento mês a mês por tipo (%)' :
+    'Estoque por tipo (R$ bi)';
 
   document.getElementById('legendCresGrande').innerHTML = GRANDE_KEYS.map((key, i) => {
     const hidden = chartCresGrande ? chartCresGrande.getDatasetMeta(i).hidden : false;
@@ -3635,13 +4118,15 @@ function renderCresGrande() {
       const row = DATA_GRANDE.by_month_bucket[k];
       return row && row[bucket] ? row[bucket][1] : null;
     });
-    const growth = raw.map((v, j) => {
-      if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
-      return (v / raw[j - lookback] - 1) * 100;
-    });
+    const values = activoModoCresGrande === 'estoque'
+      ? raw.map(v => v == null ? null : v / 1e9)
+      : raw.map((v, j) => {
+          if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
+          return (v / raw[j - lookback] - 1) * 100;
+        });
     return {
       label: GRANDE_LABELS[key],
-      data: growth.slice(cresStartIdx),
+      data: values.slice(cresStartIdx),
       borderColor: GRANDE_COLORS[key],
       backgroundColor: 'transparent',
       borderWidth: 1.5,
@@ -3651,20 +4136,24 @@ function renderCresGrande() {
     };
   });
   const cresLabels = mesLabelsGrande.slice(cresStartIdx);
-  const yLabel = activoModoCresGrande === 'cagr' ? 'LTM (%)' : '% M/M';
+  const yLabel = activoModoCresGrande === 'cagr' ? 'LTM (%)' : activoModoCresGrande === 'mom' ? '% M/M' : 'R$ bi';
+  const dlConfig = activoModoCresGrande === 'estoque' ? datalabelsConfigBRLbi : datalabelsConfig;
 
   if (!chartCresGrande) {
     chartCresGrande = new Chart(document.getElementById('chartCresGrande'), {
       type: 'line',
       plugins: [ChartDataLabels],
       data: { labels: cresLabels, datasets: cresDatasets },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: dlConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartCresGrande.data.labels = cresLabels;
     chartCresGrande.data.datasets.forEach((ds, i) => { ds.data = cresDatasets[i].data; ds.label = cresDatasets[i].label; ds.borderColor = cresDatasets[i].borderColor; });
     chartCresGrande.options.scales.y.title.text = yLabel;
+    chartCresGrande.options.plugins.datalabels = dlConfig;
+    chartCresGrande.options.scales.x.min = undefined;
+    chartCresGrande.options.scales.x.max = undefined;
     chartCresGrande.update();
   }
   initZoomBrush(chartCresGrande, ensureBrushUI('chartCresGrande'));
@@ -3797,15 +4286,17 @@ function renderMpme() {
 }
 
 let chartCresMpme;
-let activoModoCresMpme = 'mom';
+let activoModoCresMpme = 'estoque';
 function renderCresMpme() {
   const mesKeysMpme = Object.keys(DATA_MPME.by_month_bucket).sort();
   const mesLabelsMpme = mesKeysMpme.map(mesLabel);
-  const lookback = activoModoCresMpme === 'cagr' ? 12 : 1;
+  const lookback = activoModoCresMpme === 'cagr' ? 12 : (activoModoCresMpme === 'mom' ? 1 : 0);
   const cresStartIdx = lookback;
 
   document.getElementById('tituloCresMpme').textContent =
-    activoModoCresMpme === 'cagr' ? 'Crescimento por tipo — LTM (%)' : 'Crescimento mês a mês por tipo (%)';
+    activoModoCresMpme === 'cagr' ? 'Crescimento por tipo — LTM (%)' :
+    activoModoCresMpme === 'mom' ? 'Crescimento mês a mês por tipo (%)' :
+    'Estoque por tipo (R$ bi)';
 
   document.getElementById('legendCresMpme').innerHTML = MPME_KEYS.map((key, i) => {
     const hidden = chartCresMpme ? chartCresMpme.getDatasetMeta(i).hidden : false;
@@ -3827,13 +4318,15 @@ function renderCresMpme() {
       const row = DATA_MPME.by_month_bucket[k];
       return row && row[bucket] ? row[bucket][1] : null;
     });
-    const growth = raw.map((v, j) => {
-      if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
-      return (v / raw[j - lookback] - 1) * 100;
-    });
+    const values = activoModoCresMpme === 'estoque'
+      ? raw.map(v => v == null ? null : v / 1e9)
+      : raw.map((v, j) => {
+          if (j < lookback || v == null || raw[j - lookback] == null || raw[j - lookback] <= 0) return null;
+          return (v / raw[j - lookback] - 1) * 100;
+        });
     return {
       label: MPME_LABELS[key],
-      data: growth.slice(cresStartIdx),
+      data: values.slice(cresStartIdx),
       borderColor: MPME_COLORS[key],
       backgroundColor: 'transparent',
       borderWidth: 1.5,
@@ -3843,20 +4336,24 @@ function renderCresMpme() {
     };
   });
   const cresLabels = mesLabelsMpme.slice(cresStartIdx);
-  const yLabel = activoModoCresMpme === 'cagr' ? 'LTM (%)' : '% M/M';
+  const yLabel = activoModoCresMpme === 'cagr' ? 'LTM (%)' : activoModoCresMpme === 'mom' ? '% M/M' : 'R$ bi';
+  const dlConfig = activoModoCresMpme === 'estoque' ? datalabelsConfigBRLbi : datalabelsConfig;
 
   if (!chartCresMpme) {
     chartCresMpme = new Chart(document.getElementById('chartCresMpme'), {
       type: 'line',
       plugins: [ChartDataLabels],
       data: { labels: cresLabels, datasets: cresDatasets },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: dlConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartCresMpme.data.labels = cresLabels;
     chartCresMpme.data.datasets.forEach((ds, i) => { ds.data = cresDatasets[i].data; ds.label = cresDatasets[i].label; ds.borderColor = cresDatasets[i].borderColor; });
     chartCresMpme.options.scales.y.title.text = yLabel;
+    chartCresMpme.options.plugins.datalabels = dlConfig;
+    chartCresMpme.options.scales.x.min = undefined;
+    chartCresMpme.options.scales.x.max = undefined;
     chartCresMpme.update();
   }
   initZoomBrush(chartCresMpme, ensureBrushUI('chartCresMpme'));
@@ -3930,6 +4427,7 @@ renderTaxasHabitacional();
 renderRural();
 renderTaxasRural();
 renderComposicaoRural();
+renderRuralControle();
 renderGrande();
 renderMpme();
 renderDuration();
