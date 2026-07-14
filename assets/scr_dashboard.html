@@ -218,15 +218,6 @@
       </div>
     </section>
 
-    <section>
-      <h2>Severidade do vencido (%)</h2>
-      <div id="legendSeveridade" style="display:flex; gap:16px; margin-bottom:8px; font-size:12px; color:var(--text-secondary);"></div>
-      <div class="chart-box" style="height: 280px;">
-        <canvas id="chartSeveridade"></canvas>
-      </div>
-      <p class="caveat">Abre o vencido (<code>carteira_vencida</code>) em duas faixas de atraso, como % da carteira ativa: "15 a 90 dias" (atraso inicial) e "acima de 90 dias" (atraso severo). Isso é diferente da "taxa de inadimplência" mostrada acima: <code>carteira_inadimplencia</code> é o saldo <strong>total</strong> da operação (não só a parcela vencida) quando ela tem alguma parcela em atraso há mais de 90 dias — por isso costuma ser maior que "vencido acima de 90 dias", que conta só o valor efetivamente não pago.</p>
-    </section>
-
     <div class="two-col">
       <section>
         <h2>Top 10 estados por carteira ativa (mai/2026, R$ bi)</h2>
@@ -1044,13 +1035,14 @@
     </section>
 
     <section>
-      <h2>Inadimplência de crédito rural por tipo de instituição (%) — pessoa física</h2>
+      <h2>Inadimplência de crédito rural por tipo de instituição (%) — pessoa física + total PJ</h2>
       <div class="chart-box" style="height: 300px;">
         <canvas id="chartInadRuralControle"></canvas>
       </div>
       <p class="caveat"><strong>Público tem inadimplência bem mais alta que privado e cooperativa nesse recorte (rural PF).</strong>
         <br><br>
-        Metodologia e fonte: mesma base do gráfico de estoque de crédito rural por tipo de instituição mais abaixo nesta aba (IF.data, relatório 123, grupo 10037, trimestral desde 1T25). Inadimplência = saldo vencido há ≥15 dias / carteira ativa total, por tipo de controle — definição mais ampla (menos rigorosa) que a inadimplência ≥90 dias usada nas séries mensais do SCR no resto do painel, não comparável diretamente a ela. Escopo diferente do restante desta aba: aqui a série é trimestral (IF.data), não mensal (SCR).
+        Metodologia e fonte — Público/Privado/Cooperativa (PF): IF.data, relatório 123, grupo 10037, trimestral desde 1T25. Inadimplência = saldo vencido há ≥15 dias / carteira ativa total, por tipo de controle — definição mais ampla (menos rigorosa) que a inadimplência ≥90 dias usada nas séries mensais do SCR no resto do painel, não comparável diretamente a ela.
+        <strong>Total PJ (linha tracejada):</strong> fonte diferente — SCR (<code>carteira_inadimplencia / carteira_ativa</code>, ≥90 dias), somando todos os buckets rurais de pessoa jurídica, no mês de fechamento de cada trimestre acima. Não quebrado por tipo de controle (o IF.data não permite essa quebra pra PJ — ver caveat do gráfico de estoque por tipo de instituição). As duas séries (PF trimestral/≥15 dias e PJ mensal/≥90 dias) não são diretamente comparáveis entre si — a série PJ está aqui só como referência de nível, não pra comparação direta com as 3 de PF.
       </p>
     </section>
 
@@ -1560,7 +1552,7 @@ function sumCliente(entry, cliente) {
   return entry[cliente] || [0, 0, 0, 0, 0];
 }
 
-let chartCarteira, chartRisco, chartUf, chartModalidade, chartSegmento, chartGapRisco, chartSeveridade, chartSeveridadeSegmentos;
+let chartCarteira, chartRisco, chartUf, chartModalidade, chartSegmento, chartGapRisco, chartSeveridadeSegmentos;
 let activeCliente = 'all';
 let activoModoCarteira = 'cagr';
 let resetCarteiraZoom = false;
@@ -1716,28 +1708,6 @@ function render() {
   }
   initZoomBrush(chartGapRisco, ensureBrushUI('chartGapRisco'));
 
-  document.getElementById('legendSeveridade').innerHTML =
-    '<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#5aa9e6;"></span>Vencido 15 a 90 dias</span>' +
-    '<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#b23a48;"></span>Vencido acima de 90 dias</span>';
-
-  if (!chartSeveridade) {
-    chartSeveridade = new Chart(document.getElementById('chartSeveridade'), {
-      type: 'line',
-      plugins: [ChartDataLabels],
-      data: { labels: mesLabels, datasets: [
-        { label: 'Vencido 15 a 90 dias (%)', data: sev15_90Series, borderColor: '#5aa9e6', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.1 },
-        { label: 'Vencido acima de 90 dias (%)', data: sev90Series, borderColor: '#b23a48', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.1 }
-      ] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
-        scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: '%' }, grid: { color: '#e1e0d9' } } } }
-    });
-  } else {
-    chartSeveridade.data.labels = mesLabels;
-    chartSeveridade.data.datasets[0].data = sev15_90Series;
-    chartSeveridade.data.datasets[1].data = sev90Series;
-    chartSeveridade.update();
-  }
-  initZoomBrush(chartSeveridade, ensureBrushUI('chartSeveridade'));
 
   const ufAgg = {};
   for (const uf in DATA.uf_latest) ufAgg[uf] = sumCliente(DATA.uf_latest[uf], activeCliente);
@@ -3696,14 +3666,32 @@ function renderRuralControle() {
   }
 }
 
+// Inadimplência PJ agregada (todos os buckets rurais somados, sem quebra por tipo de
+// controle — essa quebra só existe no IF.data pra PF) pro mesmo anomes de fechamento de
+// trimestre usado nas 3 séries PF (IF.data). Fonte SCR (DATA_RURAL_PJ), mensal.
+function pjInadRuralParaAnomes(anomes) {
+  const prefix = String(anomes).slice(0, 4) + '-' + String(anomes).slice(4, 6);
+  const key = Object.keys(DATA_RURAL_PJ.by_month_bucket).find(k => k.startsWith(prefix));
+  if (!key) return null;
+  const row = DATA_RURAL_PJ.by_month_bucket[key];
+  let ca = 0, ci = 0;
+  for (const rk of RURAL_KEYS) {
+    const bucket = RURAL_BUCKET_MAP[rk];
+    if (row[bucket]) { ca += row[bucket][1]; ci += row[bucket][3]; }
+  }
+  return ca > 0 ? ci / ca * 100 : null;
+}
+
 let chartInadRuralControle;
 function renderInadRuralControle() {
   const d = DATA_RURAL_CONTROLE;
   const labels = d.quarters;
+  const pjValues = d.anomes.map(pjInadRuralParaAnomes);
   const datasets = [
     { label: 'Público', data: d.publico_inad_pct, borderColor: '#2a78d6', backgroundColor: 'transparent', borderWidth: 2, tension: 0.1 },
     { label: 'Privado', data: d.privado_inad_pct, borderColor: '#eda100', backgroundColor: 'transparent', borderWidth: 2, tension: 0.1 },
     { label: 'Cooperativa', data: d.cooperativa_inad_pct, borderColor: '#3f9142', backgroundColor: 'transparent', borderWidth: 2, tension: 0.1 },
+    { label: 'Total PJ (SCR)', data: pjValues, borderColor: '#6a4fc2', backgroundColor: 'transparent', borderWidth: 2, borderDash: [6, 3], tension: 0.1 },
   ];
 
   if (!chartInadRuralControle) {
