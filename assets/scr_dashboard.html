@@ -359,17 +359,6 @@
     </section>
 
     <section>
-      <h2>Inadimplência por tipo de consignado (%)</h2>
-      <p style="font-size: 12px; color: var(--text-muted); margin: 10px 0 10px;">Clique num item da legenda para ocultar/mostrar a série</p>
-      <div id="legendInadConsignado" style="display:flex; gap:16px; margin-bottom:8px; font-size:12px; color:var(--text-secondary); flex-wrap: wrap;"></div>
-      <div class="chart-box" style="height: 300px;">
-        <canvas id="chartInadConsignado"></canvas>
-      </div>
-      <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 8px;">Zoom: role o mouse sobre o gráfico · arraste para mover · duplo-clique para resetar.</p>
-      <p class="caveat">Inadimplência = <code>carteira_inadimplencia / carteira_ativa</code> (base SCR), mês a mês, mesmas categorias dos gráficos de crescimento e taxa de juros desta aba: INSS = "Aposentado/pensionista", Setor público = "Servidor ou empregado público", Setor privado (CLT) = "Empregado de empresa privada", Consignado total = soma de todos os tipos de tomador.</p>
-    </section>
-
-    <section>
       <h2 id="tituloDurationConsignado">Prazo médio do consignado (duration) por tipo de tomador — série histórica</h2>
       <div class="chart-box" style="height: 320px;">
         <canvas id="chartDurationConsignado"></canvas>
@@ -403,6 +392,17 @@
         "Taxa média de juros das operações de crédito com recursos livres - Pessoas físicas" (códigos 20742, 20744, 20745, 20746, 20747).
         É a taxa média cobrada nas <strong>novas concessões</strong> daquele mês, não a taxa média do estoque acumulado que aparece no restante do painel — as duas coisas não são diretamente comparáveis.
       </p>
+    </section>
+
+    <section>
+      <h2>Inadimplência por tipo de consignado (%)</h2>
+      <p style="font-size: 12px; color: var(--text-muted); margin: 10px 0 10px;">Clique num item da legenda para ocultar/mostrar a série</p>
+      <div id="legendInadConsignado" style="display:flex; gap:16px; margin-bottom:8px; font-size:12px; color:var(--text-secondary); flex-wrap: wrap;"></div>
+      <div class="chart-box" style="height: 300px;">
+        <canvas id="chartInadConsignado"></canvas>
+      </div>
+      <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 8px;">Zoom: role o mouse sobre o gráfico · arraste para mover · duplo-clique para resetar.</p>
+      <p class="caveat">Inadimplência = <code>carteira_inadimplencia / carteira_ativa</code> (base SCR), mês a mês, mesmas categorias dos gráficos de crescimento e taxa de juros desta aba: INSS = "Aposentado/pensionista", Setor público = "Servidor ou empregado público", Setor privado (CLT) = "Empregado de empresa privada", Consignado total = soma de todos os tipos de tomador.</p>
     </section>
 
     <section>
@@ -560,6 +560,17 @@
     </section>
 
     <section>
+      <h2>Inadimplência — rotativo x parcelado (%)</h2>
+      <p style="font-size: 12px; color: var(--text-muted); margin: 10px 0 10px;">Clique num item da legenda para ocultar/mostrar a série</p>
+      <div id="legendInadCartao" style="display:flex; gap:16px; margin-bottom:8px; font-size:12px; color:var(--text-secondary); flex-wrap: wrap;"></div>
+      <div class="chart-box" style="height: 300px;">
+        <canvas id="chartInadCartao"></canvas>
+      </div>
+      <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 8px;">Zoom: role o mouse sobre o gráfico · arraste para mover · duplo-clique para resetar.</p>
+      <p class="caveat">Inadimplência = <code>carteira_inadimplencia / carteira_ativa</code> (base SCR), mês a mês, para as submodalidades "Cartão de crédito rotativo" e "Cartão de crédito parcelado". Não inclui "Antecipação de fatura de cartão" (categoria menor, fora dessa comparação).</p>
+    </section>
+
+    <section>
       <h2>Estoque por tipo de operação (mai/2026)</h2>
       <table>
         <thead>
@@ -669,6 +680,15 @@
     </section>
 
     <section>
+      <h2>Taxa de juros x inadimplência — crédito pessoal</h2>
+      <div class="chart-box" style="height: 320px;">
+        <canvas id="chartTaxaInadPessoal"></canvas>
+      </div>
+      <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 8px;">Zoom: role o mouse sobre o gráfico · arraste para mover · duplo-clique para resetar.</p>
+      <p class="caveat">Duas fontes/escalas sobrepostas: linha = taxa média de juros nas novas concessões (SGS, eixo esquerdo), barras = inadimplência do estoque (<code>carteira_inadimplencia / carteira_ativa</code>, base SCR, eixo direito) do mesmo mês. Não são a mesma população (taxa é sobre operações novas do mês; inadimplência é sobre o estoque acumulado) — a sobreposição é só pra comparar visualmente a tendência das duas séries, não pra ler uma em função da outra.</p>
+    </section>
+
+    <section>
       <h2>Estoque por tipo de operação (mai/2026)</h2>
       <table>
         <thead>
@@ -754,6 +774,15 @@
         <canvas id="chartTaxasVeiculos"></canvas>
       </div>
       <p class="caveat">Fonte: SGS do BC — "Taxa média de juros das operações de crédito com recursos livres, Pessoas físicas, Aquisição de veículos" (código 20749 % a.a. / 25471 % a.m.). Taxa média cobrada nas <strong>novas concessões</strong> do mês, não a taxa do estoque acumulado.</p>
+    </section>
+
+    <section>
+      <h2>Taxa de juros x inadimplência — aquisição de veículos</h2>
+      <div class="chart-box" style="height: 320px;">
+        <canvas id="chartTaxaInadVeiculos"></canvas>
+      </div>
+      <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 8px;">Zoom: role o mouse sobre o gráfico · arraste para mover · duplo-clique para resetar.</p>
+      <p class="caveat">Duas fontes/escalas sobrepostas: linha = taxa média de juros nas novas concessões (SGS, eixo esquerdo), barras = inadimplência do estoque (<code>carteira_inadimplencia / carteira_ativa</code>, base SCR, eixo direito) do mesmo mês. Não são a mesma população (taxa é sobre operações novas do mês; inadimplência é sobre o estoque acumulado) — a sobreposição é só pra comparar visualmente a tendência das duas séries, não pra ler uma em função da outra.</p>
     </section>
 
     <section>
@@ -894,6 +923,17 @@
     </section>
 
     <section>
+      <h2>Inadimplência — SFH x fora do SFH (%)</h2>
+      <p style="font-size: 12px; color: var(--text-muted); margin: 10px 0 10px;">Clique num item da legenda para ocultar/mostrar a série</p>
+      <div id="legendInadHabitacional" style="display:flex; gap:16px; margin-bottom:8px; font-size:12px; color:var(--text-secondary); flex-wrap: wrap;"></div>
+      <div class="chart-box" style="height: 300px;">
+        <canvas id="chartInadHabitacional"></canvas>
+      </div>
+      <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 8px;">Zoom: role o mouse sobre o gráfico · arraste para mover · duplo-clique para resetar.</p>
+      <p class="caveat">Inadimplência = <code>carteira_inadimplencia / carteira_ativa</code> (base SCR), mês a mês, para "SFH (regulado)" e "Fora do SFH (mercado)".</p>
+    </section>
+
+    <section>
       <h2>Estoque por tipo de financiamento (mai/2026)</h2>
       <table>
         <thead>
@@ -1004,6 +1044,17 @@
     </section>
 
     <section>
+      <h2>Inadimplência de crédito rural por tipo de instituição (%) — pessoa física</h2>
+      <div class="chart-box" style="height: 300px;">
+        <canvas id="chartInadRuralControle"></canvas>
+      </div>
+      <p class="caveat"><strong>Público tem inadimplência bem mais alta que privado e cooperativa nesse recorte (rural PF).</strong>
+        <br><br>
+        Metodologia e fonte: mesma base do gráfico de estoque de crédito rural por tipo de instituição mais abaixo nesta aba (IF.data, relatório 123, grupo 10037, trimestral desde 1T25). Inadimplência = saldo vencido há ≥15 dias / carteira ativa total, por tipo de controle — definição mais ampla (menos rigorosa) que a inadimplência ≥90 dias usada nas séries mensais do SCR no resto do painel, não comparável diretamente a ela. Escopo diferente do restante desta aba: aqui a série é trimestral (IF.data), não mensal (SCR).
+      </p>
+    </section>
+
+    <section>
       <h2>Composição do saldo rural por tipo de taxa — pessoa física (% do estoque)</h2>
       <div class="chart-box" style="height: 280px;">
         <canvas id="chartComposicaoRural"></canvas>
@@ -1017,17 +1068,6 @@
         <canvas id="chartRuralControle"></canvas>
       </div>
       <p class="caveat" id="caveatRuralControle">Fonte: IF.data/BC — carteira ativa "Rural e Agroindustrial" (pessoa física, relatório 123, grupo 10037), nível Conglomerado Prudencial. Classificação por tipo de controle de capital: <strong>Público</strong> = campo TCB do cadastro do BC igual a "Público" (BB, Caixa, bancos estaduais, BNDES, agências de fomento etc.); <strong>Cooperativa</strong> = instituições com "COOPERATIVA" no nome (Sicoob, Sicredi, Unicred e demais singulares/centrais, que o TCB do BC classifica como "Privado nacional"); <strong>Privado</strong> = demais instituições privadas nacionais e estrangeiras. Série trimestral disponível a partir de 1T25 (limite do período publicado pela API do IF.data) — cresce a cada trimestre novo divulgado pelo BC. Mostra apenas pessoa física: o equivalente PJ (relatório 128, grupo 10091) foi avaliado e descartado por subestimar em ~45% o saldo PJ rural frente ao SCR.data (87,4bi vs. 158,5bi em 1T26), limitação de escopo do COSIF e não um erro de cálculo. Escopo diferente do restante desta aba (que usa o estoque mensal do SCR); aqui a série é trimestral (IF.data).</p>
-    </section>
-
-    <section>
-      <h2>Inadimplência de crédito rural por tipo de instituição (%) — pessoa física</h2>
-      <div class="chart-box" style="height: 300px;">
-        <canvas id="chartInadRuralControle"></canvas>
-      </div>
-      <p class="caveat"><strong>Público tem inadimplência bem mais alta que privado e cooperativa nesse recorte (rural PF).</strong>
-        <br><br>
-        Metodologia e fonte: mesma base do gráfico de estoque acima (IF.data, relatório 123, grupo 10037, trimestral desde 1T25). Inadimplência = saldo vencido há ≥15 dias / carteira ativa total, por tipo de controle — definição mais ampla (menos rigorosa) que a inadimplência ≥90 dias usada nas séries mensais do SCR no resto do painel, não comparável diretamente a ela.
-      </p>
     </section>
 
     <section>
@@ -1218,6 +1258,11 @@ function mesLabel(dateStr) {
   const ano = dateStr.slice(2, 4);
   const idx = parseInt(dateStr.slice(5, 7), 10) - 1;
   return MESES_PT[idx] + '/' + ano;
+}
+// Chave "AAAA-MM" pra casar series de fontes diferentes (SGS usa dia 1, SCR usa
+// fim do mes -- as datas completas nunca batem, só ano+mes).
+function ym(dateStr) {
+  return dateStr.slice(0, 7);
 }
 function fmtBRL(v) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
@@ -2228,6 +2273,57 @@ function renderCartao() {
     </tr>`;
 
   renderCresCartao();
+  renderInadCartao();
+}
+
+let chartInadCartao;
+const CARTAO_INAD_KEYS = ['cartao_rotativo', 'cartao_parcelado'];
+function renderInadCartao() {
+  const mesKeysR = Object.keys(DATA_RISCO.by_month_bucket).sort();
+  const mesLabelsR = mesKeysR.map(mesLabel);
+
+  document.getElementById('legendInadCartao').innerHTML = CARTAO_INAD_KEYS.map((key, i) => {
+    const hidden = chartInadCartao ? chartInadCartao.getDatasetMeta(i).hidden : false;
+    return `<span class="legend-item" data-index="${i}" style="display:flex;align-items:center;gap:4px;cursor:pointer;user-select:none;opacity:${hidden ? '0.4' : '1'};"><span style="width:10px;height:10px;border-radius:2px;background:${CARTAO_COLORS[key]};"></span>${CARTAO_LABELS[key]}</span>`;
+  }).join('');
+  document.getElementById('legendInadCartao').onclick = (e) => {
+    const item = e.target.closest('.legend-item');
+    if (!item || !chartInadCartao) return;
+    const idx = Number(item.dataset.index);
+    const meta = chartInadCartao.getDatasetMeta(idx);
+    meta.hidden = !meta.hidden;
+    item.style.opacity = meta.hidden ? '0.4' : '1';
+    chartInadCartao.update();
+  };
+
+  const inadDatasets = CARTAO_INAD_KEYS.map((key) => {
+    const bucket = CARTAO_BUCKET_MAP[key];
+    const data = mesKeysR.map(k => {
+      const row = DATA_RISCO.by_month_bucket[k];
+      const v = row && row[bucket];
+      return v && v[1] > 0 ? v[3] / v[1] * 100 : null;
+    });
+    return {
+      label: CARTAO_LABELS[key], data,
+      borderColor: CARTAO_COLORS[key], backgroundColor: 'transparent',
+      borderWidth: 1.5, pointRadius: 0, tension: 0.1, spanGaps: true,
+    };
+  });
+
+  if (!chartInadCartao) {
+    chartInadCartao = new Chart(document.getElementById('chartInadCartao'), {
+      type: 'line',
+      plugins: [ChartDataLabels],
+      data: { labels: mesLabelsR, datasets: inadDatasets },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+        scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: '%' }, grid: { color: '#e1e0d9' } } } }
+    });
+  } else {
+    chartInadCartao.data.labels = mesLabelsR;
+    chartInadCartao.data.datasets.forEach((ds, i) => { ds.data = inadDatasets[i].data; });
+    chartInadCartao.update();
+  }
+  initZoomBrush(chartInadCartao, ensureBrushUI('chartInadCartao'));
 }
 
 let chartCresCartao;
@@ -2525,6 +2621,49 @@ function renderTaxasVeiculos() {
     chartTaxasVeiculos.update();
   }
   initZoomBrush(chartTaxasVeiculos, ensureBrushUI('chartTaxasVeiculos'));
+
+  renderTaxaInadVeiculos(dataSource, suffix, mesKeys, mesLabels);
+}
+
+let chartTaxaInadVeiculos;
+function renderTaxaInadVeiculos(dataSource, suffix, mesKeys, mesLabels) {
+  const yLabelTaxa = 'Taxa (% ' + (suffix === 'a.a.' ? 'ao ano' : 'ao mês') + ')';
+  const taxaValues = mesKeys.map(m => dataSource.by_month[m].veiculos ?? null);
+
+  const inadByYm = {};
+  for (const k in DATA_VEICULOS.by_month_bucket) {
+    const row = DATA_VEICULOS.by_month_bucket[k]['Aquisição de veículos'];
+    if (row && row[1] > 0) inadByYm[ym(k)] = row[3] / row[1] * 100;
+  }
+  const inadValues = mesKeys.map(m => inadByYm[ym(m)] ?? null);
+
+  const datasets = [
+    { type: 'bar', label: 'Inadimplência (%)', data: inadValues, backgroundColor: '#c9e3d6', borderRadius: 2, yAxisID: 'y1', order: 2, datalabels: { anchor: 'center', align: 'center' } },
+    { type: 'line', label: 'Taxa média de juros (' + suffix + ')', data: taxaValues, borderColor: '#2a9d8f', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.1, spanGaps: true, yAxisID: 'y', order: 1 },
+  ];
+
+  if (!chartTaxaInadVeiculos) {
+    chartTaxaInadVeiculos = new Chart(document.getElementById('chartTaxaInadVeiculos'), {
+      type: 'bar',
+      plugins: [ChartDataLabels],
+      data: { labels: mesLabels, datasets },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }, datalabels: datalabelsConfig },
+        scales: {
+          x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } },
+          y: { position: 'left', title: { display: true, text: yLabelTaxa }, grid: { color: '#e1e0d9' } },
+          y1: { position: 'right', title: { display: true, text: 'Inadimplência (%)' }, grid: { drawOnChartArea: false } },
+        } }
+    });
+  } else {
+    chartTaxaInadVeiculos.data.labels = mesLabels;
+    chartTaxaInadVeiculos.data.datasets[0].data = inadValues;
+    chartTaxaInadVeiculos.data.datasets[1].data = taxaValues;
+    chartTaxaInadVeiculos.data.datasets[1].label = 'Taxa média de juros (' + suffix + ')';
+    chartTaxaInadVeiculos.options.scales.y.title.text = yLabelTaxa;
+    chartTaxaInadVeiculos.update();
+  }
+  initZoomBrush(chartTaxaInadVeiculos, ensureBrushUI('chartTaxaInadVeiculos'));
 }
 
 // =========== B3 (ex-SNG) — financiamento de veículos novos/usados ===========
@@ -2803,6 +2942,56 @@ function renderHabitacional() {
     </tr>`;
 
   renderCresHabitacional();
+  renderInadHabitacional();
+}
+
+let chartInadHabitacional;
+function renderInadHabitacional() {
+  const mesKeysH = Object.keys(DATA_HABITACIONAL.by_month_bucket).sort();
+  const mesLabelsH = mesKeysH.map(mesLabel);
+
+  document.getElementById('legendInadHabitacional').innerHTML = HABITACIONAL_KEYS.map((key, i) => {
+    const hidden = chartInadHabitacional ? chartInadHabitacional.getDatasetMeta(i).hidden : false;
+    return `<span class="legend-item" data-index="${i}" style="display:flex;align-items:center;gap:4px;cursor:pointer;user-select:none;opacity:${hidden ? '0.4' : '1'};"><span style="width:10px;height:10px;border-radius:2px;background:${HABITACIONAL_COLORS[key]};"></span>${HABITACIONAL_LABELS[key]}</span>`;
+  }).join('');
+  document.getElementById('legendInadHabitacional').onclick = (e) => {
+    const item = e.target.closest('.legend-item');
+    if (!item || !chartInadHabitacional) return;
+    const idx = Number(item.dataset.index);
+    const meta = chartInadHabitacional.getDatasetMeta(idx);
+    meta.hidden = !meta.hidden;
+    item.style.opacity = meta.hidden ? '0.4' : '1';
+    chartInadHabitacional.update();
+  };
+
+  const inadDatasets = HABITACIONAL_KEYS.map((key) => {
+    const bucket = HABITACIONAL_BUCKET_MAP[key];
+    const data = mesKeysH.map(k => {
+      const row = DATA_HABITACIONAL.by_month_bucket[k];
+      const v = row && row[bucket];
+      return v && v[1] > 0 ? v[3] / v[1] * 100 : null;
+    });
+    return {
+      label: HABITACIONAL_LABELS[key], data,
+      borderColor: HABITACIONAL_COLORS[key], backgroundColor: 'transparent',
+      borderWidth: 1.5, pointRadius: 0, tension: 0.1, spanGaps: true,
+    };
+  });
+
+  if (!chartInadHabitacional) {
+    chartInadHabitacional = new Chart(document.getElementById('chartInadHabitacional'), {
+      type: 'line',
+      plugins: [ChartDataLabels],
+      data: { labels: mesLabelsH, datasets: inadDatasets },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+        scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: '%' }, grid: { color: '#e1e0d9' } } } }
+    });
+  } else {
+    chartInadHabitacional.data.labels = mesLabelsH;
+    chartInadHabitacional.data.datasets.forEach((ds, i) => { ds.data = inadDatasets[i].data; });
+    chartInadHabitacional.update();
+  }
+  initZoomBrush(chartInadHabitacional, ensureBrushUI('chartInadHabitacional'));
 }
 
 let chartCresHabitacional;
@@ -4376,6 +4565,49 @@ function renderTaxasPessoal() {
     chartTaxasPessoal.update();
   }
   initZoomBrush(chartTaxasPessoal, ensureBrushUI('chartTaxasPessoal'));
+
+  renderTaxaInadPessoal(dataSource, suffix, mesKeys, mesLabels);
+}
+
+let chartTaxaInadPessoal;
+function renderTaxaInadPessoal(dataSource, suffix, mesKeys, mesLabels) {
+  const yLabelTaxa = 'Taxa (% ' + (suffix === 'a.a.' ? 'ao ano' : 'ao mês') + ')';
+  const taxaValues = mesKeys.map(m => dataSource.by_month[m].nao_consignado ?? null);
+
+  const inadByYm = {};
+  for (const k in DATA_RISCO.by_month_bucket) {
+    const row = DATA_RISCO.by_month_bucket[k]['Crédito pessoal (sem consignação)'];
+    if (row && row[1] > 0) inadByYm[ym(k)] = row[3] / row[1] * 100;
+  }
+  const inadValues = mesKeys.map(m => inadByYm[ym(m)] ?? null);
+
+  const datasets = [
+    { type: 'bar', label: 'Inadimplência (%)', data: inadValues, backgroundColor: '#c9d6e3', borderRadius: 2, yAxisID: 'y1', order: 2, datalabels: { anchor: 'center', align: 'center' } },
+    { type: 'line', label: 'Taxa média de juros (' + suffix + ')', data: taxaValues, borderColor: '#2a78d6', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.1, spanGaps: true, yAxisID: 'y', order: 1 },
+  ];
+
+  if (!chartTaxaInadPessoal) {
+    chartTaxaInadPessoal = new Chart(document.getElementById('chartTaxaInadPessoal'), {
+      type: 'bar',
+      plugins: [ChartDataLabels],
+      data: { labels: mesLabels, datasets },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }, datalabels: datalabelsConfig },
+        scales: {
+          x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } },
+          y: { position: 'left', title: { display: true, text: yLabelTaxa }, grid: { color: '#e1e0d9' } },
+          y1: { position: 'right', title: { display: true, text: 'Inadimplência (%)' }, grid: { drawOnChartArea: false } },
+        } }
+    });
+  } else {
+    chartTaxaInadPessoal.data.labels = mesLabels;
+    chartTaxaInadPessoal.data.datasets[0].data = inadValues;
+    chartTaxaInadPessoal.data.datasets[1].data = taxaValues;
+    chartTaxaInadPessoal.data.datasets[1].label = 'Taxa média de juros (' + suffix + ')';
+    chartTaxaInadPessoal.options.scales.y.title.text = yLabelTaxa;
+    chartTaxaInadPessoal.update();
+  }
+  initZoomBrush(chartTaxaInadPessoal, ensureBrushUI('chartTaxaInadPessoal'));
 }
 
 let activoPeriodoBancosConsignado = 'aa';
