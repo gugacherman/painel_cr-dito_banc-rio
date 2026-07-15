@@ -6,12 +6,25 @@
 <title>Painel de crédito nacional — SCR (Banco Central)</title>
 <style>
   :root {
-    --bg: #f5f5f3;
-    --card: #ffffff;
+    --bg: #f9f9f7;
+    --card: #fcfcfb;
     --border: #e1e0d9;
-    --text-primary: #1a1a19;
+    --border-strong: #c3c2b7;
+    --text-primary: #0b0b0b;
     --text-secondary: #52514e;
     --text-muted: #898781;
+    /* Paleta categórica fixa (skill dataviz) — ordem nunca muda, cada série do
+       painel usa sempre o mesmo slot em todo lugar (mesmo dado = mesma cor). */
+    --series-1: #2a78d6; /* blue */
+    --series-2: #1baf7a; /* aqua */
+    --series-3: #eda100; /* yellow */
+    --series-4: #008300; /* green */
+    --series-5: #4a3aa7; /* violet */
+    --series-6: #e34948; /* red */
+    --series-7: #e87ba4; /* magenta */
+    --series-8: #eb6834; /* orange */
+    --seq-100: #cde2fb; --seq-250: #86b6ef; --seq-450: #2a78d6; --seq-650: #104281;
+    --status-good: #0ca30c; --status-warning: #fab219; --status-serious: #ec835a; --status-critical: #d03b3b;
     --blue: #2a78d6;
     --teal: #1baf7a;
     --amber: #c98500;
@@ -92,6 +105,7 @@
   .kpi-label { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 6px; }
   .kpi-value { font-size: 23px; font-weight: 600; margin: 0; }
   .kpi-sub { font-size: 12px; color: var(--text-muted); margin: 4px 0 0; }
+  .kpi-spark { display: block; width: 100%; height: 26px; margin-top: 8px; }
   section {
     background: var(--card);
     border: 1px solid var(--border);
@@ -133,6 +147,20 @@
   .bar-cell { display: flex; align-items: center; gap: 8px; }
   .bar-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
   .bar-fill { height: 100%; background: var(--blue); border-radius: 4px; }
+  .scorecard-table td, .scorecard-table th { padding: 9px 10px; }
+  .scorecard-table tbody tr { cursor: pointer; }
+  .scorecard-table tbody tr:hover { background: rgba(11,11,11,0.03); }
+  .scorecard-table td.seg-name { font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+  .scorecard-table .bar-track { width: 64px; flex: none; background: var(--border); }
+  .scorecard-table .bar-fill { background: var(--series-1); }
+  .scorecard-table .estoque-val { min-width: 52px; text-align: right; font-variant-numeric: tabular-nums; }
+  .scorecard-spark { display: block; width: 92px; height: 26px; }
+  .delta-pill { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .delta-pill.is-good { color: var(--status-good); }
+  .delta-pill.is-warning { color: #a86a00; }
+  .delta-pill.is-serious { color: #b8542e; }
+  .delta-pill.is-critical { color: var(--status-critical); }
+  .delta-pill .arrow { font-size: 11px; }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
   @media (max-width: 780px) { .two-col { grid-template-columns: 1fr; } }
 </style>
@@ -165,11 +193,35 @@
 
     <div class="kpi-grid">
       <div class="kpi-card"><p class="kpi-label">CAGR desde 2017</p><p class="kpi-value" id="kpiGeralCagr">—</p><p class="kpi-sub" id="kpiGeralCagrSub">—</p></div>
-      <div class="kpi-card"><p class="kpi-label">Carteira ativa (mai/2026)</p><p class="kpi-value" id="kpiCarteira">—</p><p class="kpi-sub" id="kpiCarteiraSub">—</p></div>
-      <div class="kpi-card"><p class="kpi-label">Taxa de inadimplência</p><p class="kpi-value" id="kpiInadimplencia">—</p></div>
-      <div class="kpi-card"><p class="kpi-label">Ativo problemático</p><p class="kpi-value" id="kpiAtivoProblematico">—</p></div>
-      <div class="kpi-card"><p class="kpi-label">Operações registradas</p><p class="kpi-value" id="kpiOps">—</p></div>
+      <div class="kpi-card"><p class="kpi-label">Carteira ativa (mai/2026)</p><p class="kpi-value" id="kpiCarteira">—</p><p class="kpi-sub" id="kpiCarteiraSub">—</p><svg class="kpi-spark" id="kpiCarteiraSpark"></svg></div>
+      <div class="kpi-card"><p class="kpi-label">Taxa de inadimplência</p><p class="kpi-value" id="kpiInadimplencia">—</p><svg class="kpi-spark" id="kpiInadimplenciaSpark"></svg></div>
+      <div class="kpi-card"><p class="kpi-label">Ativo problemático</p><p class="kpi-value" id="kpiAtivoProblematico">—</p><svg class="kpi-spark" id="kpiAtivoProblematicoSpark"></svg></div>
+      <div class="kpi-card"><p class="kpi-label">Operações registradas</p><p class="kpi-value" id="kpiOps">—</p><svg class="kpi-spark" id="kpiOpsSpark"></svg></div>
     </div>
+
+    <section id="scorecardSection">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 4px;">
+        <h2 style="margin:0;">Painel de risco por segmento</h2>
+        <span style="font-size: 11px; color: var(--text-muted);" id="scorecardAsOf">—</span>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 14px;" id="scorecardSubtitle">Todos os 8 segmentos do painel, lado a lado — clique numa linha pra abrir a aba correspondente. Ordenado por tamanho da carteira.</p>
+      <div style="overflow-x: auto;">
+        <table class="scorecard-table">
+          <thead>
+            <tr>
+              <th>Segmento</th>
+              <th class="num">Carteira ativa</th>
+              <th class="num">Cresc. 12m</th>
+              <th class="num">Inadimplência</th>
+              <th>Tendência (12m)</th>
+              <th class="num">Δ inadimplência 12m</th>
+            </tr>
+          </thead>
+          <tbody id="tableScorecard"></tbody>
+        </table>
+      </div>
+      <p class="caveat">Carteira ativa e crescimento: <code>carteira_ativa</code> somada dentro de cada segmento (mesma base das abas individuais). Inadimplência: <code>carteira_inadimplencia / carteira_ativa</code>, mês mais recente vs. 12 meses atrás. A cor da coluna Δ é sobre <strong>direção</strong> (piorando/melhorando), não sobre o nível absoluto — segmentos de natureza diferente (ex.: cartão rotativo vs. financiamento habitacional) têm patamares de inadimplência estruturalmente diferentes, então comparar níveis brutos entre eles não é informativo; a variação recente é. Rural soma pessoa física + jurídica; os demais seguem a mesma composição das respectivas abas.</p>
+    </section>
 
     <section>
       <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap: 8px;">
@@ -208,7 +260,7 @@
       <div class="chart-box" style="height: 280px;">
         <canvas id="chartRisco"></canvas>
       </div>
-      <p class="caveat">Vencido aberto em duas faixas de atraso (vencido / carteira ativa): "15 a 90 dias" e "acima de 90 dias" — é só o valor da parcela em atraso, diferente da "Taxa de inadimplência" do card acima, que conta o saldo total do empréstimo quando ele tem atraso superior a 90 dias (ver nota no gráfico "Severidade do vencido" abaixo). Clique na legenda para ocultar/mostrar uma série — por exemplo, para tirar "Ativo problemático" do gráfico. "Ativo problemático" é uma medida mais ampla de risco: além do vencido, inclui operações renegociadas, reestruturadas e outras de difícil recuperação.</p>
+      <p class="caveat">Vencido aberto em duas faixas de atraso (vencido / carteira ativa): "15 a 90 dias" e "acima de 90 dias" — é só o valor da parcela em atraso, diferente da "Taxa de inadimplência" do card acima, que conta o saldo total do empréstimo quando ele tem atraso superior a 90 dias (ver nota no gráfico "Severidade do vencido" abaixo). Clique na legenda para ocultar/mostrar uma série — por exemplo, para tirar "Ativo problemático" do gráfico. "Ativo problemático" é uma medida mais ampla de risco: além do vencido, inclui operações renegociadas, reestruturadas e outras de difícil recuperação. <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="9" style="flex:none;"><line x1="7" y1="0" x2="7" y2="9" stroke="#898781" stroke-width="1.5" stroke-dasharray="3,2.5"/></svg></span> = passe o mouse perto da linha tracejada em jan/2025 para ver a nota sobre a Res. CMN 4.966 (mudança na regra de write-off).</p>
     </section>
 
     <section>
@@ -392,7 +444,7 @@
       <div class="chart-box" style="height: 300px;">
         <canvas id="chartInadConsignado"></canvas>
       </div>
-      <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 8px;">Zoom: role o mouse sobre o gráfico · arraste para mover · duplo-clique para resetar.</p>
+      <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 8px;">Zoom: arraste as alças abaixo do gráfico · duplo-clique para resetar.</p>
       <p class="caveat">Inadimplência = <code>carteira_inadimplencia / carteira_ativa</code> (base SCR), mês a mês, mesmas categorias dos gráficos de crescimento e taxa de juros desta aba: INSS = "Aposentado/pensionista", Setor público = "Servidor ou empregado público", Setor privado (CLT) = "Empregado de empresa privada", Consignado total = soma de todos os tipos de tomador.</p>
     </section>
 
@@ -557,7 +609,7 @@
       <div class="chart-box" style="height: 300px;">
         <canvas id="chartInadCartao"></canvas>
       </div>
-      <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 8px;">Zoom: role o mouse sobre o gráfico · arraste para mover · duplo-clique para resetar.</p>
+      <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 8px;">Zoom: arraste as alças abaixo do gráfico · duplo-clique para resetar.</p>
       <p class="caveat">Inadimplência = <code>carteira_inadimplencia / carteira_ativa</code> (base SCR), mês a mês, para as submodalidades "Cartão de crédito rotativo" e "Cartão de crédito parcelado". Não inclui "Antecipação de fatura de cartão" (categoria menor, fora dessa comparação).</p>
     </section>
 
@@ -569,6 +621,7 @@
         </thead>
         <tbody id="tableCartaoTipos"></tbody>
       </table>
+      <p style="font-size: 11px; color: var(--text-muted); margin: 8px 0 0;">"Antecipação de fatura de cartão" omitida por ser irrisória no estoque (&lt;0,01% do total); segue incluída nos totais do segmento acima.</p>
     </section>
 
     <section>
@@ -599,7 +652,7 @@
       <p class="caveat">
         Coluna "share": participação do banco na carteira ativa de crédito de cartão de crédito de pessoa física do Sistema Financeiro Nacional, no trimestre indicado no título — fonte IF.data/BC (relatório "Carteira de crédito ativa Pessoa Física", nível Conglomerado Prudencial), diferente da fonte semanal de taxas usada nas demais colunas. Banco Pan não é exibido por estar consolidado no conglomerado prudencial do BTG Pactual nesse relatório.
         Coluna "Segmento": segmentação prudencial S1-S5 conforme Resolução CMN/BCB 4.553/2017, extraída diretamente do cadastro IF.data de cada banco (individual, não agrupada). Financeiras/fintechs de cartão fora desse cadastro de bancos aparecem como "Financeira".
-        A soma dos shares exibidos não fecha 100%: cartão de crédito tem uma cauda longa de financeiras/fintechs fora dos bancos tradicionais listados acima. Para cobrir os maiores desses players, a tabela inclui também Mercado Pago, Carrefour (CSF), Porto Seguro, BRB, Renner (Realize), Neon, Riachuelo (Midway) e Pefisa. Essas marcas não aparecem por esse nome no ranking semanal do BC — o crédito é concedido pela financeira/instituição de pagamento do grupo que de fato reporta ao BC (ex.: Mercado Pago → Mercado Crédito SCFI S.A.; Carrefour (CSF) → Bco CSF S.A.; Porto Seguro → Portoseg S.A. CFI; Renner → Realize SCFI S.A.; Riachuelo → Midway S.A. - SCFI; BRB → BRB - Bco de Brasília S.A.); Rotativo/Parcelado dessas linhas vêm dessas razões sociais. BRB não tem rotativo divulgado nessa semana (só parcelado). Com isso a tabela cobre ~92% do mercado; o restante (~8%) se pulveriza entre centenas de outras financeiras e cooperativas de crédito de menor porte, não listadas aqui.
+        A soma dos shares exibidos não fecha 100%: cartão de crédito tem uma cauda longa de financeiras/fintechs fora dos bancos tradicionais listados acima. Para ampliar a cobertura, a tabela também traz os maiores desses players (Mercado Pago, Carrefour (CSF), Porto Seguro, BRB, Renner (Realize), Neon, Riachuelo (Midway) e Pefisa), reportados sob a razão social da financeira do grupo que responde ao BC. BRB não tem rotativo divulgado nessa semana (só parcelado). Com isso a tabela cobre ~92% do mercado; o restante (~8%) se pulveriza entre centenas de outras financeiras e cooperativas de menor porte, não listadas aqui.
       </p>
     </section>
 
@@ -672,11 +725,17 @@
 
     <section>
       <h2>Taxa de juros x inadimplência — crédito pessoal</h2>
-      <div class="chart-box" style="height: 320px;">
-        <canvas id="chartTaxaInadPessoal"></canvas>
+      <p style="font-size: 12px; color: var(--text-muted); margin: 10px 0 14px;">Dois painéis, mesmo período — taxa (novas concessões) e inadimplência (estoque) não são a mesma população, então cada uma tem seu próprio eixo em vez de dividir um gráfico só com duas escalas.</p>
+      <p style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 0 0 6px;">Taxa média de juros — novas concessões</p>
+      <div class="chart-box" style="height: 200px;">
+        <canvas id="chartTaxaPessoalPanel"></canvas>
       </div>
-      <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 8px;">Zoom: role o mouse sobre o gráfico · arraste para mover · duplo-clique para resetar.</p>
-      <p class="caveat">Duas fontes/escalas sobrepostas: linha = taxa média de juros nas novas concessões (SGS, eixo esquerdo), barras = inadimplência do estoque (<code>carteira_inadimplencia / carteira_ativa</code>, base SCR, eixo direito) do mesmo mês. Não são a mesma população (taxa é sobre operações novas do mês; inadimplência é sobre o estoque acumulado) — a sobreposição é só pra comparar visualmente a tendência das duas séries, não pra ler uma em função da outra.</p>
+      <p style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 16px 0 6px;">Inadimplência do estoque</p>
+      <div class="chart-box" style="height: 170px;">
+        <canvas id="chartInadPessoalPanel"></canvas>
+      </div>
+      <p style="font-size: 10px; color: var(--text-muted); margin: 6px 0 8px;">Zoom: arraste as alças abaixo do gráfico (vale para os dois painéis) · duplo-clique para resetar.</p>
+      <p class="caveat">Taxa = média cobrada nas novas concessões do mês (SGS). Inadimplência = <code>carteira_inadimplencia / carteira_ativa</code> do estoque, no mesmo mês (base SCR). Não são a mesma população (fluxo de operações novas vs. estoque acumulado) — os dois painéis compartilham o eixo do tempo pra comparar tendência, não pra ler um em função do outro.</p>
     </section>
 
     <section>
@@ -769,11 +828,17 @@
 
     <section>
       <h2>Taxa de juros x inadimplência — aquisição de veículos</h2>
-      <div class="chart-box" style="height: 320px;">
-        <canvas id="chartTaxaInadVeiculos"></canvas>
+      <p style="font-size: 12px; color: var(--text-muted); margin: 10px 0 14px;">Dois painéis, mesmo período — taxa (novas concessões) e inadimplência (estoque) não são a mesma população, então cada uma tem seu próprio eixo em vez de dividir um gráfico só com duas escalas.</p>
+      <p style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 0 0 6px;">Taxa média de juros — novas concessões</p>
+      <div class="chart-box" style="height: 200px;">
+        <canvas id="chartTaxaVeiculosPanel"></canvas>
       </div>
-      <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 8px;">Zoom: role o mouse sobre o gráfico · arraste para mover · duplo-clique para resetar.</p>
-      <p class="caveat">Duas fontes/escalas sobrepostas: linha = taxa média de juros nas novas concessões (SGS, eixo esquerdo), barras = inadimplência do estoque (<code>carteira_inadimplencia / carteira_ativa</code>, base SCR, eixo direito) do mesmo mês. Não são a mesma população (taxa é sobre operações novas do mês; inadimplência é sobre o estoque acumulado) — a sobreposição é só pra comparar visualmente a tendência das duas séries, não pra ler uma em função da outra.</p>
+      <p style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 16px 0 6px;">Inadimplência do estoque</p>
+      <div class="chart-box" style="height: 170px;">
+        <canvas id="chartInadVeiculosPanel"></canvas>
+      </div>
+      <p style="font-size: 10px; color: var(--text-muted); margin: 6px 0 8px;">Zoom: arraste as alças abaixo do gráfico (vale para os dois painéis) · duplo-clique para resetar.</p>
+      <p class="caveat">Taxa = média cobrada nas novas concessões do mês (SGS). Inadimplência = <code>carteira_inadimplencia / carteira_ativa</code> do estoque, no mesmo mês (base SCR). Não são a mesma população (fluxo de operações novas vs. estoque acumulado) — os dois painéis compartilham o eixo do tempo pra comparar tendência, não pra ler um em função do outro.</p>
     </section>
 
     <section>
@@ -920,7 +985,7 @@
       <div class="chart-box" style="height: 300px;">
         <canvas id="chartInadHabitacional"></canvas>
       </div>
-      <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 8px;">Zoom: role o mouse sobre o gráfico · arraste para mover · duplo-clique para resetar.</p>
+      <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 8px;">Zoom: arraste as alças abaixo do gráfico · duplo-clique para resetar.</p>
       <p class="caveat">Inadimplência = <code>carteira_inadimplencia / carteira_ativa</code> (base SCR), mês a mês, para "SFH (regulado)" e "Fora do SFH (mercado)".</p>
     </section>
 
@@ -1245,6 +1310,86 @@ const DATA_SEVERIDADE = {"geral": {"by_month_cliente": {"2017-01-31": {"PF": [16
 // esse update() cheio rodar instantâneo (sem o efeito de transição), preservando o comportamento
 // "sem animação" que a chamada com 'none' pretendia dar.
 Chart.defaults.animation = false;
+
+// --- Especificações de marca (skill dataviz), aplicadas globalmente: todo gráfico herda
+// isso a menos que sobrescreva explicitamente. Não muda nenhuma leitura de dado, só o traço
+// (linha 2px, marcador ≥8px no hover, barra com ponta arredondada e espessura limitada).
+Chart.defaults.color = '#898781'; // tinta "muted" -- eixo/rótulo, nunca a cor da série
+Chart.defaults.elements.line.borderWidth = 2;
+Chart.defaults.elements.point.hoverRadius = 5;
+Chart.defaults.elements.point.hoverBorderWidth = 2;
+Chart.defaults.elements.point.hoverBorderColor = '#fcfcfb'; // anel na cor da superfície
+Chart.defaults.elements.point.hitRadius = 8;
+Chart.defaults.elements.bar.borderRadius = 4;
+Chart.defaults.elements.bar.maxBarThickness = 24;
+Chart.defaults.elements.bar.borderSkipped = 'bottom';
+Chart.defaults.plugins.tooltip.padding = 10;
+Chart.defaults.plugins.tooltip.cornerRadius = 6;
+Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(11,11,11,0.92)';
+Chart.defaults.plugins.tooltip.titleFont = { weight: '600', size: 12 };
+Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
+Chart.defaults.plugins.tooltip.boxPadding = 4;
+
+// Plugin genérico de marcador de evento: qualquer dataset com isAnnotation:true vira uma
+// linha vertical tracejada (não uma marca de dado -- por isso o traço, ao contrário da
+// regra geral de "nunca tracejar grid/eixo") na coluna do seu único ponto não-nulo, com
+// hover por proximidade em x (não precisa acertar o pixel exato do ponto). O dataset em
+// si fica com pointRadius:0 -- ele só existe pra dar ao plugin um elemento válido pra
+// apontar o tooltip padrão do Chart.js (mesmo texto/estilo das outras séries).
+const eventAnnotationPlugin = {
+  id: 'eventAnnotation',
+  afterDatasetsDraw(chart) {
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return;
+    chart.data.datasets.forEach((ds, i) => {
+      if (!ds.isAnnotation) return;
+      const meta = chart.getDatasetMeta(i);
+      if (meta.hidden) return;
+      const idx = ds.data.findIndex(v => v != null);
+      if (idx === -1) return;
+      const pt = meta.data[idx];
+      if (!pt) return;
+      ctx.save();
+      ctx.setLineDash([4, 4]);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = ds.borderColor || '#898781';
+      ctx.beginPath();
+      ctx.moveTo(pt.x, chartArea.top);
+      ctx.lineTo(pt.x, chartArea.bottom);
+      ctx.stroke();
+      ctx.restore();
+    });
+  },
+  afterEvent(chart, args) {
+    const evt = args.event;
+    if (evt.type !== 'mousemove' && evt.type !== 'mouseout') return;
+    const { chartArea } = chart;
+    let found = null;
+    chart.data.datasets.forEach((ds, i) => {
+      if (!ds.isAnnotation || found) return;
+      const meta = chart.getDatasetMeta(i);
+      if (meta.hidden) return;
+      const idx = ds.data.findIndex(v => v != null);
+      if (idx === -1) return;
+      const pt = meta.data[idx];
+      if (!pt) return;
+      if (evt.type === 'mousemove' && Math.abs(evt.x - pt.x) <= 6 && evt.y >= chartArea.top && evt.y <= chartArea.bottom) {
+        found = { datasetIndex: i, index: idx };
+      }
+    });
+    const activeIsAnnotation = chart.tooltip && chart.tooltip.getActiveElements().some(el => chart.data.datasets[el.datasetIndex] && chart.data.datasets[el.datasetIndex].isAnnotation);
+    if (found) {
+      chart.tooltip.setActiveElements([found], { x: evt.x, y: evt.y });
+      chart.canvas.style.cursor = 'pointer';
+      args.changed = true;
+    } else if (activeIsAnnotation) {
+      chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+      chart.canvas.style.cursor = 'default';
+      args.changed = true;
+    }
+  },
+};
+
 const MESES_PT = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 function mesLabel(dateStr) {
   const ano = dateStr.slice(2, 4);
@@ -1272,6 +1417,43 @@ function fmtNum(v) {
 }
 function fmtPct(v) {
   return v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+}
+
+// Sparkline de stat-tile: linha "de-ênfase" (cinza) + ponto final na cor de destaque.
+// Só a forma importa (tendência), por isso sem eixo/rótulo -- o valor exato já está no
+// número grande ao lado. Últimos 12 pontos (spec do stat-tile: "12-point sparkline").
+function renderSparkline(elId, values, accentColor) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const pts = values.slice(-12).filter(v => v != null);
+  if (pts.length < 2) { el.innerHTML = ''; return; }
+  const W = 100, H = 28, pad = 2;
+  const min = Math.min(...pts), max = Math.max(...pts);
+  const range = (max - min) || 1;
+  const x = (i) => pad + (i / (pts.length - 1)) * (W - pad * 2);
+  const y = (v) => H - pad - ((v - min) / range) * (H - pad * 2);
+  const d = pts.map((v, i) => (i === 0 ? 'M' : 'L') + x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
+  const lastX = x(pts.length - 1), lastY = y(pts[pts.length - 1]);
+  el.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  el.innerHTML = `<path d="${d}" fill="none" stroke="#c3c2b7" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>` +
+    `<circle cx="${lastX.toFixed(1)}" cy="${lastY.toFixed(1)}" r="2.5" fill="${accentColor}"/>`;
+}
+
+// Mesma forma que renderSparkline, mas retorna a marcação como string -- para linhas
+// de tabela montadas via .innerHTML (não há <svg id> individual pra cada uma).
+function sparklineSvgString(values, accentColor, w, h) {
+  const W = w || 92, H = h || 26, pad = 2;
+  const pts = values.slice(-12).filter(v => v != null);
+  if (pts.length < 2) return `<svg class="scorecard-spark" viewBox="0 0 ${W} ${H}"></svg>`;
+  const min = Math.min(...pts), max = Math.max(...pts);
+  const range = (max - min) || 1;
+  const x = (i) => pad + (i / (pts.length - 1)) * (W - pad * 2);
+  const y = (v) => H - pad - ((v - min) / range) * (H - pad * 2);
+  const d = pts.map((v, i) => (i === 0 ? 'M' : 'L') + x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
+  const lastX = x(pts.length - 1), lastY = y(pts[pts.length - 1]);
+  return `<svg class="scorecard-spark" viewBox="0 0 ${W} ${H}">` +
+    `<path d="${d}" fill="none" stroke="#c3c2b7" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>` +
+    `<circle cx="${lastX.toFixed(1)}" cy="${lastY.toFixed(1)}" r="2.5" fill="${accentColor}"/></svg>`;
 }
 
 // --- Rotulagem adaptativa ao zoom (usada por sparseTickCallback/sparseDatalabelDisplay) ---
@@ -1337,7 +1519,11 @@ function sparseTickCallback(value, index) {
 function sparseDatalabelDisplay(context) {
   const meta = context.chart.getDatasetMeta(context.datasetIndex);
   if (meta.hidden) return false;
-  const visibleCount = context.chart.data.datasets.reduce((acc, _, i) => acc + (context.chart.getDatasetMeta(i).hidden ? 0 : 1), 0);
+  if (context.chart.data.datasets[context.datasetIndex].isAnnotation) return false;
+  // Marcadores de anotação (isAnnotation) não contam pro teto de 3 séries visíveis --
+  // são um ponto de evento, não uma série de dados, e não devem apagar os rótulos reais.
+  const visibleCount = context.chart.data.datasets.reduce((acc, ds, i) =>
+    acc + (context.chart.getDatasetMeta(i).hidden || ds.isAnnotation ? 0 : 1), 0);
   if (visibleCount > 3) return false;
   return shouldShowSparseLabel(context.chart, context.dataIndex);
 }
@@ -1542,6 +1728,27 @@ function initZoomBrush(chart, ids) {
   applyBrushWindow(chart, defaultBrushStartIndex(chart.data.labels), total - 1, els);
 }
 
+// Liga um segundo gráfico ao MESMO slider de zoom de um primeiro (já inicializado via
+// initZoomBrush) -- usado nos painéis empilhados taxa+inadimplência, pra substituir o
+// anti-padrão de eixo duplo por "small multiples" com navegação de tempo sincronizada.
+function linkZoomBrush(primaryChart, secondaryChart, ids) {
+  const minInput = document.getElementById(ids.min);
+  const maxInput = document.getElementById(ids.max);
+  const canvasEl = ids.canvas ? document.getElementById(ids.canvas) : null;
+  if (!minInput || !maxInput) return;
+  const mirror = () => {
+    if (!primaryChart._sparseRange) return;
+    secondaryChart.options.scales.x.min = primaryChart.options.scales.x.min;
+    secondaryChart.options.scales.x.max = primaryChart.options.scales.x.max;
+    secondaryChart._sparseRange = primaryChart._sparseRange.slice();
+    secondaryChart.update();
+  };
+  minInput.addEventListener('input', mirror);
+  maxInput.addEventListener('input', mirror);
+  if (canvasEl) canvasEl.addEventListener('dblclick', mirror);
+  mirror();
+}
+
 function sumCliente(entry, cliente) {
   if (!entry) return [0, 0, 0, 0, 0];
   if (cliente === 'all') {
@@ -1595,6 +1802,12 @@ function render() {
     return ca > 0 ? (v90 / ca * 100) : 0;
   });
 
+  // Marcador de evento: vigência da Res. CMN 4.966 (01/01/2025), que passou a permitir
+  // baixa a prejuízo (write-off) em 540 ou 720 dias de atraso, a critério do banco --
+  // explica o salto do vencido 90+ sem alta correspondente no 15-90 (ver caveat do gráfico).
+  const evtWo4966Idx = mesKeys.findIndex(k => k.slice(0, 7) === '2025-01');
+  const evtWo4966Series = mesKeys.map((k, i) => i === evtWo4966Idx ? sev90Series[i] : null);
+
   const latestKey = mesKeys[mesKeys.length - 1];
   const yoyKey = mesKeys[mesKeys.length - 13] || null;
   const [nLatest, caLatest, cvLatest, ciLatest, apLatest] = sumCliente(DATA.month_cliente[latestKey], activeCliente);
@@ -1618,6 +1831,14 @@ function render() {
   document.getElementById('kpiInadimplencia').textContent = caLatest > 0 ? fmtPct(ciLatest / caLatest * 100) : '—';
   document.getElementById('kpiAtivoProblematico').textContent = caLatest > 0 ? fmtPct(apLatest / caLatest * 100) : '—';
   document.getElementById('kpiOps').textContent = fmtNum(nLatest);
+
+  // Sparklines dos últimos 12 meses (mesmo filtro Todos/PF/PJ ativo) -- só a forma da
+  // tendência importa aqui, o valor exato já está no número grande do cartão.
+  const spark12 = mesKeys.slice(-12).map(k => sumCliente(DATA.month_cliente[k], activeCliente));
+  renderSparkline('kpiCarteiraSpark', spark12.map(r => r[1]), '#2a78d6');
+  renderSparkline('kpiInadimplenciaSpark', spark12.map(r => r[1] > 0 ? r[3] / r[1] * 100 : null), '#e34948');
+  renderSparkline('kpiAtivoProblematicoSpark', spark12.map(r => r[1] > 0 ? r[4] / r[1] * 100 : null), '#e34948');
+  renderSparkline('kpiOpsSpark', spark12.map(r => r[0]), '#2a78d6');
 
   document.getElementById('tituloCarteira').textContent =
     activoModoCarteira === 'cagr' ? 'Crescimento da carteira ativa (LTM, %)' :
@@ -1676,17 +1897,44 @@ function render() {
     chartRisco.update();
   };
 
+  const eventoWo4966Dataset = {
+    label: 'Res. CMN 4.966 (vigência jan/2025)',
+    data: evtWo4966Series,
+    isAnnotation: true,
+    showLine: false,
+    borderColor: '#898781',
+    borderWidth: 0,
+    backgroundColor: 'transparent',
+    pointRadius: 0,
+    pointHoverRadius: 0,
+    pointHitRadius: 0,
+    spanGaps: false,
+    datalabels: { display: false },
+  };
+
   if (!chartRisco) {
     chartRisco = new Chart(document.getElementById('chartRisco'), {
       type: 'line',
-      plugins: [ChartDataLabels],
-      data: { labels: mesLabels, datasets: RISCO_LINES.map(s => ({ label: s.label, data: s.data, borderColor: s.color, backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.1 })) },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+      plugins: [ChartDataLabels, eventAnnotationPlugin],
+      data: { labels: mesLabels, datasets: RISCO_LINES.map(s => ({ label: s.label, data: s.data, borderColor: s.color, backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.1 })).concat([eventoWo4966Dataset]) },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          datalabels: datalabelsConfig,
+          tooltip: {
+            callbacks: {
+              label: (context) => context.dataset.isAnnotation
+                ? ['Res. CMN 4.966/2021 — vigência 01/01/2025:', 'baixa a prejuízo (write-off) em 540 ou 720 dias,', 'a critério do banco. Explica o salto do vencido', '90+ sem alta correspondente no 15-90 dias.']
+                : `${context.dataset.label}: ${context.formattedValue}%`,
+            },
+          },
+        },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: '%' }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartRisco.data.labels = mesLabels;
     RISCO_LINES.forEach((s, i) => { chartRisco.data.datasets[i].data = s.data; });
+    chartRisco.data.datasets[RISCO_LINES.length].data = evtWo4966Series;
     chartRisco.update();
   }
   initZoomBrush(chartRisco, ensureBrushUI('chartRisco'));
@@ -1809,22 +2057,47 @@ function genericMonthTotal(byMonth, monthKey) {
   return s;
 }
 
+// Como genericMonthTotal, mas retorna {ca, ci} (carteira ativa + inadimplência)
+// somados em todos os buckets do mês -- usado pelo painel de risco consolidado.
+function genericMonthTotals(byMonth, monthKey) {
+  const row = byMonth[monthKey];
+  if (!row) return null;
+  let ca = 0, ci = 0;
+  for (const b in row) { ca += row[b][1]; ci += row[b][3]; }
+  return { ca, ci };
+}
+
+// Como genericMonthTotals, mas soma só os buckets listados -- para segmentos que
+// dividem uma fonte com outros (ex.: cartão e crédito pessoal compartilham DATA_RISCO).
+function genericMonthTotalsSubset(byMonth, monthKey, bucketNames) {
+  const row = byMonth[monthKey];
+  if (!row) return null;
+  let ca = 0, ci = 0;
+  for (const name of bucketNames) {
+    const b = row[name];
+    if (b) { ca += b[1]; ci += b[3]; }
+  }
+  return { ca, ci };
+}
+
 let chartEvolucaoSegmentos;
+// Cores na ordem categórica fixa do painel (slot 1→7, nunca ciclada/gerada) --
+// ver :root no <head>. Antes usava tons ad hoc (#d85a30, #3d3d3d) fora da paleta.
 const SEGMENTOS_EVOLUCAO = [
   { label: 'Consignado', color: '#2a78d6', getTotal: (k) => genericMonthTotal(DATA_CONSIGNADO.by_month_ocupacao, k) },
-  { label: 'Crédito pessoal e cartão', color: '#d85a30', getTotal: (k) => genericMonthTotal(DATA_RISCO.by_month_bucket, k) },
-  { label: 'Veículos', color: '#1baf7a', getTotal: (k) => genericMonthTotal(DATA_VEICULOS.by_month_bucket, k) },
-  { label: 'Habitacional', color: '#c98500', getTotal: (k) => genericMonthTotal(DATA_HABITACIONAL.by_month_bucket, k) },
+  { label: 'Crédito pessoal e cartão', color: '#1baf7a', getTotal: (k) => genericMonthTotal(DATA_RISCO.by_month_bucket, k) },
+  { label: 'Veículos', color: '#eda100', getTotal: (k) => genericMonthTotal(DATA_VEICULOS.by_month_bucket, k) },
+  { label: 'Habitacional', color: '#008300', getTotal: (k) => genericMonthTotal(DATA_HABITACIONAL.by_month_bucket, k) },
   {
-    label: 'Rural (PF + PJ)', color: '#7f77dd', getTotal: (k) => {
+    label: 'Rural (PF + PJ)', color: '#4a3aa7', getTotal: (k) => {
       const pf = genericMonthTotal(DATA_RURAL.by_month_bucket, k);
       const pj = genericMonthTotal(DATA_RURAL_PJ.by_month_bucket, k);
       if (pf == null && pj == null) return null;
       return (pf || 0) + (pj || 0);
     }
   },
-  { label: 'Grandes empresas', color: '#3d3d3d', getTotal: (k) => genericMonthTotal(DATA_GRANDE.by_month_bucket, k) },
-  { label: 'MPME', color: '#e24b4a', getTotal: (k) => genericMonthTotal(DATA_MPME.by_month_bucket, k) },
+  { label: 'Grandes empresas', color: '#e34948', getTotal: (k) => genericMonthTotal(DATA_GRANDE.by_month_bucket, k) },
+  { label: 'MPME', color: '#e87ba4', getTotal: (k) => genericMonthTotal(DATA_MPME.by_month_bucket, k) },
 ];
 
 function renderEvolucaoSegmentos() {
@@ -1845,6 +2118,11 @@ function renderEvolucaoSegmentos() {
     chartEvolucaoSegmentos.update();
   };
 
+  // Multi-linha (não empilhado): os 7 segmentos NÃO são mutuamente exclusivos (uma
+  // operação rural de PJ conta em "Rural" e também em "Grandes empresas"/"MPME" --
+  // ver caveat abaixo), então uma área empilhada implicaria visualmente um total sem
+  // sobreposição que os dados não têm. O job aqui é "comparar a trajetória de cada
+  // série", não parte-do-todo -- por isso multi-linha continua sendo a forma certa.
   const datasets = SEGMENTOS_EVOLUCAO.map(s => ({
     label: s.label,
     data: mesKeys.map(k => {
@@ -2144,6 +2422,7 @@ document.getElementById('filters').addEventListener('click', (e) => {
   btn.classList.add('active');
   activeCliente = btn.dataset.cliente;
   render();
+  renderScorecard();
 });
 
 document.getElementById('periodoCarteira').addEventListener('click', (e) => {
@@ -2187,6 +2466,135 @@ const PESSOAL_COLORS = {
 };
 const PESSOAL_KEYS = Object.keys(PESSOAL_BUCKET_MAP);
 
+// Painel de risco consolidado (Visão geral) -- um item por segmento do painel, cor na
+// ordem categórica fixa (slot 1->8, nunca ciclada). getTotals(k) retorna {ca, ci} do mês.
+const SEGMENTOS_SCORECARD = [
+  { tab: 'consignado', label: 'Consignado', color: '#2a78d6', cliente: 'pf',
+    byMonth: () => DATA_CONSIGNADO.by_month_ocupacao,
+    getTotals: (bm, k) => genericMonthTotals(bm, k) },
+  { tab: 'cartao', label: 'Cartão de crédito', color: '#1baf7a', cliente: 'pf',
+    byMonth: () => DATA_RISCO.by_month_bucket,
+    getTotals: (bm, k) => genericMonthTotalsSubset(bm, k, CARTAO_KEYS.map(kk => CARTAO_BUCKET_MAP[kk])) },
+  { tab: 'pessoal', label: 'Crédito pessoal', color: '#eda100', cliente: 'pf',
+    byMonth: () => DATA_RISCO.by_month_bucket,
+    getTotals: (bm, k) => genericMonthTotalsSubset(bm, k, PESSOAL_KEYS.map(kk => PESSOAL_BUCKET_MAP[kk])) },
+  { tab: 'veiculos', label: 'Veículos', color: '#008300', cliente: 'pf',
+    byMonth: () => DATA_VEICULOS.by_month_bucket,
+    getTotals: (bm, k) => genericMonthTotals(bm, k) },
+  { tab: 'habitacional', label: 'Habitacional', color: '#4a3aa7', cliente: 'pf',
+    byMonth: () => DATA_HABITACIONAL.by_month_bucket,
+    getTotals: (bm, k) => genericMonthTotals(bm, k) },
+  // Único segmento com PF e PJ em fontes separadas (DATA_RURAL = PF, DATA_RURAL_PJ = PJ) --
+  // byMonth/getTotals leem activeCliente em tempo de render pra somar só a população certa.
+  { tab: 'rural', label: 'Rural (PF + PJ)', color: '#e34948', cliente: 'both',
+    byMonth: () => activeCliente === 'PJ' ? DATA_RURAL_PJ.by_month_bucket : DATA_RURAL.by_month_bucket,
+    getTotals: (bm, k) => {
+      if (activeCliente === 'PF') return genericMonthTotals(DATA_RURAL.by_month_bucket, k);
+      if (activeCliente === 'PJ') return genericMonthTotals(DATA_RURAL_PJ.by_month_bucket, k);
+      const pf = genericMonthTotals(DATA_RURAL.by_month_bucket, k);
+      const pj = genericMonthTotals(DATA_RURAL_PJ.by_month_bucket, k);
+      if (!pf && !pj) return null;
+      return { ca: (pf ? pf.ca : 0) + (pj ? pj.ca : 0), ci: (pf ? pf.ci : 0) + (pj ? pj.ci : 0) };
+    } },
+  { tab: 'grande', label: 'Grandes empresas', color: '#e87ba4', cliente: 'pj',
+    byMonth: () => DATA_GRANDE.by_month_bucket,
+    getTotals: (bm, k) => genericMonthTotals(bm, k) },
+  { tab: 'mpme', label: 'MPME', color: '#eb6834', cliente: 'pj',
+    byMonth: () => DATA_MPME.by_month_bucket,
+    getTotals: (bm, k) => genericMonthTotals(bm, k) },
+];
+
+function fmtPP(v) {
+  return (v >= 0 ? '+' : '') + v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' p.p.';
+}
+
+function scorecardDeltaPill(delta) {
+  if (delta == null) return '<span style="color:var(--text-muted);">—</span>';
+  if (Math.abs(delta) < 0.02) {
+    return `<span class="delta-pill" style="color:var(--text-muted);"><span class="arrow">▬</span>${fmtPP(0).replace('+', '')}</span>`;
+  }
+  if (delta < 0) {
+    return `<span class="delta-pill is-good"><span class="arrow">▼</span>${fmtPP(delta)}</span>`;
+  }
+  const abs = Math.abs(delta);
+  let cls = 'is-warning';
+  if (abs > 0.8) cls = 'is-critical';
+  else if (abs > 0.3) cls = 'is-serious';
+  return `<span class="delta-pill ${cls}"><span class="arrow">▲</span>${fmtPP(delta)}</span>`;
+}
+
+function renderScorecard() {
+  // Filtro Todos/PF/PJ do topo (activeCliente) também restringe as linhas do painel:
+  // Consignado/Cartão/Crédito pessoal/Veículos/Habitacional só existem para pessoa física;
+  // Grandes empresas/MPME só para pessoa jurídica; Rural tem as duas (ver SEGMENTOS_SCORECARD).
+  const visibleSegs = SEGMENTOS_SCORECARD.filter(seg => {
+    if (activeCliente === 'PF') return seg.cliente === 'pf' || seg.cliente === 'both';
+    if (activeCliente === 'PJ') return seg.cliente === 'pj' || seg.cliente === 'both';
+    return true;
+  });
+
+  const computed = visibleSegs.map(seg => {
+    const byMonth = seg.byMonth();
+    const keys = Object.keys(byMonth).sort();
+    const latest = keys[keys.length - 1];
+    const idx12 = keys.length - 13;
+    const key12 = idx12 >= 0 ? keys[idx12] : null;
+
+    const totLatest = seg.getTotals(byMonth, latest);
+    const tot12 = key12 ? seg.getTotals(byMonth, key12) : null;
+
+    const caLatest = totLatest ? totLatest.ca : 0;
+    const inadLatest = totLatest && totLatest.ca > 0 ? totLatest.ci / totLatest.ca * 100 : null;
+    const inad12 = tot12 && tot12.ca > 0 ? tot12.ci / tot12.ca * 100 : null;
+    const cresc12 = tot12 && tot12.ca > 0 ? (totLatest.ca - tot12.ca) / tot12.ca * 100 : null;
+    const deltaInad = (inadLatest != null && inad12 != null) ? inadLatest - inad12 : null;
+
+    const trend = keys.slice(-12).map(k => {
+      const t = seg.getTotals(byMonth, k);
+      return t && t.ca > 0 ? t.ci / t.ca * 100 : null;
+    });
+
+    const label = seg.tab === 'rural'
+      ? (activeCliente === 'PF' ? 'Rural (PF)' : activeCliente === 'PJ' ? 'Rural (PJ)' : 'Rural (PF + PJ)')
+      : seg.label;
+
+    return { seg, label, latestLabel: mesLabel(latest), caLatest, cresc12, inadLatest, deltaInad, trend };
+  });
+
+  const maxCa = Math.max(...computed.map(c => c.caLatest), 1);
+
+  document.getElementById('scorecardAsOf').textContent = computed.length ? 'Base: ' + computed[0].latestLabel : '—';
+
+  const subtitleEl = document.getElementById('scorecardSubtitle');
+  if (activeCliente === 'all') {
+    subtitleEl.textContent = 'Todos os 8 segmentos do painel, lado a lado — clique numa linha pra abrir a aba correspondente. Ordenado por tamanho da carteira.';
+  } else {
+    const pop = activeCliente === 'PF' ? 'pessoa física' : 'pessoa jurídica';
+    subtitleEl.textContent = `${computed.length} de 8 segmentos com dados de ${pop} — clique numa linha pra abrir a aba correspondente. Ordenado por tamanho da carteira.`;
+  }
+
+  document.getElementById('tableScorecard').innerHTML = computed.map(c => {
+    const pct = (c.caLatest / maxCa * 100).toFixed(1);
+    const trendColor = c.deltaInad == null || Math.abs(c.deltaInad) < 0.02 ? '#898781' : (c.deltaInad < 0 ? '#0ca30c' : '#d03b3b');
+    const crescStr = c.cresc12 == null ? '—' : (c.cresc12 >= 0 ? '+' : '') + fmtPct(c.cresc12);
+    return `<tr data-tab="${c.seg.tab}">` +
+      `<td class="seg-name"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c.seg.color};margin-right:7px;"></span>${c.label}</td>` +
+      `<td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c.seg.color};"></div></div><span class="estoque-val">${fmtBRLcompact(c.caLatest)}</span></div></td>` +
+      `<td class="num">${crescStr}</td>` +
+      `<td class="num">${c.inadLatest == null ? '—' : fmtPct(c.inadLatest)}</td>` +
+      `<td>${sparklineSvgString(c.trend, trendColor)}</td>` +
+      `<td class="num">${scorecardDeltaPill(c.deltaInad)}</td>` +
+      `</tr>`;
+  }).join('');
+}
+
+document.getElementById('tableScorecard').addEventListener('click', (e) => {
+  const tr = e.target.closest('tr[data-tab]');
+  if (!tr) return;
+  const btn = document.querySelector(`.tab-btn[data-tab="${tr.dataset.tab}"]`);
+  if (btn) btn.click();
+});
+
 function computeCagrBuckets(bucketNames) {
   const keys = Object.keys(DATA_RISCO.by_month_bucket).sort();
   if (keys.length < 2) return null;
@@ -2221,7 +2629,9 @@ function renderCartao() {
   document.getElementById('kpiCartaoInad').textContent = totalCa > 0 ? fmtPct(totalCi / totalCa * 100) : '—';
   document.getElementById('kpiCartaoTicket').textContent = totalN > 0 ? fmtBRL(totalCa / totalN) : '—';
 
-  const sorted = bucketNames.filter(b => rows[b]).map(b => [b, rows[b]]).sort((a, b) => b[1][1] - a[1][1]);
+  // "Antecipação de fatura de cartão" fica de fora da tabela por tipo (estoque irrisório,
+  // <0,01% do total) -- continua somada nos KPIs/Total acima, que representam o segmento inteiro.
+  const sorted = bucketNames.filter(b => rows[b] && b !== 'Antecipação de fatura de cartão').map(b => [b, rows[b]]).sort((a, b) => b[1][1] - a[1][1]);
 
   document.getElementById('tableCartaoTipos').innerHTML = sorted.map(([tipo, v]) => {
     const [n, ca, cv, ci, ap] = v;
@@ -2595,9 +3005,11 @@ function renderTaxasVeiculos() {
   renderTaxaInadVeiculos(dataSource, suffix, mesKeys, mesLabels);
 }
 
-let chartTaxaInadVeiculos;
+// Substituído o combo de eixo duplo por 2 painéis empilhados de eixo único (small
+// multiples) -- ver linkZoomBrush.
+let chartTaxaVeiculosPanel, chartInadVeiculosPanel;
 function renderTaxaInadVeiculos(dataSource, suffix, mesKeys, mesLabels) {
-  const yLabelTaxa = 'Taxa (% ' + (suffix === 'a.a.' ? 'ao ano' : 'ao mês') + ')';
+  const yLabelTaxa = '% ' + (suffix === 'a.a.' ? 'ao ano' : 'ao mês');
   const taxaValues = mesKeys.map(m => dataSource.by_month[m].veiculos ?? null);
 
   const inadByYm = {};
@@ -2607,33 +3019,46 @@ function renderTaxaInadVeiculos(dataSource, suffix, mesKeys, mesLabels) {
   }
   const inadValues = mesKeys.map(m => inadByYm[ym(m)] ?? null);
 
-  const datasets = [
-    { type: 'bar', label: 'Inadimplência (%)', data: inadValues, backgroundColor: '#c9e3d6', borderRadius: 2, yAxisID: 'y1', order: 2, datalabels: { anchor: 'center', align: 'center' } },
-    { type: 'line', label: 'Taxa média de juros (' + suffix + ')', data: taxaValues, borderColor: '#2a9d8f', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.1, spanGaps: true, yAxisID: 'y', order: 1 },
-  ];
-
-  if (!chartTaxaInadVeiculos) {
-    chartTaxaInadVeiculos = new Chart(document.getElementById('chartTaxaInadVeiculos'), {
-      type: 'bar',
+  if (!chartTaxaVeiculosPanel) {
+    chartTaxaVeiculosPanel = new Chart(document.getElementById('chartTaxaVeiculosPanel'), {
+      type: 'line',
       plugins: [ChartDataLabels],
-      data: { labels: mesLabels, datasets },
+      data: { labels: mesLabels, datasets: [{ label: 'Taxa média de juros', data: taxaValues, borderColor: '#2a9d8f', backgroundColor: 'rgba(42,157,143,0.08)', fill: true, pointRadius: 0, tension: 0.1, spanGaps: true }] },
       options: { responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }, datalabels: datalabelsConfig },
+        plugins: { legend: { display: false }, datalabels: datalabelsConfig },
         scales: {
           x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } },
-          y: { position: 'left', title: { display: true, text: yLabelTaxa }, grid: { color: '#e1e0d9' } },
-          y1: { position: 'right', title: { display: true, text: 'Inadimplência (%)' }, grid: { drawOnChartArea: false } },
+          y: { title: { display: true, text: yLabelTaxa }, grid: { color: '#e1e0d9' } },
         } }
     });
   } else {
-    chartTaxaInadVeiculos.data.labels = mesLabels;
-    chartTaxaInadVeiculos.data.datasets[0].data = inadValues;
-    chartTaxaInadVeiculos.data.datasets[1].data = taxaValues;
-    chartTaxaInadVeiculos.data.datasets[1].label = 'Taxa média de juros (' + suffix + ')';
-    chartTaxaInadVeiculos.options.scales.y.title.text = yLabelTaxa;
-    chartTaxaInadVeiculos.update();
+    chartTaxaVeiculosPanel.data.labels = mesLabels;
+    chartTaxaVeiculosPanel.data.datasets[0].data = taxaValues;
+    chartTaxaVeiculosPanel.options.scales.y.title.text = yLabelTaxa;
+    chartTaxaVeiculosPanel.update();
   }
-  initZoomBrush(chartTaxaInadVeiculos, ensureBrushUI('chartTaxaInadVeiculos'));
+
+  if (!chartInadVeiculosPanel) {
+    chartInadVeiculosPanel = new Chart(document.getElementById('chartInadVeiculosPanel'), {
+      type: 'bar',
+      plugins: [ChartDataLabels],
+      data: { labels: mesLabels, datasets: [{ label: 'Inadimplência', data: inadValues, backgroundColor: '#eda100', datalabels: { anchor: 'center', align: 'center', color: '#1a1a1a' } }] },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+        scales: {
+          x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } },
+          y: { title: { display: true, text: '%' }, grid: { color: '#e1e0d9' } },
+        } }
+    });
+  } else {
+    chartInadVeiculosPanel.data.labels = mesLabels;
+    chartInadVeiculosPanel.data.datasets[0].data = inadValues;
+    chartInadVeiculosPanel.update();
+  }
+
+  const ids = ensureBrushUI('chartInadVeiculosPanel');
+  initZoomBrush(chartInadVeiculosPanel, ids);
+  linkZoomBrush(chartInadVeiculosPanel, chartTaxaVeiculosPanel, ids);
 }
 
 // =========== B3 (ex-SNG) — financiamento de veículos novos/usados ===========
@@ -4557,9 +4982,12 @@ function renderTaxasPessoal() {
   renderTaxaInadPessoal(dataSource, suffix, mesKeys, mesLabels);
 }
 
-let chartTaxaInadPessoal;
+// Substituído o combo de eixo duplo por 2 painéis empilhados de eixo único (small
+// multiples) -- ver linkZoomBrush. Cada painel tem sua própria escala; o tempo é o
+// único eixo compartilhado, sincronizado via o mesmo slider de zoom.
+let chartTaxaPessoalPanel, chartInadPessoalPanel;
 function renderTaxaInadPessoal(dataSource, suffix, mesKeys, mesLabels) {
-  const yLabelTaxa = 'Taxa (% ' + (suffix === 'a.a.' ? 'ao ano' : 'ao mês') + ')';
+  const yLabelTaxa = '% ' + (suffix === 'a.a.' ? 'ao ano' : 'ao mês');
   const taxaValues = mesKeys.map(m => dataSource.by_month[m].nao_consignado ?? null);
 
   const inadByYm = {};
@@ -4569,33 +4997,46 @@ function renderTaxaInadPessoal(dataSource, suffix, mesKeys, mesLabels) {
   }
   const inadValues = mesKeys.map(m => inadByYm[ym(m)] ?? null);
 
-  const datasets = [
-    { type: 'bar', label: 'Inadimplência (%)', data: inadValues, backgroundColor: '#c9d6e3', borderRadius: 2, yAxisID: 'y1', order: 2, datalabels: { anchor: 'center', align: 'center' } },
-    { type: 'line', label: 'Taxa média de juros (' + suffix + ')', data: taxaValues, borderColor: '#2a78d6', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.1, spanGaps: true, yAxisID: 'y', order: 1 },
-  ];
-
-  if (!chartTaxaInadPessoal) {
-    chartTaxaInadPessoal = new Chart(document.getElementById('chartTaxaInadPessoal'), {
-      type: 'bar',
+  if (!chartTaxaPessoalPanel) {
+    chartTaxaPessoalPanel = new Chart(document.getElementById('chartTaxaPessoalPanel'), {
+      type: 'line',
       plugins: [ChartDataLabels],
-      data: { labels: mesLabels, datasets },
+      data: { labels: mesLabels, datasets: [{ label: 'Taxa média de juros', data: taxaValues, borderColor: '#2a78d6', backgroundColor: 'rgba(42,120,214,0.08)', fill: true, pointRadius: 0, tension: 0.1, spanGaps: true }] },
       options: { responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }, datalabels: datalabelsConfig },
+        plugins: { legend: { display: false }, datalabels: datalabelsConfig },
         scales: {
           x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } },
-          y: { position: 'left', title: { display: true, text: yLabelTaxa }, grid: { color: '#e1e0d9' } },
-          y1: { position: 'right', title: { display: true, text: 'Inadimplência (%)' }, grid: { drawOnChartArea: false } },
+          y: { title: { display: true, text: yLabelTaxa }, grid: { color: '#e1e0d9' } },
         } }
     });
   } else {
-    chartTaxaInadPessoal.data.labels = mesLabels;
-    chartTaxaInadPessoal.data.datasets[0].data = inadValues;
-    chartTaxaInadPessoal.data.datasets[1].data = taxaValues;
-    chartTaxaInadPessoal.data.datasets[1].label = 'Taxa média de juros (' + suffix + ')';
-    chartTaxaInadPessoal.options.scales.y.title.text = yLabelTaxa;
-    chartTaxaInadPessoal.update();
+    chartTaxaPessoalPanel.data.labels = mesLabels;
+    chartTaxaPessoalPanel.data.datasets[0].data = taxaValues;
+    chartTaxaPessoalPanel.options.scales.y.title.text = yLabelTaxa;
+    chartTaxaPessoalPanel.update();
   }
-  initZoomBrush(chartTaxaInadPessoal, ensureBrushUI('chartTaxaInadPessoal'));
+
+  if (!chartInadPessoalPanel) {
+    chartInadPessoalPanel = new Chart(document.getElementById('chartInadPessoalPanel'), {
+      type: 'bar',
+      plugins: [ChartDataLabels],
+      data: { labels: mesLabels, datasets: [{ label: 'Inadimplência', data: inadValues, backgroundColor: '#eda100', datalabels: { anchor: 'center', align: 'center', color: '#1a1a1a' } }] },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+        scales: {
+          x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } },
+          y: { title: { display: true, text: '%' }, grid: { color: '#e1e0d9' } },
+        } }
+    });
+  } else {
+    chartInadPessoalPanel.data.labels = mesLabels;
+    chartInadPessoalPanel.data.datasets[0].data = inadValues;
+    chartInadPessoalPanel.update();
+  }
+
+  const ids = ensureBrushUI('chartInadPessoalPanel');
+  initZoomBrush(chartInadPessoalPanel, ids);
+  linkZoomBrush(chartInadPessoalPanel, chartTaxaPessoalPanel, ids);
 }
 
 let activoPeriodoBancosConsignado = 'aa';
@@ -4783,6 +5224,7 @@ function renderBancosPessoal() {
 }
 
 render();
+renderScorecard();
 renderEvolucaoSegmentos();
 renderCagrCards();
 renderConsignado();
