@@ -510,7 +510,7 @@
         <div class="chart-box" style="height: 340px;">
           <canvas id="chartBancosConsignadoHist"></canvas>
         </div>
-        <p class="caveat">Mesma fonte semanal da tabela (última semana de cada mês, não é média do mês inteiro). Série a partir de jan/2025, mesma janela do resto do painel de FIDC. Célula ausente num mês = instituição não teve concessão reportada nessa submodalidade naquela semana.</p>
+        <p class="caveat">Última semana de cada mês, não é média do mês inteiro. Série desde jan/2025. Linha tracejada = teto oficial (só em % a.m.): INSS 1,80% até fev/2025 e 1,85% desde mar/2025 (Resolução CNPS 1368); Público 1,80% fixo (Portaria MGI 7.588/2023). Privado (CLT) não tem teto numérico fixo — regra é relativa (CET ≤ taxa + 1 p.p. sobre a média do mercado). Banco acima do teto no gráfico = pausou a originação naquele mês (decisão comercial, não violação regulatória).</p>
       </div>
 
       <p class="caveat">
@@ -1103,7 +1103,7 @@
       <div class="chart-box" style="height: 280px;">
         <canvas id="chartFidcAutoEstoque"></canvas>
       </div>
-      <p class="caveat">Soma de fundos mono-produto dedicados a financiamento de veículo (nome de marca/programa cativo). Metodologia completa no caveat abaixo. <strong>Linha tracejada em mar/2026: passe o mouse para ver a nota sobre o salto.</strong></p>
+      <p class="caveat">Soma de fundos mono-produto dedicados a financiamento de veículo (nome de marca/programa cativo). Metodologia completa no caveat abaixo. <strong>Trecho tracejado (mar-jun/26):</strong> salto concentrado no Pan Auto FIDC — provável efeito da consolidação do Pan no BTG (não confirmado oficialmente).</p>
     </section>
 
     <section>
@@ -1111,7 +1111,7 @@
       <div class="chart-box" style="height: 240px;">
         <canvas id="chartFidcAutoFluxo"></canvas>
       </div>
-      <p class="caveat">Variação do estoque mês a mês, só entre fundos que reportaram nos dois meses (evita que atraso de envio pareça resgate em massa). Fluxo líquido — a CVM não publica cessão bruta. Azul = crescimento; vermelho = redução.</p>
+      <p class="caveat">Variação do estoque mês a mês, só entre fundos que reportaram nos dois meses (evita que atraso de envio pareça resgate em massa). Fluxo líquido — a CVM não publica cessão bruta. Azul = crescimento; vermelho = redução. <strong>Barras riscadas (abr-jun/26):</strong> mesmo efeito do Pan Auto FIDC (ver gráfico de estoque acima).</p>
     </section>
 
     <section>
@@ -1683,8 +1683,8 @@ function fmtBRLcompact(v) {
 function fmtNum(v) {
   return Math.round(v).toLocaleString('pt-BR');
 }
-function fmtPct(v) {
-  return v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+function fmtPct(v, decimals = 1) {
+  return v.toLocaleString('pt-BR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + '%';
 }
 
 // Sparkline de stat-tile: linha "de-ênfase" (cinza) + ponto final na cor de destaque.
@@ -1798,6 +1798,11 @@ function sparseDatalabelDisplay(context) {
 function pctDatalabelFormatter(value) {
   return value == null ? '' : value.toFixed(1) + '%';
 }
+// Variante com 1 casa a mais, para series de taxa a.m. (bancos praticam taxas mensais
+// bem menores que as anuais, entao 1 casa decimal perde granularidade real).
+function pctDatalabelFormatter2(value) {
+  return value == null ? '' : value.toFixed(2) + '%';
+}
 function brlBiDatalabelFormatter(value) {
   return value == null ? '' : value.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) + ' bi';
 }
@@ -1845,6 +1850,7 @@ function makeDatalabelsConfigBar(formatter) {
   };
 }
 const datalabelsConfig = makeDatalabelsConfig(pctDatalabelFormatter);
+const datalabelsConfig2 = makeDatalabelsConfig(pctDatalabelFormatter2);
 const datalabelsConfigBRLbi = makeDatalabelsConfig(brlBiDatalabelFormatter);
 const datalabelsConfigPP = makeDatalabelsConfig(ppDatalabelFormatter);
 const datalabelsConfigPPBar = makeDatalabelsConfigBar(ppDatalabelFormatter);
@@ -3267,7 +3273,7 @@ function renderTaxasVeiculos() {
 
   const latestKey = mesKeys[mesKeys.length - 1];
   const latestRow = dataSource.by_month[latestKey];
-  document.getElementById('kpiGridTaxasVeiculos').innerHTML = `<div class="kpi-card"><p class="kpi-label">Aquisição de veículos</p><p class="kpi-value">${latestRow.veiculos != null ? fmtPct(latestRow.veiculos) : '—'}</p><p class="kpi-sub">${suffix} · ${mesLabel(latestKey)}</p></div>`;
+  document.getElementById('kpiGridTaxasVeiculos').innerHTML = `<div class="kpi-card"><p class="kpi-label">Aquisição de veículos</p><p class="kpi-value">${latestRow.veiculos != null ? fmtPct(latestRow.veiculos, suffix === 'a.m.' ? 2 : 1) : '—'}</p><p class="kpi-sub">${suffix} · ${mesLabel(latestKey)}</p></div>`;
 
   const dataset = {
     label: 'Aquisição de veículos',
@@ -3285,13 +3291,14 @@ function renderTaxasVeiculos() {
       type: 'line',
       plugins: [ChartDataLabels],
       data: { labels: mesLabels, datasets: [dataset] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartTaxasVeiculos.data.labels = mesLabels;
     chartTaxasVeiculos.data.datasets[0].data = dataset.data;
     chartTaxasVeiculos.options.scales.y.title.text = yLabel;
+    chartTaxasVeiculos.options.plugins.datalabels = suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig;
     chartTaxasVeiculos.update();
   }
   initZoomBrush(chartTaxasVeiculos, ensureBrushUI('chartTaxasVeiculos'));
@@ -3347,7 +3354,7 @@ function renderTaxaInadVeiculos(dataSource, suffix, mesKeys, mesLabels) {
         { label: 'Pessoa jurídica', data: taxaPjValues, borderColor: TAXAINAD_VEICULOS_COLORS.pj, backgroundColor: 'transparent', fill: false, pointRadius: 0, tension: 0.1, spanGaps: true },
       ] },
       options: { responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+        plugins: { legend: { display: false }, datalabels: suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig },
         scales: {
           x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } },
           y: { title: { display: true, text: yLabelTaxa }, grid: { color: '#e1e0d9' } },
@@ -3358,6 +3365,7 @@ function renderTaxaInadVeiculos(dataSource, suffix, mesKeys, mesLabels) {
     chartTaxaVeiculosPanel.data.datasets[0].data = taxaPfValues;
     chartTaxaVeiculosPanel.data.datasets[1].data = taxaPjValues;
     chartTaxaVeiculosPanel.options.scales.y.title.text = yLabelTaxa;
+    chartTaxaVeiculosPanel.options.plugins.datalabels = suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig;
     chartTaxaVeiculosPanel.update();
   }
 
@@ -3876,7 +3884,7 @@ function renderTaxasHabitacional() {
   const latestRow = dataSource.by_month[latestKey];
   document.getElementById('kpiGridTaxasHabitacional').innerHTML = keys.map(k => {
     const v = latestRow[k];
-    return `<div class="kpi-card"><p class="kpi-label">${HABITACIONAL_TAXAS_LABELS[k]}</p><p class="kpi-value">${v != null ? fmtPct(v) : '—'}</p><p class="kpi-sub">${suffix} · ${mesLabel(latestKey)}</p></div>`;
+    return `<div class="kpi-card"><p class="kpi-label">${HABITACIONAL_TAXAS_LABELS[k]}</p><p class="kpi-value">${v != null ? fmtPct(v, suffix === 'a.m.' ? 2 : 1) : '—'}</p><p class="kpi-sub">${suffix} · ${mesLabel(latestKey)}</p></div>`;
   }).join('');
 
   const datasets = keys.map(k => ({
@@ -3895,13 +3903,14 @@ function renderTaxasHabitacional() {
       type: 'line',
       plugins: [ChartDataLabels],
       data: { labels: mesLabels, datasets },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartTaxasHabitacional.data.labels = mesLabels;
     chartTaxasHabitacional.data.datasets.forEach((ds, i) => { ds.data = datasets[i].data; });
     chartTaxasHabitacional.options.scales.y.title.text = yLabel;
+    chartTaxasHabitacional.options.plugins.datalabels = suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig;
     chartTaxasHabitacional.update();
   }
   initZoomBrush(chartTaxasHabitacional, ensureBrushUI('chartTaxasHabitacional'));
@@ -4353,7 +4362,7 @@ function renderTaxasRural() {
   const latestRow = dataSource.by_month[latestKey];
   document.getElementById('kpiGridTaxasRural').innerHTML = keys.map(k => {
     const v = latestRow[k];
-    return `<div class="kpi-card"><p class="kpi-label">${RURAL_TAXAS_LABELS[k]}</p><p class="kpi-value">${v != null ? fmtPct(v) : '—'}</p><p class="kpi-sub">${suffix} · ${mesLabel(latestKey)}</p></div>`;
+    return `<div class="kpi-card"><p class="kpi-label">${RURAL_TAXAS_LABELS[k]}</p><p class="kpi-value">${v != null ? fmtPct(v, suffix === 'a.m.' ? 2 : 1) : '—'}</p><p class="kpi-sub">${suffix} · ${mesLabel(latestKey)}</p></div>`;
   }).join('');
 
   const datasets = keys.map(k => ({
@@ -4372,13 +4381,14 @@ function renderTaxasRural() {
       type: 'line',
       plugins: [ChartDataLabels],
       data: { labels: mesLabels, datasets },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartTaxasRural.data.labels = mesLabels;
     chartTaxasRural.data.datasets.forEach((ds, i) => { ds.data = datasets[i].data; });
     chartTaxasRural.options.scales.y.title.text = yLabel;
+    chartTaxasRural.options.plugins.datalabels = suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig;
     chartTaxasRural.update();
   }
   initZoomBrush(chartTaxasRural, ensureBrushUI('chartTaxasRural'));
@@ -4961,7 +4971,7 @@ function renderTaxas() {
   const latestRow = dataSource.by_month[latestKey];
   document.getElementById('kpiGridTaxas').innerHTML = keys.map(k => {
     const v = latestRow[k];
-    return `<div class="kpi-card"><p class="kpi-label">${TAXAS_LABELS[k]}</p><p class="kpi-value">${v != null ? fmtPct(v) : '—'}</p><p class="kpi-sub">${suffix} · ${mesLabel(latestKey)}</p></div>`;
+    return `<div class="kpi-card"><p class="kpi-label">${TAXAS_LABELS[k]}</p><p class="kpi-value">${v != null ? fmtPct(v, suffix === 'a.m.' ? 2 : 1) : '—'}</p><p class="kpi-sub">${suffix} · ${mesLabel(latestKey)}</p></div>`;
   }).join('');
 
   const datasets = keys.map(k => ({
@@ -4980,13 +4990,14 @@ function renderTaxas() {
       type: 'line',
       plugins: [ChartDataLabels],
       data: { labels: mesLabels, datasets },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartTaxas.data.labels = mesLabels;
     chartTaxas.data.datasets.forEach((ds, i) => { ds.data = datasets[i].data; });
     chartTaxas.options.scales.y.title.text = yLabel;
+    chartTaxas.options.plugins.datalabels = suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig;
     chartTaxas.update();
   }
   initZoomBrush(chartTaxas, ensureBrushUI('chartTaxas'));
@@ -5031,7 +5042,7 @@ function renderTaxasCartao() {
   const latestRow = dataSource.by_month[latestKey];
   document.getElementById('kpiGridTaxasCartao').innerHTML = keys.map(k => {
     const v = latestRow[k];
-    return `<div class="kpi-card"><p class="kpi-label">${CARTAO_TAXAS_LABELS[k]}</p><p class="kpi-value">${v != null ? fmtPct(v) : '—'}</p><p class="kpi-sub">${suffix} · ${mesLabel(latestKey)}</p></div>`;
+    return `<div class="kpi-card"><p class="kpi-label">${CARTAO_TAXAS_LABELS[k]}</p><p class="kpi-value">${v != null ? fmtPct(v, suffix === 'a.m.' ? 2 : 1) : '—'}</p><p class="kpi-sub">${suffix} · ${mesLabel(latestKey)}</p></div>`;
   }).join('');
 
   const datasets = keys.map(k => ({
@@ -5050,13 +5061,14 @@ function renderTaxasCartao() {
       type: 'line',
       plugins: [ChartDataLabels],
       data: { labels: mesLabels, datasets },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartTaxasCartao.data.labels = mesLabels;
     chartTaxasCartao.data.datasets.forEach((ds, i) => { ds.data = datasets[i].data; });
     chartTaxasCartao.options.scales.y.title.text = yLabel;
+    chartTaxasCartao.options.plugins.datalabels = suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig;
     chartTaxasCartao.update();
   }
   initZoomBrush(chartTaxasCartao, ensureBrushUI('chartTaxasCartao'));
@@ -5423,7 +5435,7 @@ function renderTaxasPessoal() {
   const latestRow = dataSource.by_month[latestKey];
   document.getElementById('kpiGridTaxasPessoal').innerHTML = keys.map(k => {
     const v = latestRow[k];
-    return `<div class="kpi-card"><p class="kpi-label">${PESSOAL_TAXAS_LABELS[k]}</p><p class="kpi-value">${v != null ? fmtPct(v) : '—'}</p><p class="kpi-sub">${suffix} · ${mesLabel(latestKey)}</p></div>`;
+    return `<div class="kpi-card"><p class="kpi-label">${PESSOAL_TAXAS_LABELS[k]}</p><p class="kpi-value">${v != null ? fmtPct(v, suffix === 'a.m.' ? 2 : 1) : '—'}</p><p class="kpi-sub">${suffix} · ${mesLabel(latestKey)}</p></div>`;
   }).join('');
 
   const datasets = keys.map(k => ({
@@ -5442,13 +5454,14 @@ function renderTaxasPessoal() {
       type: 'line',
       plugins: [ChartDataLabels],
       data: { labels: mesLabels, datasets },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartTaxasPessoal.data.labels = mesLabels;
     chartTaxasPessoal.data.datasets.forEach((ds, i) => { ds.data = datasets[i].data; });
     chartTaxasPessoal.options.scales.y.title.text = yLabel;
+    chartTaxasPessoal.options.plugins.datalabels = suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig;
     chartTaxasPessoal.update();
   }
   initZoomBrush(chartTaxasPessoal, ensureBrushUI('chartTaxasPessoal'));
@@ -5477,7 +5490,7 @@ function renderTaxaInadPessoal(dataSource, suffix, mesKeys, mesLabels) {
       plugins: [ChartDataLabels],
       data: { labels: mesLabels, datasets: [{ label: 'Taxa média de juros', data: taxaValues, borderColor: '#2a78d6', backgroundColor: 'rgba(42,120,214,0.08)', fill: true, pointRadius: 0, tension: 0.1, spanGaps: true }] },
       options: { responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, datalabels: datalabelsConfig },
+        plugins: { legend: { display: false }, datalabels: suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig },
         scales: {
           x: { ticks: { autoSkip: false, font: { size: 10 }, callback: sparseTickCallback }, grid: { display: false } },
           y: { title: { display: true, text: yLabelTaxa }, grid: { color: '#e1e0d9' } },
@@ -5487,6 +5500,7 @@ function renderTaxaInadPessoal(dataSource, suffix, mesKeys, mesLabels) {
     chartTaxaPessoalPanel.data.labels = mesLabels;
     chartTaxaPessoalPanel.data.datasets[0].data = taxaValues;
     chartTaxaPessoalPanel.options.scales.y.title.text = yLabelTaxa;
+    chartTaxaPessoalPanel.options.plugins.datalabels = suffix === 'a.m.' ? datalabelsConfig2 : datalabelsConfig;
     chartTaxaPessoalPanel.update();
   }
 
@@ -5552,14 +5566,25 @@ function renderBancosConsignado() {
     if (arrow) arrow.textContent = dir === 1 ? ' ▲' : ' ▼';
   }
 
-  document.getElementById('tableBancosConsignado').innerHTML = bancos.map(([nome, v]) => {
+  const tetoRow = activoPeriodoBancosConsignado === 'am'
+    ? `<tr style="font-weight:700;">
+      <td>Teto CNPS/MGI</td>
+      <td>—</td>
+      <td class="num">${fmtPct(TETO_CONSIGNADO_INSS_ATUAL_AM, 2)}</td>
+      <td class="num">—</td>
+      <td class="num">${fmtPct(TETO_CONSIGNADO_PUBLICO_ATUAL_AM, 2)}</td>
+      <td class="num">—</td>
+    </tr>`
+    : '';
+
+  document.getElementById('tableBancosConsignado').innerHTML = tetoRow + bancos.map(([nome, v]) => {
     const inss = v['inss' + suf], privado = v['privado' + suf], publico = v['publico' + suf];
     const rowHtml = `<tr>
       <td>${nome}</td>
       <td><span class="badge badge-${v.segmento.toLowerCase()}">${v.segmento}</span></td>
-      <td class="num">${inss != null ? fmtPct(inss) : '—'}</td>
-      <td class="num">${privado != null ? fmtPct(privado) : '—'}</td>
-      <td class="num">${publico != null ? fmtPct(publico) : '—'}</td>
+      <td class="num">${inss != null ? fmtPct(inss, activoPeriodoBancosConsignado === 'am' ? 2 : 1) : '—'}</td>
+      <td class="num">${privado != null ? fmtPct(privado, activoPeriodoBancosConsignado === 'am' ? 2 : 1) : '—'}</td>
+      <td class="num">${publico != null ? fmtPct(publico, activoPeriodoBancosConsignado === 'am' ? 2 : 1) : '—'}</td>
       <td class="num">${v.share != null ? fmtPct(v.share) : '—'}</td>
     </tr>`;
     return rowHtml;
@@ -5571,6 +5596,29 @@ let activoTipoBancosConsignadoHist = 'inss';
 let selecionadosBancosConsignadoHist = null; // preenchido na 1a renderizacao (top 5 por share)
 let chartBancosConsignadoHist;
 const HIST_CONSIG_COLORS = ['#2a78d6', '#eda100', '#e34948', '#1baf7a', '#6a4fc2', '#c2569b', '#5aa9e6', '#8a6d1f', '#2a9d5c', '#898781'];
+
+// Teto de juros do consignado INSS (Resolucao CNPS/MPS -- Conselho Nacional de
+// Previdencia Social, via Ministerio da Previdencia). E' um teto mensal (a.m.) --
+// nao existe um teto oficial em a.a. nem para Privado(CLT)/Publico nesta mesma forma,
+// entao a linha so aparece com tipo=INSS e periodo=a.m.
+// Serie confirmada (Resolucoes CNPS + Agencia Brasil + gov.br/previdencia, cruzado
+// com noticias de jul/2026 que confirmam 1,85% ainda vigente): 1,80% de jan/2025 ate
+// 25/03/2025; 1,85% desde 26/03/2025 (Resolucao MPS/CNPS 1368) ate a data mais recente
+// checada (jul/2026). Ha reuniao do CNPS marcada pra 28/07/2026 que pode reduzir esse
+// teto -- se isso acontecer, atualizar tetoConsignadoInssAM() manualmente (nao ha API).
+function tetoConsignadoInssAM(mesKey) {
+  return mesKey < '2025-03-01' ? 1.80 : 1.85;
+}
+const TETO_CONSIGNADO_INSS_ATUAL_AM = 1.85; // valor vigente hoje -- ver tetoConsignadoInssAM() acima
+
+// Teto de juros do consignado Publico (servidor federal/SIAPE) -- Portaria MGI
+// 7.588/2023, 1,80% a.m., sem mudanca confirmada desde nov/2023 (flat, diferente do
+// INSS que mudou de valor). Sem serie historica oficial pra checar automaticamente
+// (ver _check_teto_clt_publico.py) -- se mudar, atualizar aqui a mao.
+function tetoConsignadoPublicoAM() {
+  return 1.80;
+}
+const TETO_CONSIGNADO_PUBLICO_ATUAL_AM = 1.80;
 
 function renderBancosConsignadoHist() {
   const nomesOrdenados = Object.entries(DATA_BANCOS_CONSIGNADO.bancos)
@@ -5614,19 +5662,78 @@ function renderBancosConsignadoHist() {
       spanGaps: true,
     }));
 
+  if (activoTipoBancosConsignadoHist === 'inss' && activoPeriodoBancosConsignado === 'am') {
+    datasets.push({
+      label: 'Teto CNPS (INSS)',
+      data: mesKeys.map(tetoConsignadoInssAM),
+      borderColor: '#000000',
+      backgroundColor: 'transparent',
+      borderWidth: 2.5,
+      borderDash: [7, 4],
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      stepped: 'before',
+      tension: 0,
+      spanGaps: true,
+      isAnnotation: true,
+      datalabels: {
+        display: (ctx) => ctx.dataIndex === ctx.dataset.data.length - 1,
+        formatter: (v) => v.toFixed(2) + '%',
+        color: '#000',
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        borderRadius: 4,
+        font: { size: 10, weight: 'bold' },
+        padding: { top: 2, bottom: 2, left: 4, right: 4 },
+        anchor: 'end',
+        align: 'top',
+        offset: 4,
+      },
+    });
+  }
+
+  if (activoTipoBancosConsignadoHist === 'publico' && activoPeriodoBancosConsignado === 'am') {
+    datasets.push({
+      label: 'Teto MGI (Público)',
+      data: mesKeys.map(tetoConsignadoPublicoAM),
+      borderColor: '#000000',
+      backgroundColor: 'transparent',
+      borderWidth: 2.5,
+      borderDash: [7, 4],
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      stepped: 'before',
+      tension: 0,
+      spanGaps: true,
+      isAnnotation: true,
+      datalabels: {
+        display: (ctx) => ctx.dataIndex === ctx.dataset.data.length - 1,
+        formatter: (v) => v.toFixed(2) + '%',
+        color: '#000',
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        borderRadius: 4,
+        font: { size: 10, weight: 'bold' },
+        padding: { top: 2, bottom: 2, left: 4, right: 4 },
+        anchor: 'end',
+        align: 'top',
+        offset: 4,
+      },
+    });
+  }
+
   if (!chartBancosConsignadoHist) {
     chartBancosConsignadoHist = new Chart(document.getElementById('chartBancosConsignadoHist'), {
       type: 'line',
       plugins: [ChartDataLabels],
       data: { labels: mesLabels, datasets },
       options: { responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }, datalabels: datalabelsConfig },
+        plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }, datalabels: activoPeriodoBancosConsignado === 'am' ? datalabelsConfig2 : datalabelsConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 } }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartBancosConsignadoHist.data.labels = mesLabels;
     chartBancosConsignadoHist.data.datasets = datasets;
     chartBancosConsignadoHist.options.scales.y.title.text = yLabel;
+    chartBancosConsignadoHist.options.plugins.datalabels = activoPeriodoBancosConsignado === 'am' ? datalabelsConfig2 : datalabelsConfig;
     chartBancosConsignadoHist.update();
   }
 }
@@ -5688,8 +5795,8 @@ function renderBancosCartao() {
     return `<tr>
       <td>${nome}</td>
       <td><span class="badge badge-${v.segmento.toLowerCase()}">${v.segmento}</span></td>
-      <td class="num">${rotativo != null ? fmtPct(rotativo) : '—'}</td>
-      <td class="num">${parcelado != null ? fmtPct(parcelado) : '—'}</td>
+      <td class="num">${rotativo != null ? fmtPct(rotativo, activoPeriodoBancosCartao === 'am' ? 2 : 1) : '—'}</td>
+      <td class="num">${parcelado != null ? fmtPct(parcelado, activoPeriodoBancosCartao === 'am' ? 2 : 1) : '—'}</td>
       <td class="num">${v.share != null ? fmtPct(v.share) : '—'}</td>
     </tr>`;
   }).join('');
@@ -5748,13 +5855,14 @@ function renderBancosCartaoHist() {
       plugins: [ChartDataLabels],
       data: { labels: mesLabels, datasets },
       options: { responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }, datalabels: datalabelsConfig },
+        plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }, datalabels: activoPeriodoBancosCartao === 'am' ? datalabelsConfig2 : datalabelsConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 } }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartBancosCartaoHist.data.labels = mesLabels;
     chartBancosCartaoHist.data.datasets = datasets;
     chartBancosCartaoHist.options.scales.y.title.text = yLabel;
+    chartBancosCartaoHist.options.plugins.datalabels = activoPeriodoBancosCartao === 'am' ? datalabelsConfig2 : datalabelsConfig;
     chartBancosCartaoHist.update();
   }
 }
@@ -5812,7 +5920,7 @@ function renderBancosVeiculos() {
     const taxa = v[suf];
     return `<tr>
       <td>${nome}</td>
-      <td class="num">${taxa != null ? fmtPct(taxa) : '—'}</td>
+      <td class="num">${taxa != null ? fmtPct(taxa, activoPeriodoBancosVeiculos === 'am' ? 2 : 1) : '—'}</td>
       <td class="num">${v.share != null ? fmtPct(v.share) : '—'}</td>
     </tr>`;
   }).join('');
@@ -5870,13 +5978,14 @@ function renderBancosVeiculosHist() {
       plugins: [ChartDataLabels],
       data: { labels: mesLabels, datasets },
       options: { responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }, datalabels: datalabelsConfig },
+        plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }, datalabels: activoPeriodoBancosVeiculos === 'am' ? datalabelsConfig2 : datalabelsConfig },
         scales: { x: { ticks: { autoSkip: false, font: { size: 10 } }, grid: { display: false } }, y: { title: { display: true, text: yLabel }, grid: { color: '#e1e0d9' } } } }
     });
   } else {
     chartBancosVeiculosHist.data.labels = mesLabels;
     chartBancosVeiculosHist.data.datasets = datasets;
     chartBancosVeiculosHist.options.scales.y.title.text = yLabel;
+    chartBancosVeiculosHist.options.plugins.datalabels = activoPeriodoBancosVeiculos === 'am' ? datalabelsConfig2 : datalabelsConfig;
     chartBancosVeiculosHist.update();
   }
 }
@@ -5933,7 +6042,7 @@ function renderBancosPessoal() {
     const taxa = v[suf];
     return `<tr>
       <td>${nome}</td>
-      <td class="num">${taxa != null ? fmtPct(taxa) : '—'}</td>
+      <td class="num">${taxa != null ? fmtPct(taxa, activoPeriodoBancosPessoal === 'am' ? 2 : 1) : '—'}</td>
       <td class="num">${v.share != null ? fmtPct(v.share) : '—'}</td>
     </tr>`;
   }).join('');
